@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import socket, string
+import select, socket, string
 
 DEBUG  = True
 
@@ -45,22 +45,32 @@ class ownNakPacket (ownPacket) :
 
 #------------------------------------------------------------------------------
 
-COMMAND = 1
-MONITOR = 2
 
 class ownSocket (object) :
+	COMMAND = 1
+	MONITOR = 2
+	TYPES = { COMMAND : 'CMD',
+		  MONITOR : 'MON' }
+
 	def __init__ (self,address, port, socktype) :
 		self.address = address
 		self.port = port
 		self.socktype = socktype
 		self.buf = ''
+		self.sock = None
+
+	def log (self, msg):
+		print '['+self.TYPES[self.socktype]+'] '+msg
+	
+	def connect (self):
 		self.sock = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
 		self.sock.connect((self.address,self.port))
+		self.sock.setblocking(0)
 
 		self.handleMessage()
-		if self.socktype==COMMAND:
+		if self.socktype == self.COMMAND :
 			self.sock.send('*99*0##')
-		elif self.socktype==MONITOR:
+		elif self.socktype == self.MONITOR :
 			self.sock.send('*99*1##')
 		else:
 			raise InvalidConnectionType 	
@@ -105,13 +115,23 @@ class ownSocket (object) :
 		return None
 
 	def handleMessage (self) :
+		if self.sock is None:
+			self.connect()
+		input, output, error = select.select([self.sock],[],[])
+		if len(input)==0 :
+			self.log('strange, nothing to read')
+
+		msg = self.sock.recv(1024)
+		if len(msg)==0:
+			# socket has died
+			self.log('socket has died, reconnecting')	
+			self.sock = None
+			return None
+
+		self.buf+=msg
 		p = self.buf.find('##')
-		if p==-1 :
-			msg = self.sock.recv(1024)
-			self.buf+=msg
-			p = self.buf.find('##')
-			if p==-1 : 
-				return
+		if p==-1 : 
+			return None
 		msg = self.buf[0:p]
 		self.buf = self.buf[(p+2):]
 		m = None
@@ -123,10 +143,10 @@ class ownSocket (object) :
 			msg = 'Unknown WHO value [' + str(e) + ']'	
 		else:
 			msg = str(m) 
-		print '[MON] '+msg
+		self.log(msg)
 		return m
 
 if __name__ == '__main__':
-	s = ownSocket('f454',20000,MONITOR)
+	s = ownSocket ('f454', 20000, ownSocket.MONITOR)
 	while True:
 		s.handleMessage()
