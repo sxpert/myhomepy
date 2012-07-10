@@ -76,7 +76,7 @@ class ownGatewayTime (ownPacket) :
 		self.tz = int(tz)
 
 	def __str__ (self) :
-		return "Gateway Time : %02:%02d:%02d UTC%+d"%(self.hour,self.minute,self.second,self.tz)
+		return "Gateway Time : %02d:%02d:%02d UTC%+d"%(self.hour,self.minute,self.second,self.tz)
 
 class ownGatewayDate (ownPacket) :
 	DAYS = [ 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'sunday' ]
@@ -165,13 +165,11 @@ class ownSocket (object) :
 			raise UnknownWho(who, msg)
 	
 	def parseGateway(self, m, msg) :
-		print 'Gateway message '+m
 		if m[0] == '*' :
 			m=m[1:]
 			if m[0] == '#' :
 				m=m[1:]
 				v = m.split('*')
-				print v
 				val = int(v[0])
 				if val == 0 :
 					return ownGatewayTime(v[1:])
@@ -179,6 +177,7 @@ class ownSocket (object) :
 					return ownGatewayDate(v[1:])
 				else :
 					return InvalidPacket(msg)
+		print 'Gateway message '+m
 		raise InvalidPacket(msg)
 
 	def handleMessage (self) :
