@@ -57,11 +57,38 @@ class ownLoginRequest (ownPacket) :
 		self.conn.log ('Logging in with password packet '+pwdpacket)
 		self.conn.sock.send(pwdpacket)
 
-	def __str__ (self): 
+	def __str__ (self) : 
 		return "login request ["+\
 			"openpass='"+self.openpass+"' "+\
 			"nonce='"+self.nonce+"' "+\
 			"passwd='"+self.passwd+"']"
+
+class ownGatewayTime (ownPacket) :
+	def __init__ (self, timeval) :
+		self.hour = int(timeval[0])
+		self.minute = int(timeval[1])
+		self.second = int(timeval[2])
+		tz = timeval[3]
+		if tz[0] == '1' : 
+			tz = '-'+tz[1:]
+		else:
+			tz = tz[1:]
+		self.tz = int(tz)
+
+	def __str__ (self) :
+		return "Gateway Time : %02:%02d:%02d UTC%+d"%(self.hour,self.minute,self.second,self.tz)
+
+class ownGatewayDate (ownPacket) :
+	DAYS = [ 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'sunday' ]
+
+	def __init__ (self, dateval) :
+		self.weekday = int(dateval[0])
+		self.day = int(dateval[1])
+		self.month = int(dateval[2])
+		self.year = int(dateval[3])
+
+	def __str__ (self) :
+		return "Gateway Date : %s, %04d-%02d-%02d"%(self.DAYS[self.weekday],self.year,self.month,self.day)
 
 #------------------------------------------------------------------------------
 
@@ -139,7 +166,20 @@ class ownSocket (object) :
 	
 	def parseGateway(self, m, msg) :
 		print 'Gateway message '+m
-		return None
+		if m[0] == '*' :
+			m=m[1:]
+			if m[0] == '#' :
+				m=m[1:]
+				v = m.split('*')
+				print v
+				val = int(v[0])
+				if val == 0 :
+					return ownGatewayTime(v[1:])
+				elif val == 1 :
+					return ownGatewayDate(v[1:])
+				else :
+					return InvalidPacket(msg)
+		raise InvalidPacket(msg)
 
 	def handleMessage (self) :
 		if self.sock is None:
