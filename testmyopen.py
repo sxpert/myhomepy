@@ -176,9 +176,8 @@ class ownSocket (object) :
 				elif val == 1 :
 					return ownGatewayDate(v[1:])
 				else :
-					return InvalidPacket(msg)
-		print 'Gateway message '+m
-		raise InvalidPacket(msg)
+					return UnknownPacket(msg)
+		raise UnknownPacket(msg)
 
 	def handleMessage (self) :
 		if self.sock is None:
