@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
 import select, socket, string
+import myOpenPass
 
 DEBUG  = True
+openpass = '12345'
 
 class InvalidConnectionType (Exception):
 	def __init__ (self):
@@ -42,6 +44,24 @@ class ownNakPacket (ownPacket) :
 		pass
 	def __str__ (self):
 		return 'NACK packet'
+
+class ownLoginRequest (ownPacket) :
+	def __init__ (self, conn, openpass, nonce):
+		self.conn = conn
+		self.openpass = openpass
+		self.nonce = nonce
+		self.passwd = str(myOpenPass.ownCalcPass (self.openpass, self.nonce))
+
+	def run (self) :
+		pwdpacket = '*#'+self.passwd+'##'
+		self.conn.log ('Logging in with password packet '+pwdpacket)
+		self.conn.sock.send(pwdpacket)
+
+	def __str__ (self): 
+		return "login request ["+\
+			"openpass='"+self.openpass+"' "+\
+			"nonce='"+self.nonce+"' "+\
+			"passwd='"+self.passwd+"']"
 
 #------------------------------------------------------------------------------
 
@@ -88,6 +108,13 @@ class ownSocket (object) :
 		# find WHO
 		p = m.find('*')
 		if p == -1:
+			if not normal :
+				login = True
+				for c in m:
+					if c not in string.digits:
+						login = False
+				if login :
+					return ownLoginRequest (self, openpass, m)
 			raise UnknownPacket(msg)
 		who = m[0:p]
 		m = m[(p+1):]
@@ -149,4 +176,6 @@ class ownSocket (object) :
 if __name__ == '__main__':
 	s = ownSocket ('f454', 20000, ownSocket.MONITOR)
 	while True:
-		s.handleMessage()
+		m = s.handleMessage()
+		if 'run' in dir(m):
+			m.run()
