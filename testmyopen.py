@@ -6,6 +6,11 @@ import myOpenPass
 DEBUG  = True
 openpass = '12345'
 
+#------------------------------------------------------------------------------
+#
+# Exceptions definitions
+# 
+
 class InvalidConnectionType (Exception):
 	def __init__ (self):
 		pass
@@ -29,9 +34,25 @@ class UnknownWho (Exception) :
 	def __str__ (self):
 		return 'who = '+str(self._who)+' \''+self._packet+'\''
 
+#------------------------------------------------------------------------------
+#
+# OpenWebNet packets
+#
+
+#----
+# base class
+
 class ownPacket (object) :
 	def __init__ (self) :
 		pass
+
+#------------------------------------------------------------------------------
+#
+# system packets
+#
+
+#----
+# Acknowledge packet
 
 class ownAckPacket (ownPacket) :
 	def __init__ (self) :
@@ -39,11 +60,17 @@ class ownAckPacket (ownPacket) :
 	def __str__ (self) :
 		return 'ACK packet'
 
+#----
+# Negative Acknowledge packet
+
 class ownNakPacket (ownPacket) :
 	def __init__ (self) :
 		pass
 	def __str__ (self):
 		return 'NACK packet'
+
+#----
+# login request packet
 
 class ownLoginRequest (ownPacket) :
 	def __init__ (self, conn, openpass, nonce):
@@ -63,6 +90,15 @@ class ownLoginRequest (ownPacket) :
 			"nonce='"+self.nonce+"' "+\
 			"passwd='"+self.passwd+"']"
 
+#------------------------------------------------------------------------------
+# WHO = 13
+# Gateway related packets
+# 
+
+#----
+# System time packet
+# packet sent every 10 minutes by the Master clock device
+
 class ownGatewayTime (ownPacket) :
 	def __init__ (self, timeval) :
 		self.hour = int(timeval[0])
@@ -77,6 +113,10 @@ class ownGatewayTime (ownPacket) :
 
 	def __str__ (self) :
 		return "Gateway Time : %02d:%02d:%02d UTC%+d"%(self.hour,self.minute,self.second,self.tz)
+
+#----
+# System date packet
+# packet sent every 10 minutes by the Master clock device
 
 class ownGatewayDate (ownPacket) :
 	DAYS = [ 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'sunday' ]
