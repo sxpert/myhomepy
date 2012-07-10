@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import select, socket, string
 import myOpenPass
@@ -91,6 +92,46 @@ class ownLoginRequest (ownPacket) :
 			"passwd='"+self.passwd+"']"
 
 #------------------------------------------------------------------------------
+#
+# WHO = 1
+# Light and automation
+#
+
+#----
+# WHAT = 0
+# turn something off
+
+class ownAutomationOff (ownPacket) :
+	def __init__ (self, device) :
+		self.device = device
+		
+	def __str__ (self) :
+		return self.device+' turned off'
+
+#----
+# WHAT = 1
+# turn something on
+
+class ownAutomationOn (ownPacket) :
+	def __init__ (self, device) :
+		self.device = device
+
+	def __str__ (self):	
+		return self.device+' turned on'
+
+#----
+# WHAT = 1000#
+# automation event
+
+class ownAutomationEvent (ownPacket) :
+	def __init__ (self, eventinfo):
+		self.eventinfo = eventinfo
+
+	def __str__ (self):
+		return 'automation event '+str(self.eventinfo)
+
+#------------------------------------------------------------------------------
+#
 # WHO = 13
 # Gateway related packets
 # 
@@ -198,13 +239,34 @@ class ownSocket (object) :
 				return ownNackPacket()
 			if m == '1' : 
 				return ownAckPacket()	
+		elif who == 1:
+			# automation
+			return self.parseAutomation(normal, m, msg)
 		elif who == 13:
 			# gateway control
 			return self.parseGateway(m, msg)
 		else:	
 			raise UnknownWho(who, msg)
 	
-	def parseGateway(self, m, msg) :
+	def parseAutomation (self, normal, m, msg) :
+		if normal:
+			v = m.split('*')
+			p = v[0].find('#')
+			if p == -1:
+				v0 = int(v[0])
+				if v0 == 0 :
+					# off message
+					return ownAutomationOff(v[1])
+				elif v0 == 1 : 
+					# on message
+					return ownAutomationOn(v[1])
+			else :
+				v0 = v[0].split('#')
+				if int(v0[0]) == 1000 :
+					return ownAutomationEvent([v0[1],v[1]])
+		raise UnknownPacket(msg)
+	
+	def parseGateway (self, m, msg) :
 		if m[0] == '*' :
 			m=m[1:]
 			if m[0] == '#' :
