@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import select, socket, string
+# system includes
+import sys, select, socket, string
+import datetime
+# application includes
 import myOpenPass
 
 DEBUG  = True
 openpass = '12345'
+logfile	= 'myopenlog.log'
 
 #------------------------------------------------------------------------------
 #
@@ -56,8 +60,14 @@ class ownPacket (object) :
 # Acknowledge packet
 
 class ownAckPacket (ownPacket) :
-	def __init__ (self) :
-		pass
+	def __init__ (self, conn) :
+		self.conn = conn
+
+	def run (self) :
+		if self.conn.state == self.conn.LOGGING:
+			self.conn.state = self.conn.LOGGED
+			self.conn.log('Login successful')
+
 	def __str__ (self) :
 		return 'ACK packet'
 
@@ -65,8 +75,14 @@ class ownAckPacket (ownPacket) :
 # Negative Acknowledge packet
 
 class ownNakPacket (ownPacket) :
-	def __init__ (self) :
-		pass
+	def __init__ (self, conn) :
+		self.conn = conn
+
+	def run (self):
+		if self.conn.state == self.conn.LOGGING:
+			self.conn.state = self.conn.FAILED
+			self.conn.log('Login FAILED !')
+
 	def __str__ (self):
 		return 'NACK packet'
 
@@ -83,6 +99,7 @@ class ownLoginRequest (ownPacket) :
 	def run (self) :
 		pwdpacket = '*#'+self.passwd+'##'
 		self.conn.log ('Logging in with password packet '+pwdpacket)
+		self.conn.state = self.conn.LOGGING
 		self.conn.sock.send(pwdpacket)
 
 	def __str__ (self) : 
@@ -141,7 +158,8 @@ class ownAutomationEvent (ownPacket) :
 # packet sent every 10 minutes by the Master clock device
 
 class ownGatewayTime (ownPacket) :
-	def __init__ (self, timeval) :
+	def __init__ (self, conn, timeval) :
+		self.conn = conn
 		self.hour = int(timeval[0])
 		self.minute = int(timeval[1])
 		self.second = int(timeval[2])
@@ -152,6 +170,47 @@ class ownGatewayTime (ownPacket) :
 			tz = tz[1:]
 		self.tz = int(tz)
 
+	def run (self) :
+		d = datetime.datetime.today()
+		# should tests be done ?
+		if True : 
+			# check only when gateway reports between 00:00 and 00:20
+			if not ((self.hour==0) and (self.minute<=20)):
+				return
+			# if time exactly the same, don't change anything
+			if (d.hour==self.hour) and (d.minute==self.minute) and (d.second==self.second):	
+				return
+			# don't adjust for less than 5 seconds
+			d1 = d.hour * 3600 + d.minute * 60 + d.second
+			d2 = self.hour * 3600 + self.minute * 60 + self.second
+			if abs(d1-d2) <=5 :
+				return
+		# update time if gateway reported time is wrong
+		sock = self.conn
+		if sock.mode == sock.MONITOR:
+			sock = ownSocket(sock.address, sock.port, sock.COMMAND)
+		sock.log('Time is wrong on gateway, updating time')
+		while (sock.state is None) or (sock.state == sock.LOGGING) :
+			m = sock.handleMessage()
+			if 'run' in dir(m):
+				m.run()
+		# generate the time update packet
+		tz = ''
+		if abs(self.tz) == self.tz:
+			tz += '0'
+		else:
+			tz += '1'
+		tz += "%02d"%(abs(self.tz))
+		dp = "*#13**#0*%02d*%02d*%02d*%s##"%(d.hour, d.minute, d.second, tz)
+		sock.log('Updating time with packet \''+dp+'\'')	
+		sock.sock.send (dp)
+		m = sock.handleMessage()
+		if m.__class__ == ownAckPacket:
+			sock.log ('Time set successfully')
+		sock.sock.send ("*#13**22##")
+		m = sock.handleMessage()
+		
+	
 	def __str__ (self) :
 		return "Gateway Time : %02d:%02d:%02d UTC%+d"%(self.hour,self.minute,self.second,self.tz)
 
@@ -177,28 +236,53 @@ class ownGatewayDate (ownPacket) :
 class ownSocket (object) :
 	COMMAND = 1
 	MONITOR = 2
-	TYPES = { COMMAND : 'CMD',
-		  MONITOR : 'MON' }
+	MODES = { COMMAND : 'CMD',
+		  MONITOR : 'MON' }	
+	LOGGING = 1
+	LOGGED	= 2
+	FAILED  = 3
 
-	def __init__ (self,address, port, socktype) :
+	def __init__ (self,address, port, mode) :
 		self.address = address
 		self.port = port
-		self.socktype = socktype
+		self.mode = mode
 		self.buf = ''
 		self.sock = None
+		self.state = None
+
+	def __del__ (self) :
+		if not (self.sock is None):
+			self.log ('Closing socket')
+			self.sock.close()
 
 	def log (self, msg):
-		print '['+self.TYPES[self.socktype]+'] '+msg
+		import datetime
+		try :
+			# generate datetime string
+			d = datetime.datetime.today()
+			ds = "%04d-%02d-%02d %02d:%02d:%02d"%(d.year,d.month,d.day,d.hour,d.minute,d.second)
+			logmsg = ds+' ['+self.MODES[self.mode]+'] '+msg
+			print logmsg
+			lf = open(logfile,"a+")
+			lf.write(logmsg+'\n')
+			lf.close()
+		except :
+			pass
 	
 	def connect (self):
 		self.sock = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
-		self.sock.connect((self.address,self.port))
+		try :
+			self.sock.connect((self.address,self.port))
+		except socket.error, e:
+			self.sock = None
+			self.log ("connexion error, sleeping some")
+			return
 		self.sock.setblocking(0)
 
 		self.handleMessage()
-		if self.socktype == self.COMMAND :
+		if self.mode == self.COMMAND :
 			self.sock.send('*99*0##')
-		elif self.socktype == self.MONITOR :
+		elif self.mode == self.MONITOR :
 			self.sock.send('*99*1##')
 		else:
 			raise InvalidConnectionType 	
@@ -236,9 +320,9 @@ class ownSocket (object) :
 			who = int(who)
 		if who is None: 
 			if m == '0' :
-				return ownNackPacket()
+				return ownNakPacket(self)
 			if m == '1' : 
-				return ownAckPacket()	
+				return ownAckPacket(self)	
 		elif who == 1:
 			# automation
 			return self.parseAutomation(normal, m, msg)
@@ -274,7 +358,7 @@ class ownSocket (object) :
 				v = m.split('*')
 				val = int(v[0])
 				if val == 0 :
-					return ownGatewayTime(v[1:])
+					return ownGatewayTime(self, v[1:])
 				elif val == 1 :
 					return ownGatewayDate(v[1:])
 				else :
@@ -284,7 +368,11 @@ class ownSocket (object) :
 	def handleMessage (self) :
 		if self.sock is None:
 			self.connect()
-		input, output, error = select.select([self.sock],[],[])
+		try :
+			input, output, error = select.select([self.sock],[],[])
+		except KeyboardInterrupt, e:
+			self.log ("program exit")
+			sys.exit(0)
 		if len(input)==0 :
 			self.log('strange, nothing to read')
 
