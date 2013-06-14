@@ -1,8 +1,10 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/python2.7 -3
+#-*- coding: utf-8 -*-
+
+from __future__ import print_function
 
 # system includes
-import sys, select, socket, string
+import sys, select, socket, string, types
 import datetime
 # application includes
 import myOpenPass
@@ -48,8 +50,13 @@ class UnknownWho (Exception) :
 # base class
 
 class ownPacket (object) :
+	AUTOMATION = 1
+	GATEWAY_CONTROL = 13
 	def __init__ (self) :
-		pass
+		object.__init__(self)
+		self.timestamp = datetime.datetime.today()
+	def map (self) :
+		return None
 
 #------------------------------------------------------------------------------
 #
@@ -61,6 +68,7 @@ class ownPacket (object) :
 
 class ownAckPacket (ownPacket) :
 	def __init__ (self, conn) :
+		ownPacket.__init__(self)
 		self.conn = conn
 
 	def run (self) :
@@ -76,6 +84,7 @@ class ownAckPacket (ownPacket) :
 
 class ownNakPacket (ownPacket) :
 	def __init__ (self, conn) :
+		ownPacket.__init__(self)
 		self.conn = conn
 
 	def run (self):
@@ -91,6 +100,7 @@ class ownNakPacket (ownPacket) :
 
 class ownLoginRequest (ownPacket) :
 	def __init__ (self, conn, openpass, nonce):
+		ownPacket.__init__(self)
 		self.conn = conn
 		self.openpass = openpass
 		self.nonce = nonce
@@ -115,37 +125,133 @@ class ownLoginRequest (ownPacket) :
 #
 
 #----
+# generic automation object.
+# knows how to parse device codes
+
+class ownAutomation (ownPacket) :
+	ERROR = -1
+	LIGHT = 0
+	ROOM  = 1
+	GROUP = 2
+	GEN   = 3
+	def __init__ (self, device) :
+		ownPacket.__init__(self)
+		self.device = device
+		self.type = None
+		self.group = None
+		self.room = None
+		self.point = None
+		self.parseDevice ()
+
+	def parseDevice (self):
+		if self.device == '0':
+			self.type = self.GEN
+			return
+		if self.device[0] == '#':
+			self.type = self.GROUP
+			g = int(self.device[1:])
+			if (g < 1) or (g > 255):
+				self.type = self.ERROR
+			else :
+				self.group = g
+			return
+		# light or room
+		l = len (self.device)
+		if l==1:
+			self.type = self.ROOM
+			self.room = int(self.device)
+			return
+		elif l==2:
+			self.type = self.LIGHT
+			self.room = int(self.device[0])
+			self.point = int(self.device[1])
+			return
+		elif l==3:
+			# this is a special case !
+			if self.device == '100':
+				self.type = self.ROOM
+				self.room = int(self.device[0:2])
+				return
+		elif l==4:
+			self.type = self.LIGHT
+			self.room = int (self.device[0:2])
+			self.point = int (self.device[2:4])
+			return
+		# error
+		self.type = self.ERROR
+
+	def __str__ (self):
+		if (self.type is None) or (self.type == self.ERROR):
+			return 'Unknown automation device ('+self.device+')'
+		elif self.type == self.LIGHT:
+			return 'Automation device ['+str(self.room)+','+str(self.point)+']'
+		elif self.type == self.ROOM:
+			return 'Automation room ['+str(self.room)+']'
+		elif self.type == self.GROUP:
+			return 'Automation group ['+str(self.group)+']'
+		elif self.type == self.GEN:
+			return 'Automation all'
+	
+	def map (self) :
+		if (self.type is None) or (self.type == self.ERROR):
+			return None
+		elif self.type == self.GROUP:
+			return [ 1, self.type, self.group ]
+
+
+#----
 # WHAT = 0
 # turn something off
 
-class ownAutomationOff (ownPacket) :
+class ownAutomationOff (ownAutomation) :
 	def __init__ (self, device) :
-		self.device = device
+		ownAutomation.__init__(self,device)
 		
 	def __str__ (self) :
-		return self.device+' turned off'
+		return ownAutomation.__str__(self)+' turned off'
+
+	def map (self) :
+		ms = ownAutomation.map(self)
+		if ms is not None:
+			ms.append('OFF')
+		return ms
 
 #----
 # WHAT = 1
 # turn something on
 
-class ownAutomationOn (ownPacket) :
+class ownAutomationOn (ownAutomation) :
 	def __init__ (self, device) :
-		self.device = device
+		ownAutomation.__init__(self,device)
 
 	def __str__ (self):	
-		return self.device+' turned on'
+		return super(self.__class__,self).__str__()+' turned on'
+
+	def map (self) :
+		ms = super (self.__class__, self).map()
+		if ms is not None:
+			ms.append('ON')
+		return ms
 
 #----
 # WHAT = 1000#
 # automation event
 
-class ownAutomationEvent (ownPacket) :
+class ownAutomationEvent (ownAutomation) :
+	OFF = 0
+	ON = 1
+	MODES = [ 'OFF', 'ON' ]
 	def __init__ (self, eventinfo):
-		self.eventinfo = eventinfo
+		self.mode = int(eventinfo[0])
+		self.device = eventinfo[1]
+		ownAutomation.__init__(self,self.device)
 
 	def __str__ (self):
-		return 'automation event '+str(self.eventinfo)
+		try : 
+			m = self.MODES[self.mode]
+		except:
+			m = "unknown mode "+str(self.mode)
+		return 'automation event '+ownAutomation.__str__(self)+' '+m
 
 #------------------------------------------------------------------------------
 #
@@ -159,6 +265,7 @@ class ownAutomationEvent (ownPacket) :
 
 class ownGatewayTime (ownPacket) :
 	def __init__ (self, conn, timeval) :
+		ownPacket.__init__(self)
 		self.conn = conn
 		self.hour = int(timeval[0])
 		self.minute = int(timeval[1])
@@ -242,13 +349,15 @@ class ownSocket (object) :
 	LOGGED	= 2
 	FAILED  = 3
 
-	def __init__ (self,address, port, mode) :
+	def __init__ (self,address, port, mode, map = None) :
+		object.__init__(self)
 		self.address = address
 		self.port = port
 		self.mode = mode
 		self.buf = ''
 		self.sock = None
 		self.state = None
+		self.map = map
 
 	def __del__ (self) :
 		if not (self.sock is None):
@@ -262,7 +371,7 @@ class ownSocket (object) :
 			d = datetime.datetime.today()
 			ds = "%04d-%02d-%02d %02d:%02d:%02d"%(d.year,d.month,d.day,d.hour,d.minute,d.second)
 			logmsg = ds+' ['+self.MODES[self.mode]+'] '+msg
-			print logmsg
+			print(logmsg)
 			lf = open(logfile,"a+")
 			lf.write(logmsg+'\n')
 			lf.close()
@@ -273,7 +382,7 @@ class ownSocket (object) :
 		self.sock = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
 		try :
 			self.sock.connect((self.address,self.port))
-		except socket.error, e:
+		except socket.error as e:
 			self.sock = None
 			self.log ("connexion error, sleeping some")
 			return
@@ -323,10 +432,10 @@ class ownSocket (object) :
 				return ownNakPacket(self)
 			if m == '1' : 
 				return ownAckPacket(self)	
-		elif who == 1:
+		elif who == ownPacket.AUTOMATION:
 			# automation
 			return self.parseAutomation(normal, m, msg)
-		elif who == 13:
+		elif who == ownPacket.GATEWAY_CONTROL:
 			# gateway control
 			return self.parseGateway(m, msg)
 		else:	
@@ -366,43 +475,113 @@ class ownSocket (object) :
 		raise UnknownPacket(msg)
 
 	def handleMessage (self) :
-		if self.sock is None:
-			self.connect()
-		try :
-			input, output, error = select.select([self.sock],[],[])
-		except KeyboardInterrupt, e:
-			self.log ("program exit")
-			sys.exit(0)
-		if len(input)==0 :
-			self.log('strange, nothing to read')
-
-		msg = self.sock.recv(1024)
-		if len(msg)==0:
-			# socket has died
-			self.log('socket has died, reconnecting')	
-			self.sock = None
-			return None
-
-		self.buf+=msg
 		p = self.buf.find('##')
-		if p==-1 : 
-			return None
+		if p==-1:
+			if self.sock is None:
+				self.connect()
+			try :
+				input, output, error = select.select([self.sock],[],[])
+			except KeyboardInterrupt as e:
+				self.log ("program exit")
+				sys.exit(0)
+			if len(input)==0 :
+				self.log('strange, nothing to read')
+
+			msg = self.sock.recv(1024)
+			if len(msg)==0:
+				# socket has died
+				self.log('socket has died, reconnecting')	
+				self.sock = None
+				return None
+
+			self.buf+=msg
+			p = self.buf.find('##')
+			if p==-1 : 
+				return None
 		msg = self.buf[0:p]
 		self.buf = self.buf[(p+2):]
 		m = None
 		try :
 			m = self.parseMessage(msg)
-		except UnknownPacket, e:
+		except UnknownPacket as e:
 			msg = 'Unknown Packet \'' + str(e) + '\''
-		except UnknownWho, e:
+		except UnknownWho as e:
 			msg = 'Unknown WHO value [' + str(e) + ']'	
 		else:
-			msg = str(m) 
+			msg = str(m)
+		 
 		self.log(msg)
+		if self.map is not None:
+			item = self.map.mapItem(m)
+			if item is not None:
+				self.log(str(item)+' '+str(m.timestamp))
+				f = item[1]
+				if isinstance (f, types.FunctionType) :	
+					f(self, m)
 		return m
 
+class ownMap (object) :
+	def __init__ (self):
+		object.__init__(self)
+		self.map = {}
+
+	def addMapItem (self, m, func) :
+		s = str(m)
+		self.map[s] = func
+
+	def mapItem (self, m) :
+		if (m is not None) and ('map' in dir(m)):
+			v = m.map ()
+		else :
+			# no mapping found
+			v = None	
+		if v is not None:
+			s = str(v)
+			if s in self.map.keys():
+				return [ s, self.map[s] ]
+		return None
+			
+
+group_0001_off_init = None
+def group_0001_off (sock, obj):
+	global group_0001_off_init
+	print('Group1 turned off')
+	if group_0001_off_init is None :
+		print (obj.timestamp)
+		group_0001_off_init = obj.timestamp
+	else : 
+		print (obj.timestamp,'-',group_0001_off_init)
+		delta = obj.timestamp - group_0001_off_init
+		print (delta)
+		if delta < datetime.timedelta(seconds=2) :
+			print ('general off requested')
+			if sock.mode == sock.MONITOR:
+				sock = ownSocket(sock.address, sock.port, sock.COMMAND)
+			sock.log('sending general off command')
+			while (sock.state is None) or (sock.state == sock.LOGGING) :
+				m = sock.handleMessage()
+				if 'run' in dir(m):
+					m.run()
+			dp = "*1*0*0##"
+			sock.log('sending general off packet \''+dp+'\'')	
+			sock.sock.send (dp)
+			m = sock.handleMessage()
+			if m.__class__ == ownAckPacket:
+				sock.log ('general off sent successfully')
+			
+			group_0001_off_init = None
+		else :
+			group_0001_off_init = obj.timestamp
+
+def group_0001_on (sock, obj):
+	print('Group1 turned on')
+
 if __name__ == '__main__':
-	s = ownSocket ('f454', 20000, ownSocket.MONITOR)
+	map = ownMap ()
+	# should be AUTOMATION
+	map.addMapItem ( [ ownPacket.AUTOMATION, ownAutomation.GROUP, 1, 'OFF' ], group_0001_off)
+	map.addMapItem ( [ ownPacket.AUTOMATION, ownAutomation.GROUP, 1, 'ON' ], group_0001_on)
+	s = ownSocket ('f454', 20000, ownSocket.MONITOR, map)
 	while True:
 		m = s.handleMessage()
 		if 'run' in dir(m):
