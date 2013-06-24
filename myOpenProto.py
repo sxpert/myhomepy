@@ -10,7 +10,6 @@ import datetime
 import myOpenPass
 
 DEBUG  = True
-openpass = '12345'
 logfile	= 'myopenlog.log'
 
 #------------------------------------------------------------------------------
@@ -349,9 +348,10 @@ class ownSocket (object) :
 	LOGGED	= 2
 	FAILED  = 3
 
-	def __init__ (self,address, port, mode, map = None) :
+	def __init__ (self,address, openpass, port, mode, map = None) :
 		object.__init__(self)
 		self.address = address
+		self.openpass = openpass
 		self.port = port
 		self.mode = mode
 		self.buf = ''
@@ -415,7 +415,7 @@ class ownSocket (object) :
 					if c not in string.digits:
 						login = False
 				if login :
-					return ownLoginRequest (self, openpass, m)
+					return ownLoginRequest (self, self.openpass, m)
 			raise UnknownPacket(msg)
 		who = m[0:p]
 		m = m[(p+1):]
@@ -581,7 +581,8 @@ if __name__ == '__main__':
 	# should be AUTOMATION
 	map.addMapItem ( [ ownPacket.AUTOMATION, ownAutomation.GROUP, 1, 'OFF' ], group_0001_off)
 	map.addMapItem ( [ ownPacket.AUTOMATION, ownAutomation.GROUP, 1, 'ON' ], group_0001_on)
-	s = ownSocket ('f454', 20000, ownSocket.MONITOR, map)
+	import config
+	s = ownSocket (config.host, config.openpass, 20000, ownSocket.MONITOR, map)
 	while True:
 		m = s.handleMessage()
 		if 'run' in dir(m):
