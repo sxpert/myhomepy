@@ -1,2 +1,3 @@
 host = '192.168.1.35'
-openpass = '12345'
+port = 20000
+password = '12345'

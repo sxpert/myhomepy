@@ -294,7 +294,7 @@ class ownGatewayTime (ownPacket) :
 		# update time if gateway reported time is wrong
 		sock = self.conn
 		if sock.mode == sock.MONITOR:
-			sock = ownSocket(sock.address, sock.port, sock.COMMAND)
+			sock = ownSocket(sock.address, sock.openpass, sock.port, sock.COMMAND)
 		sock.log('Time is wrong on gateway, updating time')
 		while (sock.state is None) or (sock.state == sock.LOGGING) :
 			m = sock.handleMessage()
@@ -348,11 +348,14 @@ class ownSocket (object) :
 	LOGGED	= 2
 	FAILED  = 3
 
-	def __init__ (self,address, openpass, port, mode, map = None) :
+	def __init__ (self, address, openpass, port, mode, map = None) :
 		object.__init__(self)
 		self.address = address
 		self.openpass = openpass
-		self.port = port
+		if isinstance(port, str) :
+			self.port = int(port)
+		else :  
+			self.port = port
 		self.mode = mode
 		self.buf = ''
 		self.sock = None
@@ -556,7 +559,7 @@ def group_0001_off (sock, obj):
 		if delta < datetime.timedelta(seconds=2) :
 			print ('general off requested')
 			if sock.mode == sock.MONITOR:
-				sock = ownSocket(sock.address, sock.port, sock.COMMAND)
+				sock = ownSocket(sock.address, sock.openpass, sock.port, sock.COMMAND)
 			sock.log('sending general off command')
 			while (sock.state is None) or (sock.state == sock.LOGGING) :
 				m = sock.handleMessage()

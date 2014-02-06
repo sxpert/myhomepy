@@ -4,7 +4,7 @@
 import myOpenProto as mo
 
 if __name__ == '__main__':
-	print "starting ftp"
+	print "stopping ftp"
 	s = mo.ownSocket ("f454.sxpert.org", 20000, mo.ownSocket.COMMAND)
 	while (s.state is None) or (s.state == s.LOGGING) :
 		m = s.handleMessage()
