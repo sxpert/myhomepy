@@ -585,7 +585,7 @@ if __name__ == '__main__':
 	map.addMapItem ( [ ownPacket.AUTOMATION, ownAutomation.GROUP, 1, 'OFF' ], group_0001_off)
 	map.addMapItem ( [ ownPacket.AUTOMATION, ownAutomation.GROUP, 1, 'ON' ], group_0001_on)
 	import config
-	s = ownSocket (config.host, config.openpass, 20000, ownSocket.MONITOR, map)
+	s = ownSocket (config.host, config.password, config.port, ownSocket.MONITOR, map)
 	while True:
 		m = s.handleMessage()
 		if 'run' in dir(m):

@@ -5,7 +5,8 @@ import myOpenProto as mo
 
 if __name__ == '__main__':
 	print "starting ftp"
-	s = mo.ownSocket ("f454.sxpert.org", 20000, mo.ownSocket.COMMAND)
+	import config
+	s = mo.ownSocket (config.host, config.password, config.port, mo.ownSocket.COMMAND)
 	while (s.state is None) or (s.state == s.LOGGING) :
 		m = s.handleMessage()
 		if 'run' in dir(m):
