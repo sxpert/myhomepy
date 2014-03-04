@@ -1,6 +1,11 @@
 #!/usr/bin/env python 
 # -*- coding: utf-8 -*-
 
+#
+# (c) Raphael Jacquot 2014
+# Licenced under the terms of the GNU GPL v3.0 or later
+#
+
 import myOpenProto as mo
 
 if __name__ == '__main__':

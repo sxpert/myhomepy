@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+#
+# (c) Raphael Jacquot 2014
+# Licenced under the terms of the GNU GPL v3.0 or later
+#
+
+
 def ownCalcPass (password, nonce) :
     m_1 = 0xFFFFFFFFL
     m_8 = 0xFFFFFFF8L

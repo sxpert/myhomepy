@@ -1,6 +1,11 @@
 #!/usr/bin/python2.7 -3
 #-*- coding: utf-8 -*-
 
+#
+# (c) Raphael Jacquot 2014
+# Licenced under the terms of the GNU GPL v3.0 or later
+#
+
 from __future__ import print_function
 
 # system includes
