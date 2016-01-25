@@ -80,7 +80,7 @@ class MainLoop (object) :
 			if self.sockets is not None :
 				t = self.timeout
 			else :
-				t = 1000;
+				t = 60000;
 			try :
 				events = self.poller.poll(t)
 				if len(events) > 0 : 	
@@ -207,9 +207,9 @@ class OwnSocket (object) :
 				return
 			# TODO: do things with messages
 			if self.data_callback is not None :
-				self.data_callback(msg)
+			    self.data_callback(msg)
 			else :
-				self.log(msg)
+			    self.log(msg)
 
 	def set_socket_mode (self) :
 		self.log('initializing connection')
