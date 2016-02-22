@@ -8,7 +8,7 @@
 
 import config
 import myOpenLayer1
-import myOpenTempControl
+#import myOpenTempControl
 import re
 
 class MyOpenApplication (object) :
