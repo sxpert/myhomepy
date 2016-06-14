@@ -14,10 +14,14 @@ class TestApplication (object) :
         self.ok = MyOpenApplication()
 
         self.ok.register_callback (self.ok.SYSTEM__TEMP_CONTROL, self.ok.TEMP_CONTROL__REPORT_TEMP, { 'zone': 1, 'sensor': 1}, self.TempReportAction)
+        self.ok.register_callback (self.ok.SYSTEM__LIGHTING, self.ok.LIGHTING__OFF, { 'group': 1}, self.CheckForGenOff)
         self.ok.run ()
 
     def TempReportAction (self, sensor, temp) :
         self.ok.log (unicode(sensor)+'  -  '+unicode(temp))
+
+    def CheckForGenOff (self, command, light) :
+        self.ok.log ('check for gen off : '+unicode(command)+'  -  '+unicode(light))
 
 # main program
 if __name__ == '__main__' :

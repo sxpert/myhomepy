@@ -16,8 +16,11 @@ class MyOpenApplication (object) :
     STATUS                    = 1
     MSG_TYPES                 = [ 'Command', 'Status', ]
 
-    SYSTEM__AUTOMATION        = 1
+    SYSTEM__LIGHTING          = 1
     SYSTEM__TEMP_CONTROL      = 4
+
+    LIGHTING__OFF             = 0
+    LIGHTING__ON              = 1
 
     TEMP_CONTROL__REPORT_TEMP = 0
 
@@ -96,13 +99,20 @@ class MyOpenApplication (object) :
             self.callbacks={}
         # generate callback key
         k = unicode(system)+'-'+unicode(order)+'-'
+        if system == self.SYSTEM__LIGHTING:
+            if (type(device) is dict) and ('group' in device.keys()):
+                k+='G-'+unicode(device['group'])
         if system == self.SYSTEM__TEMP_CONTROL:
             if (type(device) is dict) and ('zone' in device.keys()) and ('sensor' in device.keys()):
                 k+='['+unicode(device['zone'])+'-'+unicode(device['sensor'])+']'
         self.callbacks[k] = callback
+        #print (unicode(self.callbacks))
 
     def execute_callback (self, system, order, device, data=None):
         k = unicode(system)+'-'+unicode(order)+'-'
+        if system == self.SYSTEM__LIGHTING:
+            if (type(device) is dict) and ('group' in device.keys()):
+                k+='G-'+unicode(device['group'])
         if system == self.SYSTEM__TEMP_CONTROL:
             if (type(device) is dict) and ('zone' in device.keys()) and ('sensor' in device.keys()):
                 k+='['+unicode(device['zone'])+'-'+unicode(device['sensor'])+']'
@@ -113,7 +123,22 @@ class MyOpenApplication (object) :
     # Lighting systems
 
     def cmd_lighting (self, msg) :
-        
+        # light command
+        # '*0*#1##'
+        m = re.match('^\*(?P<command>[01])\*(?P<light>\d{2,4})##$',msg)
+        if m is not None:
+            data = m.groupdict()
+            self.log (unicode(data))
+            device = { 'light': data['light'] }
+            self.execute_callback(self.SYSTEM__LIGHTING, data['command'], device, None)
+            return
+        m = re.match('^\*(?P<command>[01])\*#(?P<group>\d{1,3})##$',msg)
+        if m is not None:
+            data = m.groupdict()
+            self.log (unicode(data))
+            device = { 'group': data['group'] }
+            self.execute_callback(self.SYSTEM__LIGHTING, data['command'], device, None)
+            return
         self.log ('lighting command '+msg)
 
     # Temperature control systems
@@ -122,7 +147,7 @@ class MyOpenApplication (object) :
         # temperature report
         # '101*0*0270##'
         m = re.match('^\*(?P<probe>\d{3})\*0\*(?P<temperature>\d{4})##$',msg)
-        if m is not None :
+        if m is not None:
             data = m.groupdict()
             self.log (unicode(data))
             # generate the device key

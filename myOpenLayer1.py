@@ -120,9 +120,13 @@ class MainLoop (object) :
                     if s.sock is None :
                         self.logger.log ('socket '+unicode(fd)+' disconnected')
                         s.connect ()
-                        newfd = s.sock.fileno()
-                        if fd != newfd :
-                            self.logger.log ('socket '+unicode(fd)+' connected with fd '+unicode(newfd))
+                        if s.sock is not None:
+                            newfd = s.sock.fileno()
+                            if fd != newfd :
+                                self.logger.log ('socket '+unicode(fd)+' connected with fd '+unicode(newfd))
+                        else:
+                            # sleep some...
+                            pass
             except KeyboardInterrupt as e:
                 self.logger.log ("program exit")
                 sys.exit(0)
@@ -191,7 +195,7 @@ class OwnSocket (object) :
         self.log ("attempting to reconnect")
 
     def read (self) :
-        data = self.sock.recv(1024)
+        data = self.sock.recv(4096)
         self.buf += data 
         while True :
             p = self.buf.find ('##')
