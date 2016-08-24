@@ -80,8 +80,10 @@ class MainLoop (object) :
             if self.sockets is not None :
                 t = self.timeout
             else :
+                # 60 seconds probably too long
                 t = 60000;
             try :
+                # should try epoll ;-)
                 events = self.poller.poll(t)
                 if len(events) > 0 :
                     for e in events :
@@ -89,7 +91,7 @@ class MainLoop (object) :
                         s = self.sockets[fd]
                         if flags & (select.POLLIN | select.POLLPRI) :
                             try: 
-                                s.read()
+                                s.recv()
                             except socket.error as e :
                                 s.log (unicode(e))
                                 if e.errno == errno.ETIMEDOUT :
@@ -194,7 +196,7 @@ class OwnSocket (object) :
         # attempt to reconnect the socket
         self.log ("attempting to reconnect")
 
-    def read (self) :
+    def recv (self) :
         data = self.sock.recv(4096)
         self.buf += data 
         while True :
@@ -234,6 +236,9 @@ class OwnSocket (object) :
                 self.data_callback(msg)
             else :
                 self.log(msg)
+
+    def send (self, msg):
+        self.sock.send(msg)
 
     def set_socket_mode (self) :
         self.log('initializing connection')

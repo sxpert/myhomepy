@@ -7,6 +7,7 @@
 #
 
 import config
+import json
 import myOpenLayer1
 #import myOpenTempControl
 import re
@@ -120,6 +121,11 @@ class MyOpenApplication (object) :
             func = self.callbacks[k]
             func (device, data)
 
+    #------------------------------------------------------------------------------------------------------------------
+    #
+    # message parsers by system, calls appropriate registered callbacks
+    #
+
     # Lighting systems
 
     def cmd_lighting (self, msg) :
@@ -160,3 +166,82 @@ class MyOpenApplication (object) :
             return
         self.log ('temp control status '+msg)
 
+        
+    #------------------------------------------------------------------------------------------------------------------
+    #
+    # system scanning
+    #
+
+    def scan_network (self):
+        self.scan_socket = myOpenLayer1.OwnSocket(
+                config.host,
+                config.port,
+                config.password,
+                myOpenLayer1.OwnSocket.COMMAND)
+        # set the callback to get messages from the layer 1
+        self.scan_socket.set_ready_callback(self.scan_ready)
+        self.scan_socket.set_data_callback(self.scan_read_serials)
+        # add the monitor socket to the system loop
+        self.system_loop.add_socket(self.scan_socket)
+
+    def scan_ready (self):
+        # send the scan request...
+        #self.scan_socket.set_data_callback(self.scan_select_device_callback)
+        self.devices = []
+        self.scan_socket.send("*#1001*0*13##")
+
+    def scan_read_serials (self, msg):
+        self.scan_socket.log (msg)
+        # parse the *#1001*0*13*[mac address in decimal]## messages
+        m = re.match('^\*#1001\*(?P<address>\d+)\*13\*(?P<macaddr>\d+)##$',msg)
+        if m is not None:
+            data = m.groupdict()
+            self.scan_socket.log('mac address '+unicode(data['macaddr']))
+            self.devices.append({'system': self.SYSTEM__LIGHTING, 'address': int(data['address']), 'macaddr': int(data['macaddr'])})
+            return
+        if msg==self.scan_socket.ACK:
+            self.scan_socket.log(unicode(self.devices))
+            self.current_device = 0
+            self.scan_select_device ()
+
+    def scan_select_device (self):
+        dev = self.devices[self.current_device]
+        self.scan_socket.set_data_callback(self.scan_confirm_selected)
+        self.scan_socket.send("*1001*10#"+unicode(dev['macaddr'])+"*0##")
+
+    def scan_confirm_selected (self, msg):
+        if msg==self.scan_socket.ACK:
+            # request the config to be sent
+            self.scan_socket.set_data_callback(self.scan_receive_conf)
+            self.scan_socket.send("*#1001*0*38#0##")
+        else:
+            # in case we don't get an ACK here...              
+            dev = self.devices[self.current_device]
+            self.scan_socket.log ("ERROR while attempting to select device with ID "+unicode(dev['macaddr']))
+            self.scan_finish ()
+
+    def scan_receive_conf (self, msg):
+        self.scan_socket.log (msg)
+        d = self.devices[self.current_device]
+        if 'data' in d.keys():
+            v = d['data']
+        else:
+            v = []
+        v.append(msg)
+        d['data'] = v
+        self.devices[self.current_device] = d
+
+        if msg==self.scan_socket.ACK:
+            # end of config data for this device
+            self.current_device+=1
+            if self.current_device < len(self.devices):
+                self.scan_select_device()
+            else:
+                self.scan_finish()
+    
+    def scan_finish (self):
+        f = open('devices.txt','w')
+        f.write (json.dumps(self.devices, indent=4))
+        f.close ()
+        self.system_loop.remove_socket(self.scan_socket)
+        self.scan_socket.close()

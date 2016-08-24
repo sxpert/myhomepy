@@ -15,6 +15,7 @@ class TestApplication (object) :
 
         self.ok.register_callback (self.ok.SYSTEM__TEMP_CONTROL, self.ok.TEMP_CONTROL__REPORT_TEMP, { 'zone': 1, 'sensor': 1}, self.TempReportAction)
         self.ok.register_callback (self.ok.SYSTEM__LIGHTING, self.ok.LIGHTING__OFF, { 'group': 1}, self.CheckForGenOff)
+        self.ok.scan_network()
         self.ok.run ()
 
     def TempReportAction (self, sensor, temp) :
