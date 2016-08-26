@@ -9,31 +9,28 @@
 import config
 import json
 import myOpenLayer1
-#import myOpenTempControl
 import re
 
-class MyOpenApplication (object) :
+SYSTEM__LIGHTING          = 1
+SYSTEM__TEMP_CONTROL      = 4
+
+class Monitor (object) :
     COMMAND                   = 0
     STATUS                    = 1
     MSG_TYPES                 = [ 'Command', 'Status', ]
-
-    SYSTEM__LIGHTING          = 1
-    SYSTEM__TEMP_CONTROL      = 4
 
     LIGHTING__OFF             = 0
     LIGHTING__ON              = 1
 
     TEMP_CONTROL__REPORT_TEMP = 0
 
-    def __init__ (self) :
+    def __init__ (self, system_loop) :
+        self.sl = system_loop
         # prepare the app startup
         self.routes = [ { '1' : self.cmd_lighting, },
                         { '4' : self.status_tempcontrol}, ]
         # initializes callbacks
         self.callbacks = None
-        # create the system loop
-        self.system_loop = myOpenLayer1.MainLoop(myOpenLayer1.system_logger)
-        # open the monitor socket to the gateway
         self.monitor_socket = myOpenLayer1.OwnSocket(
                 config.host,
                 config.port,
@@ -42,7 +39,7 @@ class MyOpenApplication (object) :
         # set the callback to get messages from the layer 1
         self.monitor_socket.set_data_callback(self.data_callback)
         # add the monitor socket to the system loop
-        self.system_loop.add_socket(self.monitor_socket)
+        self.sl.add_socket(self.monitor_socket)
 
     def log (self, msg) :
         msg = unicode(msg)
@@ -51,10 +48,6 @@ class MyOpenApplication (object) :
         else:
             print (msg)
     
-    def run (self) :
-        # run the system loop.
-        self.system_loop.run()
-
     def get_number (self, msg) :
         v = '' 
         while True :
@@ -100,10 +93,10 @@ class MyOpenApplication (object) :
             self.callbacks={}
         # generate callback key
         k = unicode(system)+'-'+unicode(order)+'-'
-        if system == self.SYSTEM__LIGHTING:
+        if system == SYSTEM__LIGHTING:
             if (type(device) is dict) and ('group' in device.keys()):
                 k+='G-'+unicode(device['group'])
-        if system == self.SYSTEM__TEMP_CONTROL:
+        if system == SYSTEM__TEMP_CONTROL:
             if (type(device) is dict) and ('zone' in device.keys()) and ('sensor' in device.keys()):
                 k+='['+unicode(device['zone'])+'-'+unicode(device['sensor'])+']'
         self.callbacks[k] = callback
@@ -111,10 +104,10 @@ class MyOpenApplication (object) :
 
     def execute_callback (self, system, order, device, data=None):
         k = unicode(system)+'-'+unicode(order)+'-'
-        if system == self.SYSTEM__LIGHTING:
+        if system == SYSTEM__LIGHTING:
             if (type(device) is dict) and ('group' in device.keys()):
                 k+='G-'+unicode(device['group'])
-        if system == self.SYSTEM__TEMP_CONTROL:
+        if system == SYSTEM__TEMP_CONTROL:
             if (type(device) is dict) and ('zone' in device.keys()) and ('sensor' in device.keys()):
                 k+='['+unicode(device['zone'])+'-'+unicode(device['sensor'])+']'
         if k in self.callbacks.keys() :
@@ -136,14 +129,14 @@ class MyOpenApplication (object) :
             data = m.groupdict()
             self.log (unicode(data))
             device = { 'light': data['light'] }
-            self.execute_callback(self.SYSTEM__LIGHTING, data['command'], device, None)
+            self.execute_callback(SYSTEM__LIGHTING, data['command'], device, None)
             return
         m = re.match('^\*(?P<command>[01])\*#(?P<group>\d{1,3})##$',msg)
         if m is not None:
             data = m.groupdict()
             self.log (unicode(data))
             device = { 'group': data['group'] }
-            self.execute_callback(self.SYSTEM__LIGHTING, data['command'], device, None)
+            self.execute_callback(SYSTEM__LIGHTING, data['command'], device, None)
             return
         self.log ('lighting command '+msg)
 
@@ -162,7 +155,7 @@ class MyOpenApplication (object) :
             device = { 'zone': zone, 'sensor': sensor }
             temp = float(data['temperature'])/10.0
             data = { 'temp': temp, 'unit': '°C' }
-            self.execute_callback(self.SYSTEM__TEMP_CONTROL, self.TEMP_CONTROL__REPORT_TEMP, device, data)
+            self.execute_callback(SYSTEM__TEMP_CONTROL, self.TEMP_CONTROL__REPORT_TEMP, device, data)
             return
         self.log ('temp control status '+msg)
 
@@ -172,56 +165,59 @@ class MyOpenApplication (object) :
     # system scanning
     #
 
-    def scan_network (self):
-        self.scan_socket = myOpenLayer1.OwnSocket(
+class Scanner (object):
+
+    def __init__ (self, system_loop):
+        self.sl = system_loop
+        self.sock = myOpenLayer1.OwnSocket(
                 config.host,
                 config.port,
                 config.password,
                 myOpenLayer1.OwnSocket.COMMAND)
         # set the callback to get messages from the layer 1
-        self.scan_socket.set_ready_callback(self.scan_ready)
-        self.scan_socket.set_data_callback(self.scan_read_serials)
+        self.sock.set_ready_callback(self.scan_ready)
+        self.sock.set_data_callback(self.scan_read_serials)
         # add the monitor socket to the system loop
-        self.system_loop.add_socket(self.scan_socket)
+        self.sl.add_socket(self.sock)
 
     def scan_ready (self):
         # send the scan request...
         #self.scan_socket.set_data_callback(self.scan_select_device_callback)
         self.devices = []
-        self.scan_socket.send("*#1001*0*13##")
+        self.sock.send("*#1001*0*13##")
 
     def scan_read_serials (self, msg):
-        self.scan_socket.log (msg)
+        self.sock.log (msg)
         # parse the *#1001*0*13*[mac address in decimal]## messages
         m = re.match('^\*#1001\*(?P<address>\d+)\*13\*(?P<macaddr>\d+)##$',msg)
         if m is not None:
             data = m.groupdict()
-            self.scan_socket.log('mac address '+unicode(data['macaddr']))
-            self.devices.append({'system': self.SYSTEM__LIGHTING, 'address': int(data['address']), 'macaddr': int(data['macaddr'])})
+            self.sock.log('mac address '+unicode(data['macaddr']))
+            self.devices.append({'system': SYSTEM__LIGHTING, 'address': int(data['address']), 'macaddr': int(data['macaddr'])})
             return
-        if msg==self.scan_socket.ACK:
-            self.scan_socket.log(unicode(self.devices))
+        if msg==self.sock.ACK:
+            self.sock.log(unicode(self.devices))
             self.current_device = 0
             self.scan_select_device ()
 
     def scan_select_device (self):
         dev = self.devices[self.current_device]
-        self.scan_socket.set_data_callback(self.scan_confirm_selected)
-        self.scan_socket.send("*1001*10#"+unicode(dev['macaddr'])+"*0##")
+        self.sock.set_data_callback(self.scan_confirm_selected)
+        self.sock.send("*1001*10#"+unicode(dev['macaddr'])+"*0##")
 
     def scan_confirm_selected (self, msg):
-        if msg==self.scan_socket.ACK:
+        if msg==self.sock.ACK:
             # request the config to be sent
-            self.scan_socket.set_data_callback(self.scan_receive_conf)
-            self.scan_socket.send("*#1001*0*38#0##")
+            self.sock.set_data_callback(self.scan_receive_conf)
+            self.sock.send("*#1001*0*38#0##")
         else:
             # in case we don't get an ACK here...              
             dev = self.devices[self.current_device]
-            self.scan_socket.log ("ERROR while attempting to select device with ID "+unicode(dev['macaddr']))
+            self.sock.log ("ERROR while attempting to select device with ID "+unicode(dev['macaddr']))
             self.scan_finish ()
 
     def scan_receive_conf (self, msg):
-        self.scan_socket.log (msg)
+        self.sock.log (msg)
         d = self.devices[self.current_device]
         if 'data' in d.keys():
             v = d['data']
@@ -231,7 +227,7 @@ class MyOpenApplication (object) :
         d['data'] = v
         self.devices[self.current_device] = d
 
-        if msg==self.scan_socket.ACK:
+        if msg==self.sock.ACK:
             # end of config data for this device
             self.current_device+=1
             if self.current_device < len(self.devices):
@@ -243,5 +239,5 @@ class MyOpenApplication (object) :
         f = open('devices.txt','w')
         f.write (json.dumps(self.devices, indent=4))
         f.close ()
-        self.system_loop.remove_socket(self.scan_socket)
-        self.scan_socket.close()
+        self.sl.remove_socket(self.sock)
+        self.sock.close()

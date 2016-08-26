@@ -7,22 +7,29 @@
 #
 
 import config
-from myOpenApplication import *
+import myOpenLayer1
+import myOpenLayer2
 
 class TestApplication (object) :
     def __init__ (self) :
-        self.ok = MyOpenApplication()
+        # create the system loop
+        self.sl = myOpenLayer1.MainLoop(myOpenLayer1.system_logger)
 
-        self.ok.register_callback (self.ok.SYSTEM__TEMP_CONTROL, self.ok.TEMP_CONTROL__REPORT_TEMP, { 'zone': 1, 'sensor': 1}, self.TempReportAction)
-        self.ok.register_callback (self.ok.SYSTEM__LIGHTING, self.ok.LIGHTING__OFF, { 'group': 1}, self.CheckForGenOff)
-        self.ok.scan_network()
-        self.ok.run ()
+        # setup the monitor socket 
+        self.mon = myOpenLayer2.Monitor(self.sl)
+        self.mon.register_callback (myOpenLayer2.SYSTEM__TEMP_CONTROL, self.mon.TEMP_CONTROL__REPORT_TEMP, { 'zone': 1, 'sensor': 1}, self.TempReportAction)
+        self.mon.register_callback (myOpenLayer2.SYSTEM__LIGHTING, self.mon.LIGHTING__OFF, { 'group': 1}, self.CheckForGenOff)
+
+        # setup the scanning process
+        self.scan = myOpenLayer2.Scanner(self.sl)
+
+        self.sl.run ()
 
     def TempReportAction (self, sensor, temp) :
-        self.ok.log (unicode(sensor)+'  -  '+unicode(temp))
+        self.mon.log (unicode(sensor)+'  -  '+unicode(temp))
 
     def CheckForGenOff (self, command, light) :
-        self.ok.log ('check for gen off : '+unicode(command)+'  -  '+unicode(light))
+        self.mon.log ('check for gen off : '+unicode(command)+'  -  '+unicode(light))
 
 # main program
 if __name__ == '__main__' :
