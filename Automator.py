@@ -11,6 +11,12 @@ import myOpenLayer1
 import myOpenLayer2
 
 class TestApplication (object) :
+    def init_scan (self):
+        self.scan.init_scan (myOpenLayer2.SYSTEM__TEMP_CONTROL, self.scan_lights)
+
+    def scan_lights (self):
+        self.scan.finish()
+
     def __init__ (self) :
         # create the system loop
         self.sl = myOpenLayer1.MainLoop(myOpenLayer1.system_logger)
@@ -21,7 +27,7 @@ class TestApplication (object) :
         self.mon.register_callback (myOpenLayer2.SYSTEM__LIGHTING, self.mon.LIGHTING__OFF, { 'group': 1}, self.CheckForGenOff)
 
         # setup the scanning process
-        self.scan = myOpenLayer2.Scanner(self.sl)
+        self.scan = myOpenLayer2.Scanner(self.sl, self.init_scan)
 
         self.sl.run ()
 

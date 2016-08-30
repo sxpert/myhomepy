@@ -166,7 +166,11 @@ class OwnSocket (object) :
         self.data_callback = None
 
     def log (self, msg) :
-        m = '['+self.address+':'+str(self.port)+' '+self.MODES[self.mode]+'] '+msg
+        col_in = '\033[92m'
+        col_out = '\033[0m'
+        if self.mode == self.COMMAND:
+            col_in = '\033[94m'
+        m = '['+self.address+':'+str(self.port)+' '+self.MODES[self.mode]+'] '+col_in+msg+col_out
         system_logger.log(m)
 
     def connect (self) :
@@ -235,18 +239,19 @@ class OwnSocket (object) :
             if self.data_callback is not None :
                 self.data_callback(msg)
             else :
-                self.log(msg)
+                self.log('<-RX '+unicode(msg))
 
     def send (self, msg):
+        self.log ('TX-> '+unicode(msg)) 
         self.sock.send(msg)
 
     def set_socket_mode (self) :
         self.log('initializing connection')
         if self.mode == self.COMMAND :
-            self.sock.send('*99*0##')
+            self.send('*99*0##')
             self.state = self.LOGGING
         elif self.mode == self.MONITOR :
-            self.sock.send('*99*1##')
+            self.send('*99*1##')
             self.state = self.LOGGING
         else :
             self.log ("unknown connection type : "+str(self.mode))
@@ -256,7 +261,7 @@ class OwnSocket (object) :
         p = '*#'+str(myOpenPass.ownCalcPass (self.passwd, nonce))+'##'
         self.log ('logging in with password packet '+p)
         self.state = self.AUTH
-        self.sock.send (p)
+        self.send (p)
 
     def set_ready_callback (self, callback) :
         self.ready_callback = callback

@@ -11,8 +11,10 @@ import json
 import myOpenLayer1
 import re
 
-SYSTEM__LIGHTING          = 1
-SYSTEM__TEMP_CONTROL      = 4
+SYSTEM__LIGHTING            = 1
+SYSTEM__TEMP_CONTROL        = 4
+SYSTEM__DIAG__LIGHTING      = 1001
+SYSTEM__DIAG__TEMP_CONTROL  = 1004
 
 class Monitor (object) :
     COMMAND                   = 0
@@ -63,6 +65,9 @@ class Monitor (object) :
 
     def data_callback (self, msg) :
         msgtype = None
+        # skip useless *1001*3*0## frame
+        if msg == '*1001*3*0##':
+            return
         # analyze the content of messages passed from the layer 1
         m = re.match('^\*(?P<who>\d+)(?P<msg>\*.*)', msg)
         if m is not None :
@@ -167,7 +172,8 @@ class Monitor (object) :
 
 class Scanner (object):
 
-    def __init__ (self, system_loop):
+    def __init__ (self, system_loop, ready):
+        self.devices=[]
         self.sl = system_loop
         self.sock = myOpenLayer1.OwnSocket(
                 config.host,
@@ -175,48 +181,53 @@ class Scanner (object):
                 config.password,
                 myOpenLayer1.OwnSocket.COMMAND)
         # set the callback to get messages from the layer 1
-        self.sock.set_ready_callback(self.scan_ready)
-        self.sock.set_data_callback(self.scan_read_serials)
+        self.sock.set_ready_callback(ready)
         # add the monitor socket to the system loop
         self.sl.add_socket(self.sock)
 
-    def scan_ready (self):
-        # send the scan request...
-        #self.scan_socket.set_data_callback(self.scan_select_device_callback)
-        self.devices = []
-        self.sock.send("*#1001*0*13##")
+    def get_diag_system(self, system):
+        if system == SYSTEM__LIGHTING:
+            return SYSTEM__DIAG__LIGHTING
+        if system == SYSTEM__TEMP_CONTROL:
+            return SYSTEM__DIAG__TEMP_CONTROL
 
-    def scan_read_serials (self, msg):
+    def init_scan (self, system, finish):
+        self.finish_callback = finish
+        self.current_system = system
+        self.sock.set_data_callback(self.read_serials)
+        self.sock.send("*#"+unicode(self.get_diag_system(self.current_system))+"*0*13##")
+
+    def read_serials (self, msg):
         self.sock.log (msg)
         # parse the *#1001*0*13*[mac address in decimal]## messages
-        m = re.match('^\*#1001\*(?P<address>\d+)\*13\*(?P<macaddr>\d+)##$',msg)
+        m = re.match('^\*#'+unicode(self.get_diag_system(self.current_system))+'\*(?P<address>\d+)\*13\*(?P<macaddr>\d+)##$',msg)
         if m is not None:
             data = m.groupdict()
             self.sock.log('mac address '+unicode(data['macaddr']))
-            self.devices.append({'system': SYSTEM__LIGHTING, 'address': int(data['address']), 'macaddr': int(data['macaddr'])})
+            self.devices.append({'system': self.current_system, 'macaddr': int(data['macaddr'])})
             return
         if msg==self.sock.ACK:
             self.sock.log(unicode(self.devices))
             self.current_device = 0
-            self.scan_select_device ()
+            self.select_device ()
 
-    def scan_select_device (self):
+    def select_device (self):
         dev = self.devices[self.current_device]
-        self.sock.set_data_callback(self.scan_confirm_selected)
-        self.sock.send("*1001*10#"+unicode(dev['macaddr'])+"*0##")
+        self.sock.set_data_callback(self.confirm_selected)
+        self.sock.send("*"+unicode(self.get_diag_system(self.current_system))+"*10#"+unicode(dev['macaddr'])+"*0##")
 
-    def scan_confirm_selected (self, msg):
+    def confirm_selected (self, msg):
         if msg==self.sock.ACK:
             # request the config to be sent
-            self.sock.set_data_callback(self.scan_receive_conf)
-            self.sock.send("*#1001*0*38#0##")
+            self.sock.set_data_callback(self.receive_conf)
+            self.sock.send("*#"+unicode(self.get_diag_system(self.current_system))+"*0*38#0##")
         else:
             # in case we don't get an ACK here...              
             dev = self.devices[self.current_device]
             self.sock.log ("ERROR while attempting to select device with ID "+unicode(dev['macaddr']))
-            self.scan_finish ()
+            self.finish ()
 
-    def scan_receive_conf (self, msg):
+    def receive_conf (self, msg):
         self.sock.log (msg)
         d = self.devices[self.current_device]
         if 'data' in d.keys():
@@ -231,11 +242,11 @@ class Scanner (object):
             # end of config data for this device
             self.current_device+=1
             if self.current_device < len(self.devices):
-                self.scan_select_device()
+                self.select_device()
             else:
-                self.scan_finish()
+                self.finish_callback()
     
-    def scan_finish (self):
+    def finish (self):
         f = open('devices.txt','w')
         f.write (json.dumps(self.devices, indent=4))
         f.close ()
