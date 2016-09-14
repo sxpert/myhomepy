@@ -23,21 +23,21 @@ logfile = 'myopenlog-2.log'
 #
 
 class Logger (object) :
-	def __init__ (self, logfile) :
-		self.logfile = logfile
+    def __init__ (self, logfile) :
+        self.logfile = logfile
 
-	def log (self, msg) :
-		# generate datetime string
-		d = datetime.datetime.today()
-		ds = "%04d-%02d-%02d %02d:%02d:%02d"%(d.year,d.month,d.day,d.hour,d.minute,d.second)
-		logmsg = ds+' '+msg
-		print(logmsg)
-		try :
-			lf = open(self.logfile,"a+")
-			lf.write(logmsg+'\n')
-			lf.close()
-		except :
-			pass
+    def log (self, msg) :
+        # generate datetime string
+        d = datetime.datetime.today()
+        ds = "%04d-%02d-%02d %02d:%02d:%02d"%(d.year,d.month,d.day,d.hour,d.minute,d.second)
+        logmsg = ds+' '+msg
+        print(logmsg)
+        try :
+            lf = open(self.logfile,"a+")
+            lf.write(logmsg+'\n')
+            lf.close()
+        except :
+            pass
 
 system_logger = Logger (logfile)
 
@@ -275,9 +275,9 @@ class OwnSocket (object) :
 #
 
 if __name__ == '__main__' :
-	import config
-	system_loop = MainLoop(system_logger)
-	# test program
-	s = OwnSocket(config.host,config.port,config.password,OwnSocket.MONITOR)
-	system_loop.add_socket(s)
-	system_loop.run()
+    import config
+    system_loop = MainLoop(system_logger)
+    # test program
+    s = OwnSocket(config.host,config.port,config.password,OwnSocket.MONITOR)
+    system_loop.add_socket(s)
+    system_loop.run()

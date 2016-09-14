@@ -9,10 +9,12 @@
 import config
 import myOpenLayer1
 import myOpenLayer2
-
+import webserver
+    
 class TestApplication (object) :
     def init_scan (self):
-        self.scan.init_scan (myOpenLayer2.SYSTEM__TEMP_CONTROL, self.scan_lights)
+        self.scan.init_scan (myOpenLayer2.SYSTEM__LIGHTING, self.scan_lights)
+        #self.scan.init_scan (myOpenLayer2.SYSTEM__TEMP_CONTROL, self.scan_lights)
 
     def scan_lights (self):
         self.scan.finish()
@@ -21,13 +23,19 @@ class TestApplication (object) :
         # create the system loop
         self.sl = myOpenLayer1.MainLoop(myOpenLayer1.system_logger)
 
+        # initializes the web server
+        addr = ('', 8000)
+        self.web = webserver.OpenWeb(addr)
+        # should be included above...
+        self.sl.add_socket (self.web)
+
         # setup the monitor socket 
         self.mon = myOpenLayer2.Monitor(self.sl)
         self.mon.register_callback (myOpenLayer2.SYSTEM__TEMP_CONTROL, self.mon.TEMP_CONTROL__REPORT_TEMP, { 'zone': 1, 'sensor': 1}, self.TempReportAction)
         self.mon.register_callback (myOpenLayer2.SYSTEM__LIGHTING, self.mon.LIGHTING__OFF, { 'group': 1}, self.CheckForGenOff)
 
         # setup the scanning process
-        self.scan = myOpenLayer2.Scanner(self.sl, self.init_scan)
+        #self.scan = myOpenLayer2.Scanner(self.sl, self.init_scan)
 
         self.sl.run ()
 
