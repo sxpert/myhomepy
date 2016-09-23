@@ -5,16 +5,22 @@ import myOpenLayer1
 import BaseHTTPServer
 
 
+
 class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
 
     def log (self):
         msg = '['+unicode(self.server.server_name)+':'+unicode(self.server.server_port)+' WEB] '
         msg+= self.address_string()+' '+self.command+' '+unicode(self.path)
         myOpenLayer1.system_logger.log (msg)
+    
+    def log_request (self, code='-', size='-'):
+        pass
+
+    def log_error (self, format, *args):
+        pass
 
     def do_GET(self):
         self.log()
-
 
         self.send_response(200)
         self.send_header('Content-type', 'text/html')
@@ -30,7 +36,7 @@ class OpenWeb (BaseHTTPServer.HTTPServer, object):
     
     def recv (self):
         self._handle_request_noblock()
-    
+
     @property
     def sock(self):
         return self.socket

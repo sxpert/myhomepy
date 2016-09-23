@@ -13,6 +13,7 @@ import re
 
 SYSTEM__LIGHTING            = 1
 SYSTEM__TEMP_CONTROL        = 4
+SYSTEM__GATEWAY             = 13
 SYSTEM__DIAG__LIGHTING      = 1001
 SYSTEM__DIAG__TEMP_CONTROL  = 1004
 
@@ -29,8 +30,9 @@ class Monitor (object) :
     def __init__ (self, system_loop) :
         self.sl = system_loop
         # prepare the app startup
-        self.routes = [ { '1' : self.cmd_lighting, },
-                        { '4' : self.status_tempcontrol}, ]
+        self.routes = [ { '1'  : self.cmd_lighting },
+                        { '4'  : self.status_tempcontrol, 
+                          '13' : self.status_gateway }, ]
         # initializes callbacks
         self.callbacks = None
         self.monitor_socket = myOpenLayer1.OwnSocket(
@@ -126,7 +128,7 @@ class Monitor (object) :
 
     # Lighting systems
 
-    def cmd_lighting (self, msg) :
+    def cmd_lighting (self, msg):
         # light command
         # '*0*#1##'
         m = re.match('^\*(?P<command>[01])\*(?P<light>\d{2,4})##$',msg)
@@ -147,7 +149,7 @@ class Monitor (object) :
 
     # Temperature control systems
 
-    def status_tempcontrol (self, msg) :
+    def status_tempcontrol (self, msg):
         # temperature report
         # '101*0*0270##'
         m = re.match('^\*(?P<probe>\d{3})\*0\*(?P<temperature>\d{4})##$',msg)
@@ -163,7 +165,11 @@ class Monitor (object) :
             self.execute_callback(SYSTEM__TEMP_CONTROL, self.TEMP_CONTROL__REPORT_TEMP, device, data)
             return
         self.log ('temp control status '+msg)
+    
+    # gateway
 
+    def status_gateway (self, msg):
+        self.log ('gateway status '+msg) 
         
     #------------------------------------------------------------------------------------------------------------------
     #
