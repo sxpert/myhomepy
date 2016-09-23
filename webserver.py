@@ -30,6 +30,7 @@ class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
 class OpenWeb (BaseHTTPServer.HTTPServer, object):
     def __init__ (self, address):
         super(OpenWeb, self).__init__(address, OpenWebHandler)
+        myOpenLayer1.system_logger.log ('['+unicode(self.server_name)+':'+unicode(self.server_port)+' WEB] starting')
    
     def connect (self):
         pass

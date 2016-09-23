@@ -6,18 +6,13 @@
 # Licenced under the terms of the GNU GPL v3.0 or later
 #
 
-import config
+#import config
 import myOpenLayer1
 import myOpenLayer2
+import config
 import webserver
     
 class TestApplication (object) :
-    def init_scan (self):
-        self.scan.init_scan (myOpenLayer2.SYSTEM__LIGHTING, self.scan_lights)
-        #self.scan.init_scan (myOpenLayer2.SYSTEM__TEMP_CONTROL, self.scan_lights)
-
-    def scan_lights (self):
-        self.scan.finish()
 
     def __init__ (self) :
         # create the system loop
@@ -30,20 +25,31 @@ class TestApplication (object) :
         self.sl.add_socket (self.web)
 
         # setup the monitor socket 
-        self.mon = myOpenLayer2.Monitor(self.sl)
-        self.mon.register_callback (myOpenLayer2.SYSTEM__TEMP_CONTROL, self.mon.TEMP_CONTROL__REPORT_TEMP, { 'zone': 1, 'sensor': 1}, self.TempReportAction)
-        self.mon.register_callback (myOpenLayer2.SYSTEM__LIGHTING, self.mon.LIGHTING__OFF, { 'group': 1}, self.CheckForGenOff)
+#        self.mon = myOpenLayer2.Monitor(self.sl)
+#        self.mon.register_callback (myOpenLayer2.SYSTEM__TEMP_CONTROL, self.mon.TEMP_CONTROL__REPORT_TEMP, { 'zone': 1, 'sensor': 1}, self.TempReportAction)
+#        self.mon.register_callback (myOpenLayer2.SYSTEM__LIGHTING, self.mon.LIGHTING__OFF, { 'group': 1}, self.CheckForGenOff)
 
         # setup the scanning process
         #self.scan = myOpenLayer2.Scanner(self.sl, self.init_scan)
 
         self.sl.run ()
 
+    # callbacks
+
     def TempReportAction (self, sensor, temp) :
         self.mon.log (unicode(sensor)+'  -  '+unicode(temp))
 
     def CheckForGenOff (self, command, light) :
         self.mon.log ('check for gen off : '+unicode(command)+'  -  '+unicode(light))
+
+    # system scanner (probably needs to go somewhere else)
+
+    def init_scan (self):
+        self.scan.init_scan (myOpenLayer2.SYSTEM__LIGHTING, self.scan_lights)
+        #self.scan.init_scan (myOpenLayer2.SYSTEM__TEMP_CONTROL, self.scan_lights)
+
+    def scan_lights (self):
+        self.scan.finish()
 
 # main program
 if __name__ == '__main__' :

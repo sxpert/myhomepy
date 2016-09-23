@@ -1,7 +1,7 @@
 .#*
 *.pyc
 *.log
-config.py
+config.json
 openpass_cs/openpass_cs/openpass_cs/bin/*
 openpass_cs
 myopenlog.log
