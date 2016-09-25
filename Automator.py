@@ -11,6 +11,7 @@ import myOpenLayer1
 import myOpenLayer2
 import config
 import webserver
+import website
     
 class TestApplication (object) :
 
@@ -21,6 +22,14 @@ class TestApplication (object) :
         # initializes the web server
         addr = ('', 8000)
         self.web = webserver.OpenWeb(addr)
+    
+        self.web.register_routes (
+            [
+                [ "^/$", website.ow_index.OW_index ],
+                [ "^/add_system(.*)$", website.ow_add_system.OW_add_system ],
+            ]
+        )
+
         # should be included above...
         self.sl.add_socket (self.web)
 
