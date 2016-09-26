@@ -112,6 +112,10 @@ class Monitor (object) :
         #print (unicode(self.callbacks))
 
     def execute_callback (self, system, order, device, data=None):
+        # if no callbacks have been setup, don't bother
+        if self.callbacks is None:
+            return
+
         k = unicode(system)+'-'+unicode(order)+'-'
         if system == SYSTEM__LIGHTING:
             if (type(device) is dict) and ('group' in device.keys()):
