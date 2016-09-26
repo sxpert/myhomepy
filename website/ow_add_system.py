@@ -138,5 +138,8 @@ class OW_add_system (object):
             self.generate_basic_form(request)
             return
 
+        # add the new gateway
+        config.config.add_system(self.gateway, int(self.openwebnet_port), self.password_open)
+
         request.html_response('<pre>ok\n%s\n%s\n%s\n%s</pre>'% (self.action, self.gateway, self.openwebnet_port, self.password_open))
 

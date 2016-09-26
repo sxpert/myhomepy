@@ -27,7 +27,7 @@ class Monitor (object) :
 
     TEMP_CONTROL__REPORT_TEMP = 0
 
-    def __init__ (self, system_loop) :
+    def __init__ (self, system_loop, system_id) :
         self.sl = system_loop
         # prepare the app startup
         self.routes = [ { '1'  : self.cmd_lighting },
@@ -35,10 +35,12 @@ class Monitor (object) :
                           '13' : self.status_gateway }, ]
         # initializes callbacks
         self.callbacks = None
+        system = config.config[system_id]
+        gw = system['gateway']
         self.monitor_socket = myOpenLayer1.OwnSocket(
-                config.host,
-                config.port,
-                config.password,
+                gw['ip'],
+                gw['port'],
+                gw['password'],
                 myOpenLayer1.OwnSocket.MONITOR)
         # set the callback to get messages from the layer 1
         self.monitor_socket.set_data_callback(self.data_callback)

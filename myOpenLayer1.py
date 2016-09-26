@@ -182,6 +182,7 @@ class OwnSocket (object) :
         self.sock.setsockopt (socket.SOL_TCP, socket.TCP_KEEPINTVL, 1)
         self.sock.setsockopt (socket.SOL_TCP, socket.TCP_KEEPCNT, 2)
         try :
+            self.log ("Initializing connection to "+unicode(self.address)+" port "+unicode(self.port))
             self.sock.connect ((self.address, self.port))
         except socket.error as e :
             self.sock = None

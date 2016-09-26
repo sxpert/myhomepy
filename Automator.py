@@ -18,6 +18,7 @@ class TestApplication (object) :
     def __init__ (self) :
         # create the system loop
         self.sl = myOpenLayer1.MainLoop(myOpenLayer1.system_logger)
+        config.config.set_main_loop(self.sl)
 
         # initializes the web server
         addr = ('', 8000)
