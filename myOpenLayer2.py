@@ -6,7 +6,6 @@
 # Licenced under the terms of the GNU GPL v3.0 or later
 #
 
-import config
 import json
 import myOpenLayer1
 import re
@@ -17,7 +16,7 @@ SYSTEM__GATEWAY             = 13
 SYSTEM__DIAG__LIGHTING      = 1001
 SYSTEM__DIAG__TEMP_CONTROL  = 1004
 
-class Monitor (object) :
+class OWNMonitor (object) :
     COMMAND                   = 0
     STATUS                    = 1
     MSG_TYPES                 = [ 'Command', 'Status', ]
@@ -35,6 +34,7 @@ class Monitor (object) :
                           '13' : self.status_gateway }, ]
         # initializes callbacks
         self.callbacks = None
+        import config
         system = config.config[system_id]
         gw = system['gateway']
         self.monitor_socket = myOpenLayer1.OwnSocket(

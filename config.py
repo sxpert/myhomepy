@@ -5,9 +5,8 @@
 
 CONFIG_FILE_NAME = 'config.json'
 
-import myOpenLayer1
-import myOpenLayer2
 import json
+import myOpenLayer1
 
 class Config (object):
     def __init__ (self, config_file=None):
@@ -20,8 +19,12 @@ class Config (object):
     def log(self, msg):
         myOpenLayer1.system_logger.log ('[CONF] '+msg)
 
+    # sets the main loop
+    # starts up all loaded systems
     def set_main_loop(self, ml):
         self.main_loop = ml
+        for sys_id in range(0, len(self.systems)):
+            self._add_system(sys_id)
 
     def load(self):
         try: 
@@ -32,6 +35,9 @@ class Config (object):
         else:
             self.log ('configuration file opened successfully')
             # read the configuration file
+            d = f.read()
+            f.close()
+            self.systems = json.loads(d)
         
     def save(self):
         f = open(self.config_file, 'w')
@@ -73,8 +79,13 @@ class Config (object):
         sys_id = len(self.systems)
         self.systems.append(system)
         self.save()
-        
+       
+        self._add_system(sys_id)
+
+    def _add_system(self, sys_id):    
         self.log("added system with system id="+unicode(sys_id))
-        self.monitors.append(myOpenLayer2.Monitor(self.main_loop, sys_id))
+        import myOpenLayer2
+        sys = myOpenLayer2.OWNMonitor(self.main_loop, sys_id)
+        self.monitors.append(sys)
 
 config = Config()
