@@ -17,7 +17,10 @@ class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
     def log (self, code=None, size=None, msg=None):
         srv = '['+unicode(self.server.server_name)+':'+unicode(self.server.server_port)+' WEB]'
         if msg is None:
-            req = self.address_string()+' '+self.command+' '+unicode(self.path)
+            if self.command is None:
+                req = self.address_string()+' [Unknown Command] '+unicode(self.path)
+            else:
+                req = self.address_string()+' '+self.command+' '+unicode(self.path)
             res = unicode(code)
             if size is not None:
                 res += ' '+unicode(size)
