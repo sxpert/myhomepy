@@ -1,0 +1,33 @@
+
+models:
+  2: 2 buttons basic command 
+129: F411/2 type
+130: F411/4 type
+
+brand: 
+  0: unknown
+  2: legrand
+
+skin:
+  4: celiane
+
+* system 1: lighting
+. mac address decimal
+        . mac address in hex
+                 . reported model number in *#1001*...*1*<model>*<nb_configurators>*<brand>*<skin>##
+                              . model reported
+                                      . real model if different
+ 816742 000C7666 130-6-0-0 BT_F411/4                chambre            
+6693791 0066239F   2-6-0-0 BT_H4652/2 LG_0672??     séjour à gauche de la baie vitrée
+6693798 006623A6   2-6-0-0 BT_H4652/2               entrée et salon
+6693812 006623B4   2-6-0-0 BT_H4652/2               toilettes et faux plafond
+6694042 0066249A   2-6-0-0 BT_H4652/2               cuisine
+7802726 00770F66   2-6-0-0 BT_H4652/2               entrée de la chambre
+7802967 00771057   2-6-0-0 BT_H4652/2               placard de la chambre
+7803068 007710BC   2-6-0-0 BT_H4652/2               tete de lit gauche
+7803122 007710F2   2-6-0-0 BT_H4652/2               salle de bains
+7803160 00771118   2-6-0-0 BT_H4652/2               tete de lit droit
+8130287 007C0EEF 130-6-0-0 BT_F411/4                entrée, salon, cuisine, salle de bains
+8177893 007CC8E5 129-5-0-0 BT_F411/2                salle de bains et placard chambre
+8182713 007CDBB9 130-6-0-0 BT_F411/4                faux plafond, séjour
+9828102 0095F706   2-6-2-4 LG_067552                droite de l'entree du séjour

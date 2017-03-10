@@ -35,8 +35,8 @@ class TestApplication (object) :
         self.sl.add_socket (self.web)
 
         # setup the monitor socket 
-#        self.mon = myOpenLayer2.Monitor(self.sl)
-#        self.mon.register_callback (myOpenLayer2.SYSTEM__TEMP_CONTROL, self.mon.TEMP_CONTROL__REPORT_TEMP, { 'zone': 1, 'sensor': 1}, self.TempReportAction)
+        #self.mon = myOpenLayer2.Monitor(self.sl)
+        #self.mon.register_callback (myOpenLayer2.SYSTEM__TEMP_CONTROL, self.mon.TEMP_CONTROL__REPORT_TEMP, { 'zone': 1, 'sensor': 1}, self.TempReportAction)
 #        self.mon.register_callback (myOpenLayer2.SYSTEM__LIGHTING, self.mon.LIGHTING__OFF, { 'group': 1}, self.CheckForGenOff)
 
         # setup the scanning process

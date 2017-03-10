@@ -7,3 +7,5 @@ openpass_cs
 myopenlog.log
 myOpenProto.py
 devices.txt
+*.db
+*.swp

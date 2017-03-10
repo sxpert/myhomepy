@@ -18,7 +18,8 @@ class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
         srv = '['+unicode(self.server.server_name)+':'+unicode(self.server.server_port)+' WEB]'
         if msg is None:
             if self.command is None:
-                req = self.address_string()+' [Unknown Command] '+unicode(self.path)
+                # note: there is no path to display
+                req = self.address_string()+' [Unknown Command] '
             else:
                 req = self.address_string()+' '+self.command+' '+unicode(self.path)
             res = unicode(code)
