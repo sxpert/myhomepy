@@ -193,7 +193,16 @@ class OpenWeb (BaseHTTPServer.HTTPServer, object):
         pass
     
     def recv (self):
-        self._handle_request_noblock()
+        from socket import error as SocketError
+        import errno
+        try:
+            self._handle_request_noblock()
+        except SocketError as e:
+            # ignore connection reset by peer...
+            if e.errno != errno.ECONNRESET:
+                raise
+            pass
+
 
     @property
     def sock(self):
