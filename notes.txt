@@ -1,12 +1,39 @@
 
+
+myhomesuite passwords :
+Developers profile    : "BtSWIgrass07"
+QA tester profile     : "S@laprove1"
+Customer Care profile : "BtxC4r3"
+
+many passwords are stored in BTicino.Core.v3 BTicino.Core.Constants/CommonConstants
+
+plant file password     : "btpltpsw"
+default password        : "bticino"
+password for .xtz files : "btxtrpsw"
+tegui password          : "tegui"
+
+Firmware files passwords :
+
+password for F454 firmware             : "F454"
+password for MyHome Screen 10 firmware : "TS10" 
+
+
 models:
   2: 2 buttons basic command 
 129: F411/2 type
 130: F411/4 type
 
-brand: 
-  0: unknown
-  2: legrand
+brand: (from the enums at : Bticino.Core.v3.dll{BTicino.Core.Utils/Brand|BrandCode) 
+  0: (Undefined)    (Undefined)
+  1: BTicino        BT
+  2: Legrand        LG
+  3: Tegui          TG
+  4: Kontaktor      KT
+  5: Shidean        SH
+  6: [obsolete]
+  7: LegrandGroup   LGG
+  8: LegrandBTicino LGG
+  9: Arnould        AR
 
 skin:
   4: celiane
