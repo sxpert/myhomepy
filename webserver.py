@@ -184,8 +184,11 @@ class OpenWeb (BaseHTTPServer.HTTPServer, object):
     def __init__ (self, address):
         self.routes = None
         super(OpenWeb, self).__init__(address, OpenWebHandler)
-        myOpenLayer1.system_logger.log ('['+unicode(self.server_name)+':'+unicode(self.server_port)+' WEB] starting')
+        self.log ('starting')
    
+    def log (self, message):
+        myOpenLayer1.system_logger.log ('['+unicode(self.server_name)+':'+unicode(self.server_port)+' WEB] '+message)
+
     def register_routes(self, routes):
         self.routes = routes
 
@@ -201,6 +204,8 @@ class OpenWeb (BaseHTTPServer.HTTPServer, object):
             # ignore connection reset by peer...
             if e.errno != errno.ECONNRESET:
                 raise
+            else:
+                self.log('client connection aborted')
             pass
 
 
