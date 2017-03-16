@@ -1,0 +1,220 @@
+{
+    "version": "3.3.70",
+    "scenarios": {
+        "ScanPlant": {
+            "id": 7,
+            "description": "Scan by system and address",
+            "type": "readonly",
+            "sequences": [ 
+                { "id": "ScanAddressed" }, 
+                { "id": "DiagAddressed", "repeat": true}, 
+                { "id": "DiagKO", "repeat": true },
+                { "id": "CloseScan", "repeat": true }
+            ]
+        }
+    },
+    "sequences": {
+        "CloseScan": {
+            "id": 7,
+            "openlist": [
+                { "id": "cmd_diag_abort", "mandatory": true, "onNAK": 3 }
+            ]
+        },
+        "DiagAddressed": {
+            "id": 8,
+            "openlist": [
+                { "id": "cmd_diag_start_add", "mandatory": true, "onNAK": 4 },
+                { "id": "cmd_diag_abort", "onNAK": 0, "onERR": 0 },
+                { "id": "res_object_model" },
+                { "id": "res_fw_version" },
+                { "id": "res_hw_version" },
+                { "id": "res_conf_1_6" },
+                { "id": "res_conf_7_12" },
+                { "id": "res_micro_version" },
+                { "id": "res_diag_a" },
+                { "id": "res_diag_b" },
+                { "id": "res_id" },
+                { "id": "res_ko_value", "repeat": true },
+                { "id": "res_ko_sys", "repeat": true },
+                { "id": "res_busy_ko_error", "repeat": true },
+                { "id": "res_trans_end" }
+            ]
+        },
+        "DiagKO": {
+            "id": 11,
+            "openlist": [
+                { "id": "cmd_param_all_ko", "mandatory": true, "onNAK": 2 },
+                { "id": "res_param_ko", "repeat": true },
+                { "id": "res_busy_ko_error", "repeat": true },
+                { "id": "res_param_ko_special", "repeat": true }
+            ]
+        },
+        "ScanAddressed": {
+            "id": 12,
+            "openlist": [
+                { "id": "cmd_scan_start_addr", "mandatory": true, "repeat": true, "onERR": 4 },
+                { "id": "res_object_model", "repeat": true }
+            ]
+        }
+    },
+    "opensentences": {
+        "res_object_model": {
+            "id": 1,
+            "description": "device answers with it's object model and number of physical configurators",
+            "type": "RX",
+            "str": "*#[who]*[where]*1*[object_model]*[n_conf]*[brand]*[line]##",
+            "has_address": true,
+            "has_params": true,
+            "diag_open": true
+        },
+        "res_fw_version": {
+            "id": 2,
+            "description": "device answers with it's firmware version",
+            "type": "RX",
+            "str": "*#[who]*[where]*2*[fw_version]##",
+            "has_params": true,
+            "diag_open": true
+        },
+        "res_hw_version": {
+            "id": 3,
+            "description": "device answers with it's harware version",
+            "type": "RX",
+            "str": "*#[who]*[where]*3*[hw_version]##",
+            "has_params": true,
+            "diag_open": true
+        },
+        "res_conf_1_6": {
+            "id": 4,
+            "description": "device answers with hardware configurators 1 through 6",
+            "type": "RX",
+            "str": "*#[who]*[where]*4*[c1]*[c2]*[c3]*[c4]*[c5]*[c6]##",
+            "has_params": true,
+            "diag_open": true
+        },
+        "res_conf_7_12": {
+            "id": 5,
+            "description": "device answers with hardware configurators 7 through 12",
+            "type": "RX",
+            "str": "*#[who]*[where]*5[c7]*[c8]*[c9]*[c10]*[c11]*[c12]##",
+            "has_params": true,
+            "diag_open": true
+        },
+        "res_micro_version": {
+            "id": 6,
+            "description": "device answers with it's micro version (whatever that is)",
+            "type": "RX",
+            "str": "*#[who]*[where]*6*[micro_version]##",
+            "has_params": true,
+            "diag_open": true
+        },
+        "res_diag_a": {
+            "id": 7,
+            "description": "device answers with diagnostic bit set A",
+            "type": "RX",
+            "str": "*#[who]*[where]*7*[bitmask_dia_a]##",
+            "has_params": true,
+            "diag_open": true
+        },
+        "res_diag_b": {
+            "id": 8,
+            "description": "device answers with diagnostic bit set B",
+            "type": "RX",
+            "str": "*#[who]*[where]*8*[bitmask_dia_b]##",
+            "has_params": true,
+            "diag_open": true
+        },
+        "res_trans_end": {
+            "id": 9,
+            "description": "end of transmission from device",
+            "type": "RX",
+            "str": "*[who]*4*[_junk]##",
+            "has_address": true,
+            "diag_open": true
+        },
+        "res_id": {
+            "id": 20,
+            "description": "device answers with it's ID",
+            "type": "RX",
+            "str": "*#[who]*[where]*13*[id]##",
+            "has_params": true,
+            "diag_open": true
+        },
+        "res_ko_value": {
+            "id": 21,
+            "description": "device answers with it's key/object, value and state",
+            "type": "RX",
+            "str": "*#[who]*[where]*30*[slot]*[keyo]*[state]##",
+            "has_params": true,
+            "diag_open": true
+        },
+        "res_ko_sys": {
+            "id": 22,
+            "description": "device answers with it's key/object, system and address",
+            "type": "RX",
+            "str": "*#[who]*[where]*32#[slot]*[sys]*[addr]##",
+            "has_params": true,
+            "diag_open": true
+        },
+        "res_param_ko": {
+            "id": 26,
+            "description": "device answers with the key/value of key/object",
+            "type": "RX",
+            "str": "*#[who]*[where]*35#[index]#[slot]*[val_par]##",
+            "has_params": true,
+            "diag_open": true
+        },
+        "cmd_diag_start_add": {
+            "id": 33,
+            "description": "programmer start diagnostic session with address",
+            "type": "TX",
+            "str": "*#[who]*[where]*0##",
+            "has_address": true,
+            "diag_open": true
+        },
+        "cmd_diag_abort": {
+            "id": 35,
+            "description": "programmer abort diagnostic",
+            "type": "TX",
+            "str": "*[who]*6*0##",
+            "diag_open": true
+        },
+        "res_busy_ko_error": {
+            "id": 37,
+            "description": "device indicates the key/object is busy",
+            "type": "RX",
+            "str": "*#[who]*[where]*31*[slot]*1*[state]##",
+            "has_params": true,
+            "diag_open": true,
+            "error": [ "ERR", "INFO" ]
+        },
+        "res_param_ok_special": {
+            "id": 78,
+            "description": "device answers with the special parameter of key/object",
+            "type": "RX",
+            "str": "*#[who]*[where]*310*[slot]*[val_par]##",
+            "has_params": true,
+            "diag_open": true
+        },
+        "cmd_param_all_ko": {
+            "id": 83,
+            "description": "reset key/objects on all slots",
+            "type": "TX",
+            "str": "*#[who]*0*38#0##",
+            "diag_open": true
+        },
+        "cmd_diag_abort": {
+            "id": 84,
+            "description": "device abort diagnostic",
+            "type": "RX":
+            "str": "*[who]*6*0##",
+            "error": [ "ERR", "INFO" ]
+        },
+        "cmd_scan_start_addr": { 
+            "id": 85,
+            "description": "programmer start scan session with address",
+            "type": "TX",
+            "str": "*#[who]*[where]*1##",
+            "has_address": true
+        }
+    }
+}
