@@ -253,6 +253,8 @@ class OWNMonitor (object) :
     #
     
     def update_callbacks (self, system):
+        if "callbacks" not in system.keys():
+            system["callbacks"] = []
         callbacks = system["callbacks"]
         for cb in callbacks:
             print (unicode(cb))
