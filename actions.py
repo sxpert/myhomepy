@@ -46,7 +46,7 @@ class Sentence (ProtoObject):
         self.name = name
         self.id = self._must ("id", data)
         self.description = self._must ("description", data)
-        t = self._must ("type", data, ["RX", "TX"])
+        self.type = self._must ("type", data, ["RX", "TX"])
         self.str = self._must ("str", data)
         self.has_address = self._boolean ("has_address", data)
         self.has_params = self._boolean ("has_params", data)
@@ -62,6 +62,8 @@ class SequenceItem (ProtoObject):
     def setup (self, name, data):
         self.name = name
         self.id = self._must ("id", data)
+        if self.id not in self._proto.sentences.keys():
+            return self._abort ("unable to find "+self.id+" in sentences list")
         self.sentence = self._proto.sentences[self.id]
         self.mandatory = self._boolean ("mandatory", data)
         self.repeat = self._boolean ("repeat", data)
@@ -79,11 +81,44 @@ class Sequence (ProtoObject):
         self.id = self._must ("id", data)
         ol = self._must ("openlist", data)
         if type(ol) is not list:
-            return self._abort ("'openlist' is not list type")
+            return self._abort ("'openlist' is not list type in sequence '"+name+"'")
         self.openlist = []
         for o in ol:
             self.openlist.append(SequenceItem(self._proto).setup(self.name+" - "+unicode(len(self.openlist)+1), o))
         return self        
+
+    def __repr__ (self):
+        return self.name
+
+class ScenarioItem (ProtoObject):
+
+    def setup (self, name, data):
+        self.name = name
+        self.id = self._must ("id", data)
+        if self.id not in self._proto.sequences.keys():
+            return self._abort ("Unable to find "+self.id+" in sequences list")
+        self.sequence = self._proto.sequences[self.id]
+        self.repeat = self._boolean ("repeat", data)
+        return self
+
+    def __repr__ (self):
+        return unicode(self.sequence)
+
+class Scenario (ProtoObject):
+    
+    def setup (self, name, data):
+        self.name = name
+        self.id = self._must ("id", data)
+        self.description = self._must("description", data)
+        self.type = self._must ("type", data, ["readonly"])
+        seq = self._must("sequences", data)
+        if type(seq) is not list:
+            return self._abort ("'sequences is not list type in scenario '"+name+"'")
+        self.sequences = []
+        for s in seq:
+            self.sequences.append(ScenarioItem(self._proto).setup(self.name+" - "+unicode(len(self.sequences)+1), s))
+        self._proto.log ("        "+unicode(self.sequences))
+        return self
 
 class Proto (object):
     def __init__ (self, proto, log = None):
@@ -113,11 +148,11 @@ class Proto (object):
             return self.abort ("unable to find 'sentences' in protocol description file")
         self.sentences = {}
         sentences = proto["sentences"]
-        for sentence_name in sentences.keys():
-            self.log ("    "+sentence_name)
-            sentence_data = sentences[sentence_name]
-            sentence = Sentence(self).setup(sentence_name, sentence_data)
-            self.sentences[sentence_name] = sentence
+        for name in sentences.keys():
+            self.log ("    "+name)
+            data = sentences[name]
+            sentence = Sentence(self).setup(name, data)
+            self.sentences[name] = sentence
         return True
 
     def load_sequences (self, proto):
@@ -126,15 +161,25 @@ class Proto (object):
             return self.abort ("unable to find 'sequences' in protocol description file")
         self.sequences = {}
         sequences = proto["sequences"]
-        for sequence_name in sequences.keys():
-            self.log ("    "+sequence_name)
-            sequence_data = sequences[sequence_name]
-            sequence = Sequence(self).setup(sequence_name, sequence_data)
-            self.sequences[sequence_name] = sequence
+        for name in sequences.keys():
+            self.log ("    "+name)
+            data = sequences[name]
+            sequence = Sequence(self).setup(name, data)
+            self.sequences[name] = sequence
         return True
     
     def load_scenarios (self, proto):
-        pass
+        self.log ("Loading scenarios")
+        if "scenarios" not in proto:
+            return self.abort ("Unable to find 'scenarios' in protocol description file")
+        self.scenarios = {}
+        scenarios = proto["scenarios"]
+        for name in scenarios.keys():
+            self.log ("    "+name)
+            data = scenarios[name]
+            scenario = Scenario(self).setup(name, data)
+            self.scenarios[name] = scenario
+        return True
 
 #
 # takes data from actions.json
@@ -196,6 +241,7 @@ class ActionEngine (object):
         pass
 
     def run_open_sentence (self, msg = None):
+        self._proto.log ("run next sentence")
         pass
 
 class ScanNetwork (object):

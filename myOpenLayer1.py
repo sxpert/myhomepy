@@ -181,14 +181,12 @@ class OwnSocket (object) :
         self.sock.setsockopt (socket.SOL_TCP, socket.TCP_KEEPIDLE, 1)
         self.sock.setsockopt (socket.SOL_TCP, socket.TCP_KEEPINTVL, 1)
         self.sock.setsockopt (socket.SOL_TCP, socket.TCP_KEEPCNT, 2)
+        self.log ("Initializing connection to "+unicode(self.address)+" port "+unicode(self.port))
         try :
-            self.log ("Initializing connection to "+unicode(self.address)+" port "+unicode(self.port))
-            try:
-                self.sock.connect ((self.address, self.port))
-            except KeyboardInterrupt as e:
-                self.logger.log ("program exit")
-                sys.exit(0)
-
+            self.sock.connect ((self.address, self.port))
+        except KeyboardInterrupt as e:
+            self.logger.log ("program exit")
+            sys.exit(0)
         except socket.error as e :
             self.sock = None
             self.log ("connection error, sleeping some")

@@ -78,7 +78,24 @@
             ]
         },
         "DiagAID": {
-            "id": 14
+            "id": 14,
+            "openlist": [
+                { "id": "cmd_diag_id", "mandatory": true, "repeated": true, "onNAK": 4 },
+                { "id": "cmd_diag_abort", "onNAK": 0, "onERR": 0 },
+                { "id": "res_object_model" },
+                { "id": "res_fw_version" },
+                { "id": "res_hw_version" },
+                { "id": "res_conf_1_6" },
+                { "id": "res_conf_7_12" },
+                { "id": "res_micro_version" },
+                { "id": "res_diag_a" },
+                { "id": "res_diag_b"},
+                { "id": "res_id" },
+                { "id": "res_ko_value", "repeated": true },
+                { "id": "res_ko_sys", "repeated": true },
+                { "id": "res_busy_ko_error", "repeated": true },
+                { "id": "res_trans_end" }
+            ]
         }
     },
     "sentences": {
@@ -193,6 +210,14 @@
             "type": "TX",
             "str": "*#[who]*[where]*0##",
             "has_address": true,
+            "diag_open": true
+        },
+        "cmd_diag_id": {
+            "id": 34,
+            "description": "programmer starts a diagnostic session wth ID",
+            "type": "TX",
+            "str": "*[who]*10#[id]*0##",
+            "has_params": true,
             "diag_open": true
         },
         "cmd_diag_abort": {
