@@ -104,7 +104,7 @@ class MainLoop (object) :
                             s.reconnect(self)
                         elif flags & select.POLLERR :
                             self.logger.log ('socket '+str(s)+' is in error state')
-                            self.poller.unregister (socket.sock)
+                            self.poller.unregister (s.sock)
                             del self.sockets[fd]
                             s.reconnect(self)
                 # handle timers
@@ -231,7 +231,7 @@ class OwnSocket (object) :
                     self.log ('successfully connected')
                     self.state=self.LOGGED
                     if self.ready_callback is not None :
-                        self.ready_callback()
+                        self.ready_callback(self)
                 else:
                     self.log ('unable to log in')
                     self.state=self.FAILED

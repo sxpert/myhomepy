@@ -11,6 +11,17 @@
                 { "id": "DiagKO", "repeat": true },
                 { "id": "CloseScan", "repeat": true }
             ]
+        },
+        "ScanByAID": {
+            "id": 13,
+            "description": "Scan By AID",
+            "type": "readonly",
+            "sequences": [
+                { "id": "ScanAID" },
+                { "id": "DiagAID", "repeat": true },
+                { "id": "DiagKO", "repeat": true },
+                { "id": "CloseScan", "repeat": true }
+            ]
         }
     },
     "sequences": {
@@ -55,6 +66,19 @@
                 { "id": "cmd_scan_start_addr", "mandatory": true, "repeat": true, "onERR": 4 },
                 { "id": "res_object_model", "repeat": true }
             ]
+        },
+        "ScanAID": {
+            "id": 13,
+            "openlist": [
+                { "id": "cmd_reset", "mandatory": true, "onNAK": 3 },
+                { "id": "cmd_scan_all", "mandatory": true, "repeat": true },
+                { "id": "res_id" , "repeat": true },
+                { "id": "cmd_scan_check", "repeat": true },
+                { "id": "cmd_reset", "mandatory": true, "onNAK": 3 }
+            ]
+        },
+        "DiagAID": {
+            "id": 14
         }
     },
     "opensentences": {
@@ -187,6 +211,28 @@
             "diag_open": true,
             "error": [ "ERR", "INFO" ]
         },
+        "cmd_reset": {
+            "id": 44,
+            "description": "programmer deletes results of previous scans from memory",
+            "type": "TX",
+            "str": "*[who]*12*0##",
+            "diag_open": true
+        },
+        "cmd_scan_all": {
+            "id": 45,
+            "description": "programmer starts scan for all devices with id",
+            "type": "TX",
+            "str": "*#[who]*0*13##",
+            "diag_open": true
+        },
+        "cmd_scan_check": {
+            "id": 48,
+            "description": "programmer sends flag to all the devices found",
+            "type": "TX",
+            "str": "*[who]*11#[id]*0##",
+            "has_params": true,
+            "diag_open": true
+        },
         "res_param_ok_special": {
             "id": 78,
             "description": "device answers with the special parameter of key/object",
@@ -205,7 +251,7 @@
         "cmd_diag_abort": {
             "id": 84,
             "description": "device abort diagnostic",
-            "type": "RX":
+            "type": "RX",
             "str": "*[who]*6*0##",
             "error": [ "ERR", "INFO" ]
         },

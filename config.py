@@ -88,4 +88,21 @@ class Config (object):
         sys = myOpenLayer2.OWNMonitor(self.main_loop, sys_id)
         self.monitors.append(sys)
 
+    @property
+    def nb_systems (self):
+        return len(self.systems)
+
+    def command_socket (self, sys_id, ready_callback, data_callback):
+        import myOpenLayer1
+        system = self.systems[sys_id]
+        gw = system['gateway']
+        sock = myOpenLayer1.OwnSocket(
+                gw['ip'],
+                gw['port'],
+                gw['password'],
+                myOpenLayer1.OwnSocket.COMMAND)
+        sock.set_ready_callback(ready_callback)
+        sock.set_data_callback(data_callback)
+        return sock
+
 config = Config()
