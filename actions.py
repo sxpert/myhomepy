@@ -1,7 +1,140 @@
 #!/usr/bin/python
-import json
 import myOpenLayer1
 from config import config
+
+class ProtoObject (object):
+    def __init__ (self, proto = None):
+        self._proto = proto
+        self._error = False
+
+    def _abort (self, msg):
+        self._error = True
+        return self._proto.abort (msg)
+
+    def _must (self, varname, dataset, options = None):
+        if self._error:
+            return None
+        if varname not in dataset.keys():
+            self._abort ("Unable to find '"+varname+"' item in "+unicode(dataset)+" from "+self.name)
+            return None
+        v = dataset[varname]
+        if options :
+            if v in options:
+                v = options.index(v)
+            else:
+                self._abort ("Unable to find '"+v+"' in options "+unicode(options)+" for item '"+varname+"' from "+self.name)
+        return v
+
+    def _optional (self, varname, dataset):
+        if self._error:
+            return None
+        if varname in dataset.keys():
+            return dataset[varname]
+        else:
+            return False
+
+    def _boolean (self, varname, dataset):
+        v = self._optional (varname, dataset)
+        if v is None:
+            return False
+
+class Sentence (ProtoObject):
+    RX = 0
+    TX = 1
+
+    def setup (self, name, data):
+        self.name = name
+        self.id = self._must ("id", data)
+        self.description = self._must ("description", data)
+        t = self._must ("type", data, ["RX", "TX"])
+        self.str = self._must ("str", data)
+        self.has_address = self._boolean ("has_address", data)
+        self.has_params = self._boolean ("has_params", data)
+        self.diag_open = self._boolean ("diag_open", data)
+        self.error = self._optional ("error", data)
+        return self
+
+    def __repr__ (self):
+        return self.str
+
+class SequenceItem (ProtoObject):
+
+    def setup (self, name, data):
+        self.name = name
+        self.id = self._must ("id", data)
+        self.sentence = self._proto.sentences[self.id]
+        self.mandatory = self._boolean ("mandatory", data)
+        self.repeat = self._boolean ("repeat", data)
+        self.onNAK = self._optional ("onNAK", data)
+        self.onERR = self._optional ("onERR", data)
+        return self
+
+    def __repr__ (self):
+        return unicode(self.sentence)
+
+class Sequence (ProtoObject):
+
+    def setup (self, name, data):
+        self.name = name
+        self.id = self._must ("id", data)
+        ol = self._must ("openlist", data)
+        if type(ol) is not list:
+            return self._abort ("'openlist' is not list type")
+        self.openlist = []
+        for o in ol:
+            self.openlist.append(SequenceItem(self._proto).setup(self.name+" - "+unicode(len(self.openlist)+1), o))
+        return self        
+
+class Proto (object):
+    def __init__ (self, proto, log = None):
+        self.error = False
+        self._log = log
+        if not self.load_sentences (proto):
+            return
+        if not self.load_sequences (proto):
+            return
+        if not self.load_scenarios (proto):
+            return
+
+    def log (self, msg):
+        if self._log is None:
+            print (unicode(msg))
+        else:
+            self._log (msg)
+            
+    def abort (self, msg):
+        self.log ("ERROR: "+msg+" - aborting")
+        self.error = True
+        return False
+    
+    def load_sentences (self, proto):
+        self.log ("Loading sentences")
+        if "sentences" not in proto:
+            return self.abort ("unable to find 'sentences' in protocol description file")
+        self.sentences = {}
+        sentences = proto["sentences"]
+        for sentence_name in sentences.keys():
+            self.log ("    "+sentence_name)
+            sentence_data = sentences[sentence_name]
+            sentence = Sentence(self).setup(sentence_name, sentence_data)
+            self.sentences[sentence_name] = sentence
+        return True
+
+    def load_sequences (self, proto):
+        self.log ("Loading sequences")
+        if "sequences" not in proto:
+            return self.abort ("unable to find 'sequences' in protocol description file")
+        self.sequences = {}
+        sequences = proto["sequences"]
+        for sequence_name in sequences.keys():
+            self.log ("    "+sequence_name)
+            sequence_data = sequences[sequence_name]
+            sequence = Sequence(self).setup(sequence_name, sequence_data)
+            self.sequences[sequence_name] = sequence
+        return True
+    
+    def load_scenarios (self, proto):
+        pass
 
 #
 # takes data from actions.json
@@ -11,15 +144,20 @@ class ActionEngine (object):
     def __init__ (self, logger = None):
         self.logger = logger
         # load the json
-        f = open("actions.json", "r")
+        self.load_protocol_data ("actions.json")
+
+    def load_protocol_data (self, protocol_data_file):
+        import json
+        f = open(protocol_data_file, "r")
         s = f.read()
         f.close()
-        self._proto = json.loads(s)
-        if "version" not in self._proto:
-            self.log ("ERROR: unable to find protocol database version data")
-            return
-        self.log ("Open protocol version "+self._proto["version"]+" loaded")
-
+        _proto = json.loads(s)
+        if "version" not in _proto:
+            return self.abort ("unable to find protocol database version data")
+        self.log ("Open protocol version "+_proto["version"]+" loaded")
+        # parse protocol data into a new object
+        self._proto = Proto (_proto, self.log)
+    
     def log (self, msg):
         col_in = '\033[93m'
         col_out = '\033[0m'
@@ -28,34 +166,37 @@ class ActionEngine (object):
             print (s)
         else:
             self.logger.log (s)
+    
+    def abort (self, msg):
+        self.log ("ERROR: "+msg+" - aborting")
+        self.error = True
+        return
 
     def run (self, context):
         self.context = context
+        self.start_scenario ()
     
     def ready_callback (self, ownsock):
+        if self._proto.error:
+            self.log ("ERROR on ActionEngine initialization - not doing anything")
+            return
         self.log ("ActionEngine ready")
         self.ownsock = ownsock
         # start the scenario
-        self.start_scenario ()
+        self.run_open_sentence()
 
     def data_callback (self, msg):
-        self.log ("ActionEngine data")
+        if self._proto.error:
+            return
+        self.log ("ActionEngine data '"+unicode(msg)+"'")
+        if self.error:
+            return
 
     def start_scenario (self):
-        if "scenario" not in self.context:
-            self.log ("ERROR: no scenario defined in context - aborting")
-            return
-        self.scenario_name = self.context["scenario"]
-        # find scenario data
-        if "scenarios" not in self._proto:
-            self.log ("ERROR: can't find scenarios in protocol database - aborting")
-            return
-        scenarios = self._proto["scenarios"]
-        if self.scenario_name not in scenarios:
-            self.log ("ERROR: can't find scenario '"+self.scenario_name+"' in protocol database - aborting")
-            return
-        self.scenario = scenarios[self.scenario_name]
-        self.log (self.scenario)
+        pass
+
+    def run_open_sentence (self, msg = None):
+        pass
 
 class ScanNetwork (object):
     def __init__ (self, logger = None):

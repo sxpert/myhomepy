@@ -81,7 +81,7 @@
             "id": 14
         }
     },
-    "opensentences": {
+    "sentences": {
         "res_object_model": {
             "id": 1,
             "description": "device answers with it's object model and number of physical configurators",
@@ -233,7 +233,7 @@
             "has_params": true,
             "diag_open": true
         },
-        "res_param_ok_special": {
+        "res_param_ko_special": {
             "id": 78,
             "description": "device answers with the special parameter of key/object",
             "type": "RX",
