@@ -98,12 +98,13 @@ class MainLoop (object) :
                                     s.close()
                         elif flags & select.POLLHUP :
                             self.logger.log ('socket '+str(s)+' is hanged-up')
-                            self.poller.unregister (socket.sock)
-                            # remove socket from dict
+                            # remove from poller and reconnect
+                            self.poller.unregister (s.sock)
                             del self.sockets[fd]
                             s.reconnect(self)
                         elif flags & select.POLLERR :
                             self.logger.log ('socket '+str(s)+' is in error state')
+                            # remove from poller and reconnect
                             self.poller.unregister (s.sock)
                             del self.sockets[fd]
                             s.reconnect(self)
@@ -185,7 +186,7 @@ class OwnSocket (object) :
         try :
             self.sock.connect ((self.address, self.port))
         except KeyboardInterrupt as e:
-            self.logger.log ("program exit")
+            self.log ("program exit")
             sys.exit(0)
         except socket.error as e :
             self.sock = None
@@ -203,6 +204,7 @@ class OwnSocket (object) :
     def reconnect (self, mainloop) :
         # attempt to reconnect the socket
         self.log ("attempting to reconnect")
+        self.close()
 
     def recv (self) :
         data = self.sock.recv(4096)

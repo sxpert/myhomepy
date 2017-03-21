@@ -82,9 +82,9 @@ class Sequence (ProtoObject):
         ol = self._must ("openlist", data)
         if type(ol) is not list:
             return self._abort ("'openlist' is not list type in sequence '"+name+"'")
-        self.openlist = []
+        self.sentences = []
         for o in ol:
-            self.openlist.append(SequenceItem(self._proto).setup(self.name+" - "+unicode(len(self.openlist)+1), o))
+            self.sentences.append(SequenceItem(self._proto).setup(self.name+" - "+unicode(len(self.sentences)+1), o))
         return self        
 
     def __repr__ (self):
@@ -181,13 +181,38 @@ class Proto (object):
             self.scenarios[name] = scenario
         return True
 
+    def get_sentence(self, scenario_name, sequence_nb, sentence_nb):
+        if scenario_name not in self.scenarios.keys():
+            self.log ("ERROR: unable to find scenario '"+scenario_name+"'")
+            return None
+        scenario = self.scenarios[scenario_name]
+        self.log ("scenario : "+scenario.name)
+        nb_sequences = len(scenario.sequences)
+        if sequence_nb >= nb_sequences:
+            self.log ("ERROR: sequence number requested ("+unicode(sequence_nb)+") larger than the number of sequences available in scenario ("+unicode(nb_sequences)+")")
+            return None
+        self.log (unicode(nb_sequences)+" sequences in scenario")
+        sequence = scenario.sequences[sequence_nb]
+        self.log ("sequence : "+unicode(sequence))
+        nb_sentences = len(sequence.sequence.sentences)
+        if sentence_nb >= nb_sentences:
+            self.log ("ERROR: sentence number requested ("+unicode(sentence_nb)+") larger than the number of sentences available in sequence ("+unicode(nb_sentences)+")")
+            return None
+        self.log (unicode(nb_sentences)+" sentences in sequence")
+        sentence = sequence.sequence.sentences[sentence_nb]
+        self.log ("sentence : "+unicode(sentence))
+
+        self.log (dir(scenario))
+        self.log (dir(sequence))
+        self.log (dir(sentence))
+
 #
 # takes data from actions.json
 # executes the series of requests
 #
 class ActionEngine (object):
     def __init__ (self, logger = None):
-        self.logger = logger
+        self._logger = logger
         # load the json
         self.load_protocol_data ("actions.json")
 
@@ -207,18 +232,18 @@ class ActionEngine (object):
         col_in = '\033[93m'
         col_out = '\033[0m'
         s = "[ActionEngine] " + col_in + unicode(msg) + col_out
-        if self.logger is None: 
+        if self._logger is None: 
             print (s)
         else:
-            self.logger.log (s)
+            self._logger.log (s)
     
     def abort (self, msg):
         self.log ("ERROR: "+msg+" - aborting")
-        self.error = True
+        self._error = True
         return
 
     def run (self, context):
-        self.context = context
+        self._context = context
         self.start_scenario ()
     
     def ready_callback (self, ownsock):
@@ -234,15 +259,25 @@ class ActionEngine (object):
         if self._proto.error:
             return
         self.log ("ActionEngine data '"+unicode(msg)+"'")
-        if self.error:
+        if self._error:
             return
 
+    @property
+    def scenario (self):
+        if "scenario" not in self._context:
+            self.log ("ERROR: no 'scenario' in context")
+            return None
+        return self._context["scenario"]
+
     def start_scenario (self):
-        pass
+        self._sequence = 0
+        self._sentence = 0
 
     def run_open_sentence (self, msg = None):
-        self._proto.log ("run next sentence")
-        pass
+        self._proto.log ("Run next sentence")
+        # get sentence
+        sentence = self._proto.get_sentence (self.scenario, self._sequence, self._sentence)
+        
 
 class ScanNetwork (object):
     def __init__ (self, logger = None):
