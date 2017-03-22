@@ -120,6 +120,9 @@ class Scenario (ProtoObject):
         self._proto.log ("        "+unicode(self.sequences))
         return self
 
+    def __repr__ (self):
+        return self.name
+
 class Proto (object):
     def __init__ (self, proto, log = None):
         self.error = False
@@ -201,11 +204,8 @@ class Proto (object):
         self.log (unicode(nb_sentences)+" sentences in sequence")
         sentence = sequence.sequence.sentences[sentence_nb]
         self.log ("sentence : "+unicode(sentence))
-
-        self.log (dir(scenario))
-        self.log (dir(sequence))
-        self.log (dir(sentence))
-
+        return (scenario, sequence, sentence)
+    
 #
 # takes data from actions.json
 # executes the series of requests
@@ -276,8 +276,8 @@ class ActionEngine (object):
     def run_open_sentence (self, msg = None):
         self._proto.log ("Run next sentence")
         # get sentence
-        sentence = self._proto.get_sentence (self.scenario, self._sequence, self._sentence)
-        
+        data = self._proto.get_sentence (self.scenario, self._sequence, self._sentence)
+        self.log(data)
 
 class ScanNetwork (object):
     def __init__ (self, logger = None):

@@ -30,6 +30,7 @@ class TestApplication (object) :
                 [ "^/add_system(.*)$", website.ow_add_system.OW_add_system ],
             ]
         )
+        self.web.default_route (website.ow_static.OW_static)
 
         self.sl.add_socket (self.web)
 

@@ -1,11 +1,17 @@
 #!/usr/bin/python
 # myOpenApplication webserver
 
-import re
+import os, sys, re, shutil
 import urllib
 import myOpenLayer1
 import config
 import BaseHTTPServer
+import mimetypes
+import cgi
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from StringIO import StringIO
 
 #--------------------------------------------------------------------------------------------------
 #
@@ -14,8 +20,18 @@ import BaseHTTPServer
 
 class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
 
+    @property
+    def _srv (self):
+        return '['+unicode(self.server.server_name)+':'+unicode(self.server.server_port)+' WEB]'
+
+    def _log (self, msg):
+        myOpenLayer1.system_logger.log (self._srv+' '+msg)
+
+    def _log_error (self, msg):
+        myOpenLayer1.system_logger.log ((self._srv[:-1]+'_ERROR]')+' '+msg)
+
+
     def log (self, code=None, size=None, msg=None):
-        srv = '['+unicode(self.server.server_name)+':'+unicode(self.server.server_port)+' WEB]'
         if msg is None:
             if self.command is None:
                 # note: there is no path to display
@@ -26,15 +42,18 @@ class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
             if size is not None:
                 res += ' '+unicode(size)
             msg = req+' '+res
+            self._log (msg)
         else:
-            srv=srv[:-1]+'_ERROR]'
-        myOpenLayer1.system_logger.log (srv+' '+msg)
+            self._log_error (msg)
     
     def log_request (self, code=None, size=None):
         self.log(code, size)
 
     def log_error (self, format, *args):
         self.log(None, None, format%args)
+
+    #----------------------------------------------------------------------------------------------
+    # responses
 
     def redirect(self, url):
         self.send_response(302)
@@ -46,21 +65,114 @@ class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
         self.send_header('Content-type', 'text/html; charset=utf-8')
         self.end_headers()
         self.wfile.write(html)
+    
+    def file_response(self, basedir, path):
+        basepath = os.path.abspath(os.path.dirname(sys.argv[0]))
+        destpath = os.path.join(basepath, basedir, path)
+        if os.path.isdir(destpath):
+            if not path.endswith('/'):
+                # redirect to proper path
+                return self.redirect(path+'/')
+            for index in 'index.html', 'index.htm':
+                full_index = os.path.join(destpath, index)
+                if os.path.exists(full_index):
+                    path = os.path.join(path,index)
+                    break
+            else:
+                return self.directory_list_response(basedir, path)
+        ctype = self.guess_type(destpath)
+        try:
+            f=open(destpath,'rb')
+        except IOError:
+            self.send_error(404)
+            return None
+        self.send_response(200)
+        self.send_header("Content-type",ctype)
+        fs=os.fstat(f.fileno())
+        self.send_header("Content-length", unicode(fs[6]))
+        self.send_header("Last-modified", self.date_time_string(fs.st_mtime))
+        self.end_headers()
+        shutil.copyfileobj(f, self.wfile)
+        f.close()
+       
+
+    def directory_list_response (self, basedir, path):
+        basepath = os.path.abspath(os.path.dirname(sys.argv[0]))
+        destpath = os.path.join(basepath, basedir, path)
+        try:
+            l = os.listdir(destpath)
+        except os.error:
+            self.send_error(404, 'No permission to list directory')
+            return None
+        l.sort(key=lambda a: a.lower())
+        f = StringIO()
+        displaypath = cgi.escape(urllib.unquote(self.path))
+        f.write ('<!DOCTYPE html>')
+        f.write ("<html>\n<title>Directory listing for %s</title>\n"%displaypath)
+        f.write ("<body>\n<h2>Directory listing for %s</h2>\n"%displaypath)
+        f.write ("<hr>\n<ul>\n")
+        for name in l:
+            fullname = os.path.join (destpath, name)
+            displayname = linkname = name
+            if os.path.isdir (fullname):
+                displayname = name + '/'
+                linkname = name + '/'
+            if os.path.islink (fullname):
+                displayname = name + '@'
+            f.write ('<li><a href="%s">%s</a>\n'%(urllib.quote(linkname), cgi.escape(displayname)))
+        f.write ("</ul>\n<hr>\n</body>\n</html>\n")
+        length = f.tell()
+        f.seek(0)
+        self.send_response (200)
+        encoding = sys.getfilesystemencoding ()
+        self.send_header ("Content-type", "text/html; charset=%s"%encoding)
+        self.send_header ("Content-length", unicode(length))
+        self.end_headers()
+        shutil.copyfileobj(f, self.wfile)
+        f.close()
+
+    def guess_type (self, path):
+        import posixpath
+        base, ext = posixpath.splitext(path)
+        if ext in self.extension_map:
+            return self.extension_map[ext]
+        ext=ext.lower()
+        if ext in self.extension_map:
+            return self.extension_map[ext]
+        else:
+            return self.extension_map['']
+
+    if not mimetypes.inited:
+        mimetypes.init()
+    extension_map = mimetypes.types_map.copy()
+    extension_map.update ({
+        '': 'application/octet-stream',
+        '.py': 'text/plain',
+        '.h': 'text/plain',
+        '.c': 'text/plain'
+        })
+
+    #----------------------------------------------------------------------------------------------
 
     def find_route(self):
         if self.server.routes is None:
             return None
-        for r in self.server.routes :
-            e, c = r
-            m = re.match(e, self.path)
-            if m is not None:
-                g = m.groups()
-                if len(g)>0:
-                    myOpenLayer1.system_logger.log(unicode(m.groups()))
-                o = c()
+        else:
+            for r in self.server.routes :
+                e, c = r
+                m = re.match(e, self.path)
+                if m is not None:
+                    g = m.groups()
+                    if len(g)>0:
+                        myOpenLayer1.system_logger.log(unicode(m.groups()))
+                    o = c()
+                    return o
+            if self.server.default is not None:
+                # handle default route
+                o = self.server.default ()
                 return o
-        self.send_error(404)
-        return None
+            self.send_error(404)
+            return None
 
     def do_request(self):
         o = self.find_route()
@@ -81,6 +193,7 @@ class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
             # response already sent in this case
             return 
         self.do_request()
+
 
     #----------------------------------------------------------------------------------------------
     # variables management
@@ -168,6 +281,8 @@ class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
                 v+=c
         return v
 
+    
+
 #--------------------------------------------------------------------------------------------------
 #
 # TODO: ssl mode
@@ -183,6 +298,7 @@ class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
 class OpenWeb (BaseHTTPServer.HTTPServer, object):
     def __init__ (self, address):
         self.routes = None
+        self.default = None
         super(OpenWeb, self).__init__(address, OpenWebHandler)
         self.log ('starting')
    
@@ -191,6 +307,9 @@ class OpenWeb (BaseHTTPServer.HTTPServer, object):
 
     def register_routes(self, routes):
         self.routes = routes
+
+    def default_route (self, dr):
+        self.default = dr
 
     def connect (self):
         pass
