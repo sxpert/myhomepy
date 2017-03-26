@@ -18,20 +18,20 @@ except ImportError:
 #
 #
 
-class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
+class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
 
     @property
-    def _srv (self):
+    def _srv(self):
         return '['+unicode(self.server.server_name)+':'+unicode(self.server.server_port)+' WEB]'
 
-    def _log (self, msg):
-        myOpenLayer1.system_logger.log (self._srv+' '+msg)
+    def _log(self, msg):
+        myOpenLayer1.system_logger.log(self._srv+' '+msg)
 
-    def _log_error (self, msg):
-        myOpenLayer1.system_logger.log ((self._srv[:-1]+'_ERROR]')+' '+msg)
+    def _log_error(self, msg):
+        myOpenLayer1.system_logger.log((self._srv[:-1]+'_ERROR]')+' '+msg)
 
 
-    def log (self, code=None, size=None, msg=None):
+    def log(self, code=None, size=None, msg=None):
         if msg is None:
             if self.command is None:
                 # note: there is no path to display
@@ -42,14 +42,14 @@ class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
             if size is not None:
                 res += ' '+unicode(size)
             msg = req+' '+res
-            self._log (msg)
+            self._log(msg)
         else:
-            self._log_error (msg)
-    
-    def log_request (self, code=None, size=None):
+            self._log_error(msg)
+
+    def log_request(self, code=None, size=None):
         self.log(code, size)
 
-    def log_error (self, format, *args):
+    def log_error(self, format, *args):
         self.log(None, None, format%args)
 
     #----------------------------------------------------------------------------------------------
@@ -60,13 +60,18 @@ class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
         self.send_header('Location', url)
         self.end_headers()
 
-    def html_response(self, html, more_headers = None):
+    def html_response(self, html, more_headers=None):
         self.send_response(200)
         self.send_header('Content-type', 'text/html; charset=utf-8')
         self.end_headers()
         self.wfile.write(html)
-    
+
     def file_response(self, basedir, path):
+        # remove all traces of '/' at the begining of the path,
+        # this prevents doing things like //etc/
+        while len(path) > 0 and path[0] == '/':
+            path = path[1:]
+        self.log("fixed-up path : '"+path+"'")
         basepath = os.path.abspath(os.path.dirname(sys.argv[0]))
         destpath = os.path.join(basepath, basedir, path)
         if os.path.isdir(destpath):
@@ -76,29 +81,34 @@ class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
             for index in 'index.html', 'index.htm':
                 full_index = os.path.join(destpath, index)
                 if os.path.exists(full_index):
-                    path = os.path.join(path,index)
+                    path = os.path.join(path, index)
                     break
             else:
                 return self.directory_list_response(basedir, path)
         ctype = self.guess_type(destpath)
+        self.log(ctype)
+        if ctype == "text/html":
+            ctype += "; charset=%s"%sys.getfilesystemencoding()
         try:
-            f=open(destpath,'rb')
+            f = open(destpath, 'rb')
         except IOError:
             self.send_error(404)
             return None
         self.send_response(200)
-        self.send_header("Content-type",ctype)
-        fs=os.fstat(f.fileno())
+        self.send_header("Content-type", ctype)
+        fs = os.fstat(f.fileno())
         self.send_header("Content-length", unicode(fs[6]))
         self.send_header("Last-modified", self.date_time_string(fs.st_mtime))
         self.end_headers()
         shutil.copyfileobj(f, self.wfile)
         f.close()
-       
 
-    def directory_list_response (self, basedir, path):
+
+    def directory_list_response(self, basedir, path):
+        self.log("basedir : '%s' path : '%s'"%(basedir, path))
         basepath = os.path.abspath(os.path.dirname(sys.argv[0]))
         destpath = os.path.join(basepath, basedir, path)
+        self.log("destpath : '%s'"%(destpath))
         try:
             l = os.listdir(destpath)
         except os.error:
@@ -107,36 +117,36 @@ class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
         l.sort(key=lambda a: a.lower())
         f = StringIO()
         displaypath = cgi.escape(urllib.unquote(self.path))
-        f.write ('<!DOCTYPE html>')
-        f.write ("<html>\n<title>Directory listing for %s</title>\n"%displaypath)
-        f.write ("<body>\n<h2>Directory listing for %s</h2>\n"%displaypath)
-        f.write ("<hr>\n<ul>\n")
+        f.write('<!DOCTYPE html>')
+        f.write("<html>\n<title>Directory listing for %s</title>\n"%displaypath)
+        f.write("<body>\n<h2>Directory listing for %s</h2>\n"%displaypath)
+        f.write("<hr>\n<ul>\n")
         for name in l:
-            fullname = os.path.join (destpath, name)
+            fullname = os.path.join(destpath, name)
             displayname = linkname = name
-            if os.path.isdir (fullname):
+            if os.path.isdir(fullname):
                 displayname = name + '/'
                 linkname = name + '/'
-            if os.path.islink (fullname):
+            if os.path.islink(fullname):
                 displayname = name + '@'
-            f.write ('<li><a href="%s">%s</a>\n'%(urllib.quote(linkname), cgi.escape(displayname)))
-        f.write ("</ul>\n<hr>\n</body>\n</html>\n")
+            f.write('<li><a href="%s">%s</a>\n'%(urllib.quote(linkname), cgi.escape(displayname)))
+        f.write("</ul>\n<hr>\n</body>\n</html>\n")
         length = f.tell()
         f.seek(0)
-        self.send_response (200)
-        encoding = sys.getfilesystemencoding ()
-        self.send_header ("Content-type", "text/html; charset=%s"%encoding)
-        self.send_header ("Content-length", unicode(length))
+        self.send_response(200)
+        encoding = sys.getfilesystemencoding()
+        self.send_header("Content-type", "text/html; charset=%s"%encoding)
+        self.send_header("Content-length", unicode(length))
         self.end_headers()
         shutil.copyfileobj(f, self.wfile)
         f.close()
 
-    def guess_type (self, path):
+    def guess_type(self, path):
         import posixpath
         base, ext = posixpath.splitext(path)
         if ext in self.extension_map:
             return self.extension_map[ext]
-        ext=ext.lower()
+        ext = ext.lower()
         if ext in self.extension_map:
             return self.extension_map[ext]
         else:
@@ -145,12 +155,12 @@ class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
     if not mimetypes.inited:
         mimetypes.init()
     extension_map = mimetypes.types_map.copy()
-    extension_map.update ({
+    extension_map.update({
         '': 'application/octet-stream',
         '.py': 'text/plain',
         '.h': 'text/plain',
         '.c': 'text/plain'
-        })
+    })
 
     #----------------------------------------------------------------------------------------------
 
@@ -158,12 +168,12 @@ class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
         if self.server.routes is None:
             return None
         else:
-            for r in self.server.routes :
+            for r in self.server.routes:
                 e, c = r
                 m = re.match(e, self.path)
                 if m is not None:
                     g = m.groups()
-                    if len(g)>0:
+                    if len(g) > 0:
                         myOpenLayer1.system_logger.log(unicode(m.groups()))
                     o = c()
                     return o
@@ -250,7 +260,7 @@ class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
 
     def parse_variables(self):
         self.parse_url_variables()
-        try: 
+        try:
             t = self.headers['content-type']
         except KeyError as e:
             pass
@@ -270,15 +280,15 @@ class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
         v = ""
         for c in value:
             if c == "<":
-                v+="&lt;"
+                v += "&lt;"
             elif c == ">":
-                v+="&gt;"
-            elif c == "&":    
-                v+="&amp;"
+                v += "&gt;"
+            elif c == "&":
+                v += "&amp;"
             elif c == "\"":
-                v+="&quot;"
+                v += "&quot;"
             else:
-                v+=c
+                v += c
         return v
 
     
@@ -295,26 +305,29 @@ class OpenWebHandler (BaseHTTPServer.BaseHTTPRequestHandler, object):
 # httpd.serve_forever()
 #
 
-class OpenWeb (BaseHTTPServer.HTTPServer, object):
-    def __init__ (self, address):
+class OpenWeb(BaseHTTPServer.HTTPServer, object):
+    def __init__(self, address):
         self.routes = None
         self.default = None
         super(OpenWeb, self).__init__(address, OpenWebHandler)
-        self.log ('starting')
-   
-    def log (self, message):
-        myOpenLayer1.system_logger.log ('['+unicode(self.server_name)+':'+unicode(self.server_port)+' WEB] '+message)
+        self.log('starting')
+
+    def log(self, message):
+        server_name = unicode(self.server_name)
+        server_port = unicode(self.server_port)
+        message = unicode(message)
+        myOpenLayer1.system_logger.log('[%s:%s WEB] %s'% (server_name, server_port, message))
 
     def register_routes(self, routes):
         self.routes = routes
 
-    def default_route (self, dr):
+    def default_route(self, dr):
         self.default = dr
 
-    def connect (self):
+    def connect(self):
         pass
-    
-    def recv (self):
+
+    def recv(self):
         from socket import error as SocketError
         import errno
         try:
@@ -331,12 +344,12 @@ class OpenWeb (BaseHTTPServer.HTTPServer, object):
     @property
     def sock(self):
         return self.socket
-    
+
 if __name__ == '__main__':
     addr = ('', 8000)
     srv = OpenWeb(addr)
     import myOpenLayer1
     system_loop = myOpenLayer1.MainLoop(myOpenLayer1.system_logger)
     print srv.sock.fileno()
-    system_loop.add_socket (srv)
-    system_loop.run ()
+    system_loop.add_socket(srv)
+    system_loop.run()
