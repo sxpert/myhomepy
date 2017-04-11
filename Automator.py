@@ -26,8 +26,8 @@ class TestApplication (object) :
     
         self.web.register_routes (
             [
-                [ "^/$", website.ow_index.OW_index ],
-                [ "^/add_system(.*)$", website.ow_add_system.OW_add_system ],
+                [ "^/API/$", website.ow_index.OW_index ],
+                [ "^/API/add_system(.*)$", website.ow_add_system.OW_add_system ],
             ]
         )
         self.web.default_route (website.ow_static.OW_static)

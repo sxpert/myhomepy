@@ -67,6 +67,13 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
         self.wfile.write(html)
 
     def file_response(self, basedir, path):
+        """
+        this method responds with the contents of the file which is given
+        in the path argument. Lookups are limited to the contents of the
+        basedir directory and its subdirectories
+        if path points to a directory, displays the list of files in the
+        directory
+        """
         # remove all traces of '/' at the begining of the path,
         # this prevents doing things like //etc/
         while len(path) > 0 and path[0] == '/':
@@ -75,13 +82,16 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
         basepath = os.path.abspath(os.path.dirname(sys.argv[0]))
         destpath = os.path.join(basepath, basedir, path)
         if os.path.isdir(destpath):
-            if not path.endswith('/'):
+            if len(path) > 0 and not path.endswith('/'):
                 # redirect to proper path
                 return self.redirect(path+'/')
             for index in 'index.html', 'index.htm':
                 full_index = os.path.join(destpath, index)
+                self.log(full_index)
                 if os.path.exists(full_index):
+                    self.log("file exists")
                     path = os.path.join(path, index)
+                    destpath = full_index
                     break
             else:
                 return self.directory_list_response(basedir, path)
