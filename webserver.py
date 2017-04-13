@@ -2,6 +2,7 @@
 # myOpenApplication webserver
 
 import os, sys, re, shutil
+from threading import Thread
 import urllib
 import myOpenLayer1
 import config
@@ -78,7 +79,6 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
         # this prevents doing things like //etc/
         while len(path) > 0 and path[0] == '/':
             path = path[1:]
-        self.log("fixed-up path : '"+path+"'")
         basepath = os.path.abspath(os.path.dirname(sys.argv[0]))
         destpath = os.path.join(basepath, basedir, path)
         if os.path.isdir(destpath):
@@ -87,16 +87,13 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
                 return self.redirect(path+'/')
             for index in 'index.html', 'index.htm':
                 full_index = os.path.join(destpath, index)
-                self.log(full_index)
                 if os.path.exists(full_index):
-                    self.log("file exists")
                     path = os.path.join(path, index)
                     destpath = full_index
                     break
             else:
                 return self.directory_list_response(basedir, path)
         ctype = self.guess_type(destpath)
-        self.log(ctype)
         if ctype == "text/html":
             ctype += "; charset=%s"%sys.getfilesystemencoding()
         try:
@@ -315,18 +312,38 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
 # httpd.serve_forever()
 #
 
-class OpenWeb(BaseHTTPServer.HTTPServer, object):
+class OpenWeb(Thread):
     def __init__(self, address):
+        self.log("initializing thread")
+        Thread.__init__(self)
+        self.address = address
         self.routes = None
         self.default = None
-        super(OpenWeb, self).__init__(address, OpenWebHandler)
-        self.log('starting')
+        self.httpd = None
+        self.start()
+
+    def run(self):
+        self.log("starting thread")
+        self.httpd = BaseHTTPServer.HTTPServer(self.address, OpenWebHandler)
+        if self.routes is None:
+            self.log("error, no routes set")
+            return
+        if self.default is None:
+            self.log("error, no default set")
+            return
+        self.httpd.routes = self.routes
+        self.httpd.default = self.default
+        self.httpd.serve_forever()
 
     def log(self, message):
-        server_name = unicode(self.server_name)
-        server_port = unicode(self.server_port)
+        try:
+            server_name = unicode(self.httpd.server_name)
+            server_port = unicode(self.httpd.server_port)
+            server = "%s:%s "% (server_name, server_port)
+        except AttributeError:
+            server = ""
         message = unicode(message)
-        myOpenLayer1.system_logger.log('[%s:%s WEB] %s'% (server_name, server_port, message))
+        myOpenLayer1.system_logger.log('[%sWEB] %s'% (server, message))
 
     def register_routes(self, routes):
         self.routes = routes
@@ -334,26 +351,29 @@ class OpenWeb(BaseHTTPServer.HTTPServer, object):
     def default_route(self, dr):
         self.default = dr
 
-    def connect(self):
-        pass
+    def stop(self):
+        self.httpd.shutdown()
+    
+#    def connect(self):
+#        pass
 
-    def recv(self):
-        from socket import error as SocketError
-        import errno
-        try:
-            self._handle_request_noblock()
-        except SocketError as e:
-            # ignore connection reset by peer...
-            if e.errno != errno.ECONNRESET:
-                raise
-            else:
-                self.log('client connection aborted')
-            pass
+#    def recv(self):
+#        from socket import error as SocketError
+#        import errno
+#        try:
+#            self._handle_request_noblock()
+#        except SocketError as e:
+#            # ignore connection reset by peer...
+#            if e.errno != errno.ECONNRESET:
+#                raise
+#            else:
+#                self.log('client connection aborted')
+#            pass
 
 
-    @property
-    def sock(self):
-        return self.socket
+#    @property
+#    def sock(self):
+#        return self.socket
 
 if __name__ == '__main__':
     addr = ('', 8000)

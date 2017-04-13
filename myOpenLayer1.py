@@ -47,12 +47,14 @@ system_logger = Logger (logfile)
 #
 
 class MainLoop (object) :
-    def __init__ (self, logger, timeout = 200) :
+    # default timeout 200ms
+    def __init__ (self, logger, timeout = 0.2) :
+        self.servers = []
         self.sockets = {}
         self.timers = []
         self.logger = logger
         self.timeout = timeout 
-        self.poller = select.poll()
+        self.poller = select.epoll()
 
     def add_socket (self, socket):
         # get socket to connect
@@ -60,9 +62,21 @@ class MainLoop (object) :
         if socket.sock is not None :
             fd = socket.sock.fileno()
             self.sockets[fd] = socket
-            self.poller.register(socket.sock, select.POLLIN | select.POLLPRI | select.POLLHUP | select.POLLERR)
+            self.poller.register(socket.sock, select.EPOLLIN | select.EPOLLPRI | select.EPOLLHUP | select.EPOLLERR | select.EPOLLET)
         else :
             self.logger.log ('unable to add socket to poller, sock==None')
+
+    def add_server (self, server):
+        if server not in self.servers:
+            self.servers.append(server)
+        self.logger.log(unicode(self.servers))
+
+    def wait_servers (self):
+        for s in self.servers:
+            self.logger.log("waiting on server "+unicode(s))
+            s.stop()
+            s.join()
+        self.logger.log(unicode("all remaining servers stopped"))
 
     def remove_socket (self, socket) :
         if socket is not None :
@@ -81,7 +95,7 @@ class MainLoop (object) :
                 t = self.timeout
             else :
                 # 60 seconds probably too long
-                t = 60000;
+                t = 60.0;
             try :
                 # should try epoll ;-)
                 events = self.poller.poll(t)
@@ -89,20 +103,20 @@ class MainLoop (object) :
                     for e in events :
                         fd, flags = e
                         s = self.sockets[fd]
-                        if flags & (select.POLLIN | select.POLLPRI) :
+                        if flags & (select.EPOLLIN | select.EPOLLPRI) :
                             try: 
                                 s.recv()
                             except socket.error as e :
                                 s.log (unicode(e))
                                 if e.errno == errno.ETIMEDOUT :
                                     s.close()
-                        elif flags & select.POLLHUP :
+                        elif flags & select.EPOLLHUP :
                             self.logger.log ('socket '+str(s)+' is hanged-up')
                             # remove from poller and reconnect
                             self.poller.unregister (s.sock)
                             del self.sockets[fd]
                             s.reconnect(self)
-                        elif flags & select.POLLERR :
+                        elif flags & select.EPOLLERR :
                             self.logger.log ('socket '+str(s)+' is in error state')
                             # remove from poller and reconnect
                             self.poller.unregister (s.sock)
@@ -132,6 +146,7 @@ class MainLoop (object) :
                             pass
             except KeyboardInterrupt as e:
                 self.logger.log ("program exit")
+                self.wait_servers()
                 sys.exit(0)
 
 #--------------------------------------------------------------------------------------------------

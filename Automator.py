@@ -32,7 +32,7 @@ class TestApplication (object) :
         )
         self.web.default_route (website.ow_static.OW_static)
 
-        self.sl.add_socket (self.web)
+        self.sl.add_server (self.web)
 
         self.sl.run ()
 
