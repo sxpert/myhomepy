@@ -40,5 +40,5 @@ body {
 }
 .detail-container {
     display: flex;
-    width: calc(100% - 15% - 5pt);
+    width: calc( 100% - 15% - 5pt );
 }

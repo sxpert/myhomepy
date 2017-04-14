@@ -21,7 +21,6 @@ class WindowTab {
     }
 
     click(event) {
-        console.log(this.tab_label+' clicked');
         this.main.set_window(this.config_window)
     }
 }
@@ -34,9 +33,12 @@ class ConfigTab extends WindowTab {
     }
 }
 
-class ResizeBar {
-    constructor(){
-        console.log('resizer-bar constructor');
+class ResizeVBar {
+    constructor(left, right, min_width_left_percent = undefined, min_width_right_percent = undefined){
+        this.left = left;
+        this.right = right;
+        this.min_width_left_percent = min_width_left_percent;
+        this.min_width_right_percent = min_width_right_percent;
     }
     generate_html(){
         var bar = document.createElement('div');
@@ -44,7 +46,6 @@ class ResizeBar {
         var resize_bar = this;
         this.mouse_down_handler = function(e){
                 var b = resize_bar;
-                console.log(b);
                 b.mouse_down(e);
             };
         bar.addEventListener('mousedown', this.mouse_down_handler);
@@ -52,6 +53,14 @@ class ResizeBar {
         return bar;
     }
     mouse_down(e){
+        // compute the offset
+        var b_rect = this.bar.getBoundingClientRect();
+        this.delta_x = e.clientX - b_rect.x;
+        this.width = b_rect.width;
+        var parent_b_rect = this.bar.parentElement.getBoundingClientRect();
+        this.parent_width = parent_b_rect.width;
+        this.min_width_left = ((this.parent_width-this.width) * this.min_width_left_percent) / 100.0;
+        this.min_width_right = ((this.parent_width-this.width) * this.min_width_right_percent) / 100.0;
         e.target.setCapture(true);
         var resize_bar = this;
         this.mouse_move_handler = function(e){
@@ -66,7 +75,24 @@ class ResizeBar {
         e.target.addEventListener('mouseup', this.mouse_up_handler);
     }
     mouse_move(e){
-        console.log(e.clientX+' '+e.clientY);
+        var left = this.left[0];
+        var left_width = (e.clientX-this.delta_x);
+        var right = this.right[0];
+        var right_width = this.parent_width-(e.clientX-this.delta_x+this.width);
+
+        if (left_width < this.min_width_left) {
+            left_width = this.min_width_left;
+            right_width = this.parent_width - left_width - this.width;
+        }
+        if (right_width < this.min_width_right) {
+            right_width = this.min_width_right;
+            left_width = this.parent_width - right_width - this.width;
+        }
+
+        left_width += 'px';
+        right_width += 'px';
+        left.style.width = left_width;
+        right.style.width = right_width;
     }
     mouse_up(e){
         e.target.removeEventListener('mousemove', this.mouse_move_handler);
@@ -81,9 +107,9 @@ class ConfigWindow {
     }
     generate_html() {
         this.tree = $('<div class="options-tree">');
-        this.resize_bar = new ResizeBar();
-        var jqrb = $(this.resize_bar.generate_html());
         this.detail = $('<div class="detail-container">');
+        this.resize_bar = new ResizeVBar(this.tree, this.detail, 10, 65);
+        var jqrb = $(this.resize_bar.generate_html());
         var subwindows = [
             this.tree,
             jqrb,
