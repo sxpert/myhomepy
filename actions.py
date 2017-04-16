@@ -299,7 +299,7 @@ class ScanNetwork (object):
         return self.ae.data_callback
 
 if __name__ == "__main__":
-    logger = myOpenLayer1.system_logger
+    logger = myOpenLayer1.SYSTEM_LOGGER
     sl = myOpenLayer1.MainLoop(logger)
     sn = ScanNetwork(logger)
     config.set_main_loop(sl)

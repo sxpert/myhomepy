@@ -25,11 +25,14 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
     def _srv(self):
         return '['+unicode(self.server.server_name)+':'+unicode(self.server.server_port)+' WEB]'
 
+    def __log(self, msg):
+        myOpenLayer1.SYSTEM_LOGGER.log(msg)
+
     def _log(self, msg):
-        myOpenLayer1.system_logger.log(self._srv+' '+msg)
+        self.__log(self._srv+' '+msg)
 
     def _log_error(self, msg):
-        myOpenLayer1.system_logger.log((self._srv[:-1]+'_ERROR]')+' '+msg)
+        self.__log((self._srv[:-1]+'_ERROR]')+' '+msg)
 
 
     def log(self, code=None, size=None, msg=None):
@@ -181,7 +184,7 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
                 if m is not None:
                     g = m.groups()
                     if len(g) > 0:
-                        myOpenLayer1.system_logger.log(unicode(m.groups()))
+                        self.__log(unicode(m.groups()))
                     o = c()
                     return o
             if self.server.default is not None:
@@ -274,7 +277,7 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
         if t == 'application/x-www-form-urlencoded':
             return self.parse_post_urlencoded_variables()
         # unknown type, skip
-        myOpenLayer1.system_logger.log('unknown content-type: '+t)
+        self.__log('unknown content-type: '+t)
         return True
 
     def get_variable(self, name):
@@ -343,7 +346,7 @@ class OpenWeb(Thread):
         except AttributeError:
             server = ""
         message = unicode(message)
-        myOpenLayer1.system_logger.log('[%sWEB] %s'% (server, message))
+        myOpenLayer1.SYSTEM_LOGGER.log('[%sWEB] %s'% (server, message))
 
     def register_routes(self, routes):
         self.routes = routes
@@ -379,7 +382,7 @@ if __name__ == '__main__':
     addr = ('', 8000)
     srv = OpenWeb(addr)
     import myOpenLayer1
-    system_loop = myOpenLayer1.MainLoop(myOpenLayer1.system_logger)
+    system_loop = myOpenLayer1.MainLoop(myOpenLayer1.SYSTEM_LOGGER)
     print srv.sock.fileno()
     system_loop.add_socket(srv)
     system_loop.run()

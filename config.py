@@ -17,7 +17,7 @@ class Config (object):
         self.load()
 
     def log(self, msg):
-        myOpenLayer1.system_logger.log ('[CONF] '+msg)
+        myOpenLayer1.SYSTEM_LOGGER.log ('[CONF] '+msg)
 
     # sets the main loop
     # starts up all loaded systems

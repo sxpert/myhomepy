@@ -23,7 +23,7 @@ class TestApplication(object):
 
     def __init__(self):
         # create the system loop
-        self.system_loop = myOpenLayer1.MainLoop(myOpenLayer1.system_logger)
+        self.system_loop = myOpenLayer1.MainLoop(myOpenLayer1.SYSTEM_LOGGER)
         config.config.set_main_loop(self.system_loop)
 
         # initializes the web server
