@@ -36,6 +36,8 @@ body {
 .resize-bar {
     display: flex;
     width: 5pt;
+    outline: 0;
+    background-color: #ccc;
     cursor: ew-resize;
 }
 .detail-container {
