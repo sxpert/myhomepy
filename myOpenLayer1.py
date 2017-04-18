@@ -203,32 +203,32 @@ class OwnSocket(Thread):
                         # check if socket is disconnected
                         try:
                             data = self.sock.recv(1, socket.MSG_PEEK)
-                        except IOError as e:
-                            if e.errno == errno.EWOULDBLOCK:
+                        except IOError as error:
+                            if error.errno == errno.EWOULDBLOCK:
                                 # nothing to be read, pass
                                 pass
                             else:
-                                self.log(unicode(e))
+                                self.log(unicode(error))
                         else:
                             if len(data) == 0:
                                 self.log('socket disconnected')
                                 self.poller.unregister(self.sockfd)
                                 self.reconnect()
                         # no event, check timers
+                        # handle timers
+                        # while len(self.timers) > 0:
+                        #     t = self.timers[0]
+                        #     ts = t[0]
+                        #     now = time.time()
+                        #     if now < ts:
+                        #         break
+                        #     self.timers = self.timers[1:]
+                        #     t[1]()
                         pass
                 except KeyboardInterrupt:
                     # should not happen, normally caught by the main loop class
                     self.log("Keyboard Interrupt in OWNSocket thread")
                     self.stopping = True
-#                 # handle timers
-#                 while len(self.timers) > 0:
-#                     t = self.timers[0]
-#                     ts = t[0]
-#                     now = time.time()
-#                     if now < ts:
-#                         break
-#                     self.timers = self.timers[1:]
-#                     t[1]()
 
     def log(self, msg):
         col_in = '\033[92m'
