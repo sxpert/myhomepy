@@ -84,7 +84,7 @@ class OWNMonitor (object) :
         self.monitor_socket.set_data_callback(self.data_callback)
         self.update_callbacks(system)
         # add the monitor socket to the system loop
-        self.sl.add_socket(self.monitor_socket)
+        self.sl.add_task(self.monitor_socket)
 
     def log (self, msg) :
         msg = unicode(msg)

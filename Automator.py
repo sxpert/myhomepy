@@ -1,6 +1,8 @@
 #!/usr/bin/python2.7 -3
 #-*- coding: utf-8 -*-
 
+#!/usr/bin/python3
+
 """
 Main application module
 """
@@ -38,7 +40,7 @@ class TestApplication(object):
         )
         self.web.default_route(website.ow_static.OW_static)
 
-        self.system_loop.add_server(self.web)
+        self.system_loop.add_task(self.web)
 
         self.system_loop.run()
 

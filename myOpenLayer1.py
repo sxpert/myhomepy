@@ -1,5 +1,7 @@
-#!/usr/bin/python2.7 -3
+#!/usr/bin/python3
 #-*- coding: utf-8 -*-
+
+##!/usr/bin/python2.7 -3
 
 #
 # (c) Raphael Jacquot 2014
@@ -18,6 +20,7 @@ import errno
 import datetime
 # application includes
 import myOpenPass
+from threading import Thread
 
 DEBUG = True
 LOGFILE = 'myopenlog-2.log'
@@ -59,119 +62,57 @@ SYSTEM_LOGGER = Logger(LOGFILE)
 #
 
 class MainLoop(object):
-    # default timeout 200ms
+    """
+    main program loop
+    manages threads
+    """
     def __init__(self, logger, timeout=0.2):
-        self.servers = []
-        self.sockets = {}
+        self.tasks = []
         self.timers = []
+        self.stopped = False
         self.logger = logger
         self.timeout = timeout
-        self.poller = select.epoll()
 
-    def add_socket(self, socket):
-        # get socket to connect
-        socket.connect()
-        if socket.sock is not None:
-            fd = socket.sock.fileno()
-            self.sockets[fd] = socket
-            self.poller.register(socket.sock,
-                                 select.EPOLLIN | select.EPOLLPRI |
-                                 select.EPOLLHUP | select.EPOLLERR | select.EPOLLET)
-        else:
-            self.logger.log('unable to add socket to poller, sock==None')
+    def add_task(self, task):
+        print("adding task "+unicode(task))
+        self.tasks.append(task)
 
-    def add_server(self, server):
-        if server not in self.servers:
-            self.servers.append(server)
-        self.logger.log(unicode(self.servers))
 
-    def wait_servers(self):
-        for s in self.servers:
-            self.logger.log("waiting on server "+unicode(s))
-            s.stop()
-            s.join()
+    def wait_all(self):
+        """
+        stops all registered tasks,
+        then joins them
+        """
+        for task in self.tasks:
+            self.logger.log("waiting on server "+unicode(task))
+            task.stop()
+            task.join()
         self.logger.log(unicode("all remaining servers stopped"))
 
-    def remove_socket(self, socket):
-        if socket is not None:
-            if socket.sock is not None:
-                self.poller.unregister(socket.sock)
-                fd = socket.sock.fileno()
-                del self.sockets[fd]
-
-    def add_timer(self, ts, callback):
-        self.timers.append((ts, callback))
-        self.timers = sorted(self.timers, key=lambda timer: timer[0])
-
     def run(self):
-        while True:
-            if self.sockets is not None:
-                t = self.timeout
-            else:
-                # 60 seconds probably too long
-                t = 60.0
-            try:
-                # should try epoll ;-)
-                events = self.poller.poll(t)
-                if len(events) > 0:
-                    for e in events:
-                        fd, flags = e
-                        s = self.sockets[fd]
-                        if flags & (select.EPOLLIN | select.EPOLLPRI):
-                            try:
-                                s.recv()
-                            except socket.error as e:
-                                s.log(unicode(e))
-                                if e.errno == errno.ETIMEDOUT:
-                                    s.close()
-                        elif flags & select.EPOLLHUP:
-                            self.logger.log('socket '+str(s)+' is hanged-up')
-                            # remove from poller and reconnect
-                            self.poller.unregister(s.sock)
-                            del self.sockets[fd]
-                            s.reconnect(self)
-                        elif flags & select.EPOLLERR:
-                            self.logger.log('socket '+str(s)+' is in error state')
-                            # remove from poller and reconnect
-                            self.poller.unregister(s.sock)
-                            del self.sockets[fd]
-                            s.reconnect(self)
-                # handle timers
-                while len(self.timers) > 0:
-                    t = self.timers[0]
-                    ts = t[0]
-                    now = time.time()
-                    if now < ts:
-                        break
-                    self.timers = self.timers[1:]
-                    t[1]()
-                # check if one of the socket is disconnected
-                for fd in self.sockets.keys():
-                    s = self.sockets[fd]
-                    if s.sock is None:
-                        self.logger.log('socket '+unicode(fd)+' disconnected')
-                        s.connect()
-                        if s.sock is not None:
-                            newfd = s.sock.fileno()
-                            if fd != newfd:
-                                self.logger.log('socket '+
-                                                unicode(fd)+
-                                                ' connected with fd '+
-                                                unicode(newfd))
-                        else:
-                            # sleep some...
-                            pass
-            except KeyboardInterrupt as e:
-                self.logger.log("program exit")
-                self.wait_servers()
-                sys.exit(0)
+        """
+        main program loop.
+        handles keyboard interrupt, stops all other threads in that case
+        """
+        # start all registered tasks
+        for task in self.tasks:
+            if not task.is_alive():
+                task.start()
+        try:
+            print("running thread")
+            while not self.stopped:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            self.logger.log("^C forcing program exit")
+            self.wait_all()
+            sys.exit(0)
 
 #--------------------------------------------------------------------------------------------------
 #
 # Layer 1 : tcp socket handling
 #
 
-class OwnSocket(object):
+class OwnSocket(Thread):
     COMMAND = 1
     MONITOR = 2
     MODES = {
@@ -187,24 +128,91 @@ class OwnSocket(object):
     NACK = '*#*0##'
     ACK = '*#*1##'
 
-    def __init__(self, address, port, passwd, mode):
+    def __init__(self, address, port, passwd, mode, timeout = 0.2):
         self.address = address
         self.port = port
         self.passwd = passwd
         self.mode = mode
         self.buf = ''
         self.sock = None
+        self.sockfd = None
         self.state = self.NONE
         self.ready_callback = None
         self.data_callback = None
+        self.stopping = False
+        self.timeout = timeout
+        self.poller = select.epoll()
+        Thread.__init__(self)
+
+    def stop(self):
+        self.stopping = True
+
+    def run(self):
+        while not self.stopping:
+            if self.sock is None:
+                self.connect()
+                # setup poller object after connecting
+                if self.sock is not None:
+                    self.sockfd = self.sock.fileno()
+                    self.poller.register(self.sockfd,
+                                         select.EPOLLIN | select.EPOLLPRI |
+                                         select.EPOLLHUP | select.EPOLLERR | select.EPOLLET)
+                else:
+                    self.log('unable to add socket to poller, sock==None')
+            else:
+                if self.sock is not None:
+                    timeout = self.timeout
+                else:
+                    # 60 seconds probably too long
+                    timeout = 60.0
+                try:
+                    events = self.poller.poll(timeout)
+                    if len(events) > 0:
+                        for event in events:
+                            filedesc, flags = event
+                            if self.sockfd != filedesc:
+                                self.log('problem, socket\'s fd (%d) is'\
+                                         ' different from given fd (%d)'%(
+                                             self.sockfd, filedesc,))
+                            else:
+                                # filedesc should be the same as the socket's fd
+                                if flags & (select.EPOLLIN | select.EPOLLPRI):
+                                    try:
+                                        self.recv()
+                                    except socket.error as e:
+                                        self.log(unicode(e))
+                                        if e.errno == errno.ETIMEDOUT:
+                                            self.close()
+                                elif flags & select.EPOLLHUP:
+                                    self.log('socket '+str(self)+' is hanged-up')
+                                    # remove from poller and reconnect
+                                    self.poller.unregister(self.sockfd)
+                                    self.reconnect()
+                                elif flags & select.EPOLLERR:
+                                    self.log('socket '+str(self)+' is in error state')
+                                    # remove from poller and reconnect
+                                    self.poller.unregister(self.sockfd)
+                                    self.reconnect()
+                except KeyboardInterrupt:
+                    # should not happen, normally caught by the main loop class
+                    self.log("Keyboard Interrupt in OWNSocket thread")
+#                 # handle timers
+#                 while len(self.timers) > 0:
+#                     t = self.timers[0]
+#                     ts = t[0]
+#                     now = time.time()
+#                     if now < ts:
+#                         break
+#                     self.timers = self.timers[1:]
+#                     t[1]()
 
     def log(self, msg):
         col_in = '\033[92m'
         col_out = '\033[0m'
         if self.mode == self.COMMAND:
             col_in = '\033[94m'
-        m = '['+self.address+':'+str(self.port)+' '+self.MODES[self.mode]+'] '+col_in+msg+col_out
-        SYSTEM_LOGGER.log(m)
+        _msg = '['+self.address+':'+str(self.port)+' '+self.MODES[self.mode]+'] '+col_in+msg+col_out
+        SYSTEM_LOGGER.log(_msg)
 
     def connect(self):
         self.state = self.NONE
@@ -217,10 +225,10 @@ class OwnSocket(object):
         self.log("Initializing connection to "+unicode(self.address)+" port "+unicode(self.port))
         try:
             self.sock.connect((self.address, self.port))
-        except KeyboardInterrupt as e:
+        except KeyboardInterrupt:
             self.log("program exit")
             sys.exit(0)
-        except socket.error as e:
+        except socket.error:
             self.sock = None
             self.log("connection error, sleeping some")
             # this should setup some timer
@@ -232,8 +240,9 @@ class OwnSocket(object):
             self.log('OwnSocket : Closing socket')
             self.sock.close()
             self.sock = None
+            self.sockfd = None
 
-    def reconnect(self, mainloop):
+    def reconnect(self):
         # attempt to reconnect the socket
         self.log("attempting to reconnect")
         self.close()
@@ -242,11 +251,11 @@ class OwnSocket(object):
         data = self.sock.recv(4096)
         self.buf += data
         while True:
-            p = self.buf.find('##')
-            if p == -1:
+            position = self.buf.find('##')
+            if position == -1:
                 return
-            msg = self.buf[0:p+2]
-            self.buf = self.buf[(p+2):]
+            msg = self.buf[0:position+2]
+            self.buf = self.buf[(position+2):]
             if self.state == self.NONE:
                 if msg == self.ACK:
                     self.set_socket_mode()
@@ -255,8 +264,8 @@ class OwnSocket(object):
                     self.log('Invalid message received : '+msg)
                     return
             elif self.state == self.LOGGING:
-                p = re.compile('\*#(\d+)##')
-                m = p.match(msg)
+                nonce_re = re.compile(r'\*#(\d+)##')
+                m = nonce_re.match(msg)
                 if m is not None:
                     nonce = m.group(1)
                     self.send_response(nonce)
