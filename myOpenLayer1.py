@@ -141,6 +141,7 @@ class OwnSocket(Thread):
         self.data_callback = None
         self.stopping = False
         self.timeout = timeout
+        self.cnxfailcnt = 0
         self.poller = select.epoll()
         Thread.__init__(self)
 
@@ -149,22 +150,27 @@ class OwnSocket(Thread):
 
     def run(self):
         while not self.stopping:
+            if self.sock is not None or self.cnxfailcnt < 3:
+                timeout = self.timeout
+            else:
+                # 60 seconds probably too long
+                timeout = 5.0
             if self.sock is None:
                 self.connect()
                 # setup poller object after connecting
                 if self.sock is not None:
-                    self.sockfd = self.sock.fileno()
                     self.poller.register(self.sockfd,
                                          select.EPOLLIN | select.EPOLLPRI |
-                                         select.EPOLLHUP | select.EPOLLERR | select.EPOLLET)
+                                         select.EPOLLHUP | select.EPOLLERR |
+                                         select.EPOLLET)
                 else:
                     self.log('unable to add socket to poller, sock==None')
+                    try:
+                        time.sleep(timeout)
+                    except KeyboardInterrupt:
+                        self.log('KeyboardInterrupt while waiting for network event')
+                        self.stopping = True
             else:
-                if self.sock is not None:
-                    timeout = self.timeout
-                else:
-                    # 60 seconds probably too long
-                    timeout = 60.0
                 try:
                     events = self.poller.poll(timeout)
                     if len(events) > 0:
@@ -175,7 +181,7 @@ class OwnSocket(Thread):
                                          ' different from given fd (%d)'%(
                                              self.sockfd, filedesc,))
                             else:
-                                # filedesc should be the same as the socket's fd
+                                self.log("flags: "+bin(flags)[2:])
                                 if flags & (select.EPOLLIN | select.EPOLLPRI):
                                     try:
                                         self.recv()
@@ -193,9 +199,27 @@ class OwnSocket(Thread):
                                     # remove from poller and reconnect
                                     self.poller.unregister(self.sockfd)
                                     self.reconnect()
+                    else:
+                        # check if socket is disconnected
+                        try:
+                            data = self.sock.recv(1, socket.MSG_PEEK)
+                        except IOError as e:
+                            if e.errno == errno.EWOULDBLOCK:
+                                # nothing to be read, pass
+                                pass
+                            else:
+                                self.log(unicode(e))
+                        else:
+                            if len(data) == 0:
+                                self.log('socket disconnected')
+                                self.poller.unregister(self.sockfd)
+                                self.reconnect()
+                        # no event, check timers
+                        pass
                 except KeyboardInterrupt:
                     # should not happen, normally caught by the main loop class
                     self.log("Keyboard Interrupt in OWNSocket thread")
+                    self.stopping = True
 #                 # handle timers
 #                 while len(self.timers) > 0:
 #                     t = self.timers[0]
@@ -230,9 +254,12 @@ class OwnSocket(Thread):
             sys.exit(0)
         except socket.error:
             self.sock = None
+            self.cnxfailcnt += 1
             self.log("connection error, sleeping some")
             # this should setup some timer
             return
+        self.cnxfailcnt = 0
+        self.sockfd = self.sock.fileno()
         self.sock.setblocking(0)
 
     def close(self):
