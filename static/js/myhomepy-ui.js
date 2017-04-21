@@ -44,11 +44,7 @@ class ResizeVBar {
         var bar = document.createElement('div');
         bar.setAttribute('class','resize-bar');
         var resize_bar = this;
-        this.mouse_down_handler = function(e){
-                var b = resize_bar;
-                b.mouse_down(e);
-            };
-        bar.addEventListener('mousedown', this.mouse_down_handler);
+        bar.addEventListener('mousedown', (e) => {this.mouse_down(e)});
         this.bar = bar;
         return bar;
     }
@@ -63,15 +59,9 @@ class ResizeVBar {
         this.min_width_right = ((this.parent_width-this.width) * this.min_width_right_percent) / 100.0;
         e.target.setCapture(true);
         var resize_bar = this;
-        this.mouse_move_handler = function(e){
-                var b = resize_bar;
-                b.mouse_move(e);
-            };
+        this.mouse_move_handler = (e) => this.mouse_move(e)
         e.target.addEventListener('mousemove', this.mouse_move_handler);
-        this.mouse_up_handler = function(e){
-                var b = resize_bar;
-                b.mouse_up(e);
-            };
+        this.mouse_up_handler = (e) => this.mouse_up(e)
         e.target.addEventListener('mouseup', this.mouse_up_handler);
     }
     mouse_move(e){
