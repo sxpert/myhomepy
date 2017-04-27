@@ -96,8 +96,12 @@ class MainLoop(object):
         """
         # start all registered tasks
         for task in self.tasks:
-            if not task.is_alive():
+            # try starting the task
+            try:
                 task.start()
+            except RuntimeError:
+                # hah, task already started, ignore
+                pass
         try:
             print("running thread")
             while not self.stopped:
