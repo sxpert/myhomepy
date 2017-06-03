@@ -1,11 +1,16 @@
 #!/usr/bin/python
 # myOpenApplication webserver
 
-import os, sys, re, shutil
+import os
+import sys
+import re
+import shutil
+import socket
 from threading import Thread
 import urllib
 import myOpenLayer1
 import config
+import SocketServer
 import BaseHTTPServer
 import mimetypes
 import cgi
@@ -301,8 +306,6 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
                 v += c
         return v
 
-    
-
 #--------------------------------------------------------------------------------------------------
 #
 # TODO: ssl mode
@@ -313,6 +316,34 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
 # httpd = BaseHTTPServer.HTTPServer(('localhost', 4443), SimpleHTTPServer.SimpleHTTPRequestHandler)
 # httpd.socket = ssl.wrap_socket (httpd.socket, certfile='path/to/localhost.pem', server_side=True)
 # httpd.serve_forever()
+#
+
+#
+#
+# web server object
+#
+
+class OWNHTTPServer(SocketServer.TCPServer):
+    allow_reuse_address = 1    # Seems to make sense in testing environment
+
+    def process_request(self, request, client_address):
+        """Call finish_request.
+        TODO: Override to catch errno 32 in finish request
+        """
+        self.finish_request(request, client_address)
+        self.shutdown_request(request)
+
+
+    def server_bind(self):
+        """Override server_bind to store the server name."""
+        SocketServer.TCPServer.server_bind(self)
+        host, port = self.socket.getsockname()[:2]
+        self.server_name = socket.getfqdn(host)
+        self.server_port = port
+
+#
+#
+# web server thread
 #
 
 class OpenWeb(Thread):
@@ -327,7 +358,8 @@ class OpenWeb(Thread):
 
     def run(self):
         self.log("starting thread")
-        self.httpd = BaseHTTPServer.HTTPServer(self.address, OpenWebHandler)
+#        self.httpd = BaseHTTPServer.HTTPServer(self.address, OpenWebHandler)
+        self.httpd = OWNHTTPServer(self.address, OpenWebHandler)
         if self.routes is None:
             self.log("error, no routes set")
             return

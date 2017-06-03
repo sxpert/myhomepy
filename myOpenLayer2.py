@@ -120,6 +120,7 @@ class OWNMonitor (object) :
     #
     def data_callback (self, msg) :
         msgtype = None
+        self.log(msg)
         # skip useless *1001*3*0## frame
         if msg == '*1001*3*0##':
             return
