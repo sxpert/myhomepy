@@ -304,5 +304,5 @@ if __name__ == "__main__":
     sn = ScanNetwork(logger)
     config.set_main_loop(sl)
     cs = config.command_socket(config.nb_systems-1, sn.ready_callback, sn.scan_callback)
-    sl.add_socket(cs)
+    sl.add_task(cs)
     sl.run ()

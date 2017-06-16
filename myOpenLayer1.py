@@ -86,7 +86,10 @@ class MainLoop(object):
         for task in self.tasks:
             self.logger.log("waiting on server "+unicode(task))
             task.stop()
-            task.join()
+            try:
+                task.join()
+            except KeyboardInterrupt:
+                pass
         self.logger.log(unicode("all remaining servers stopped"))
 
     def run(self):
@@ -185,7 +188,7 @@ class OwnSocket(Thread):
                                          ' different from given fd (%d)'%(
                                              self.sockfd, filedesc,))
                             else:
-                                self.log("flags: "+bin(flags)[2:])
+                                #self.log("flags: "+bin(flags)[2:])
                                 if flags & (select.EPOLLIN | select.EPOLLPRI):
                                     try:
                                         self.recv()
@@ -229,6 +232,11 @@ class OwnSocket(Thread):
                         #     self.timers = self.timers[1:]
                         #     t[1]()
                         pass
+                except IOError as error:
+                    if error.errno == 4:
+                        # just ignore this
+                        self.log('Interrupted System Call')
+                        pass
                 except KeyboardInterrupt:
                     # should not happen, normally caught by the main loop class
                     self.log("Keyboard Interrupt in OWNSocket thread")
@@ -250,8 +258,10 @@ class OwnSocket(Thread):
         self.sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPIDLE, 1)
         self.sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPINTVL, 1)
         self.sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPCNT, 2)
+        # set socket as non-blocking (to avoid the idiotic timeout on connect)
         self.log("Initializing connection to "+unicode(self.address)+" port "+unicode(self.port))
         try:
+            self.sock.settimeout(1)
             self.sock.connect((self.address, self.port))
         except KeyboardInterrupt:
             self.log("program exit")
@@ -265,7 +275,7 @@ class OwnSocket(Thread):
         self.cnxfailcnt = 0
         self.sockfd = self.sock.fileno()
         self.sock.setblocking(0)
-
+        
     def close(self):
         if self.sock is not None:
             self.log('OwnSocket : Closing socket')
@@ -286,6 +296,7 @@ class OwnSocket(Thread):
             if position == -1:
                 return
             msg = self.buf[0:position+2]
+            self.log(msg)
             self.buf = self.buf[(position+2):]
             if self.state == self.NONE:
                 if msg == self.ACK:

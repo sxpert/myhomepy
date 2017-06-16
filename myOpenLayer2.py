@@ -103,7 +103,7 @@ class OWNMonitor (object) :
         except AttributeError as e:
             system = config.config[self.system_id]
             if "database" not in system.keys():
-                self.log ("WARNING: unable to find a value for \'database\' in the config for the system")
+                self.log("WARNING: unable to find a value for \'database\' in the config for the system")
                 return None
             db_name = system["database"]
             # open database, and store a link
@@ -120,7 +120,6 @@ class OWNMonitor (object) :
     #
     def data_callback (self, msg) :
         msgtype = None
-        self.log(msg)
         # skip useless *1001*3*0## frame
         if msg == '*1001*3*0##':
             return
