@@ -41,12 +41,13 @@ class ProtoObject (object):
 class Sentence (ProtoObject):
     RX = 0
     TX = 1
+    TYPES = ['RX', 'TX']
 
     def setup (self, name, data):
         self.name = name
         self.id = self._must ("id", data)
         self.description = self._must ("description", data)
-        self.type = self._must ("type", data, ["RX", "TX"])
+        self.type = self._must ("type", data, self.TYPES)
         self.str = self._must ("str", data)
         self.has_address = self._boolean ("has_address", data)
         self.has_params = self._boolean ("has_params", data)
@@ -54,8 +55,89 @@ class Sentence (ProtoObject):
         self.error = self._optional ("error", data)
         return self
 
-    def __repr__ (self):
-        return self.str
+    def __repr__(self):
+        return self.TYPES[self.type]+'('+self.str+')'
+
+    def is_tx(self):
+        return self.type == self.TX
+
+    def replace_vars(self, actionengine, data):
+        out_sentence = ''
+        var_name = ''
+        actionengine.log('replacing vars in outgoing sentence \'%s\''%(self.__repr__()))
+        for char in self.str:
+            if char == '[':
+                # var begin
+                var_name += char
+            elif char == ']':
+                # other chars
+                var_name = var_name[1:]
+                actionengine.log('var: %s'%(var_name))
+                if var_name not in data.keys():
+                    actionengine.log('WARNING: can\'t find variable \'%s\' in %s'
+                                     %(var_name, str(data)))
+                    return False
+                out_sentence += data[var_name]
+                var_name = ''
+            else:
+                if len(var_name) > 0:
+                    var_name += char
+                else:
+                    out_sentence += char
+        return out_sentence
+
+    def parse(self, actionengine, msg, data):
+        actionengine.log("parsing sentence \'%s\'"%(msg))
+        actionengine.log("expecting format \'%s\'"%(self.str))
+        var_name = ''
+        for char in self.str:
+            if len(var_name) > 0:
+                # variable handling
+                if char in ['*', '#']:
+                    if len(var_name) > 0:
+                        # consume stuff
+                        var_value = ''
+                        while True:
+                            if len(msg) == 0:
+                                actionengine.log("sentence does not match expected format")
+                                return False
+                            pchar = msg[0]
+                            msg = msg[1:]
+                            if pchar == char:
+                                break
+                            var_value += pchar
+                        actionengine.log("%s = %s"%(var_name, var_value))
+                        var_name = ''
+                elif char == ']':
+                    var_name = var_name[1:]
+                else:
+                    var_name += char
+            else:
+                # normal mode
+                if char == '[':
+                    var_name += char
+                else:
+                    # consume
+                    pchar = msg[0]
+                    if char != pchar:
+                        actionengine.log("sentence does not match expected format")
+                        return False
+                    msg = msg[1:]
+        return True
+
+    def execute(self, actionengine, msg, data):
+        if self.type == self.TX:
+            sentence = self.replace_vars(actionengine, data)
+            if sentence != False:
+                actionengine.log(sentence)
+                actionengine.ownsock.send(sentence)
+                return actionengine.OK
+        elif self.type == self.RX:
+            state = self.parse(actionengine, msg, data)
+            actionengine.log("parse returned %d"%(state))
+        else:
+            actionengine.log('Type not handled %s'%(self.TYPES[self.type]))
+        return actionengine.NOT_HANDLED
 
 class SequenceItem (ProtoObject):
 
@@ -74,6 +156,21 @@ class SequenceItem (ProtoObject):
     def __repr__ (self):
         return unicode(self.sentence)
 
+    def is_tx(self):
+        return self.sentence.is_tx()
+
+    def expect_ack(self):
+        # false or something
+        return self.onNAK
+
+    def execute(self, actionengine, msg, data):
+        state = self.sentence.execute(actionengine, msg, data)
+        if state == actionengine.OK:
+            if self.repeat:
+                actionengine.log('Repeat == True')
+                state = actionengine.SAME
+        return state
+
 class Sequence (ProtoObject):
 
     def setup (self, name, data):
@@ -86,6 +183,9 @@ class Sequence (ProtoObject):
         for o in ol:
             self.sentences.append(SequenceItem(self._proto).setup(self.name+" - "+unicode(len(self.sentences)+1), o))
         return self        
+
+    def __len__(self):
+        return len(self.sentences)
 
     def __repr__ (self):
         return self.name
@@ -100,6 +200,9 @@ class ScenarioItem (ProtoObject):
         self.sequence = self._proto.sequences[self.id]
         self.repeat = self._boolean ("repeat", data)
         return self
+
+    def __len__(self):
+        return len(self.sequence)
 
     def __repr__ (self):
         return unicode(self.sequence)
@@ -184,35 +287,110 @@ class Proto (object):
             self.scenarios[name] = scenario
         return True
 
-    def get_sentence(self, scenario_name, sequence_nb, sentence_nb):
+    def _get_scenario(self, scenario_name):
         if scenario_name not in self.scenarios.keys():
-            self.log ("ERROR: unable to find scenario '"+scenario_name+"'")
+            self.log("ERROR: unable to find scenario '%s'"%(scenario_name))
             return None
         scenario = self.scenarios[scenario_name]
-        self.log ("scenario : "+scenario.name)
+        self.log("scenario : %s"%(scenario_name))
+        return scenario
+
+    def _get_sequence(self, scenario, sequence_nb):
         nb_sequences = len(scenario.sequences)
         if sequence_nb >= nb_sequences:
-            self.log ("ERROR: sequence number requested ("+unicode(sequence_nb)+") larger than the number of sequences available in scenario ("+unicode(nb_sequences)+")")
+            self.log("ERROR: sequence number requested (%d) larger than the number of sequences available in scenario (%d)"
+                     %(sequence_nb, nb_sequences))
             return None
-        self.log (unicode(nb_sequences)+" sequences in scenario")
+        self.log ("%d sequences in scenario"%(nb_sequences))
         sequence = scenario.sequences[sequence_nb]
         self.log ("sequence : "+unicode(sequence))
+        return sequence
+
+    def _get_sentence(self, sequence, sentence_nb):
         nb_sentences = len(sequence.sequence.sentences)
         if sentence_nb >= nb_sentences:
-            self.log ("ERROR: sentence number requested ("+unicode(sentence_nb)+") larger than the number of sentences available in sequence ("+unicode(nb_sentences)+")")
+            self.log("ERROR: sentence number requested (%d) larger than the number of sentences available in sequence (%d)"
+                     %(sentence_nb, nb_sentences))
             return None
-        self.log (unicode(nb_sentences)+" sentences in sequence")
+        self.log ("%d sentences in sequence"%(nb_sentences))
         sentence = sequence.sequence.sentences[sentence_nb]
         self.log ("sentence : "+unicode(sentence))
-        return (scenario, sequence, sentence)
+        return sentence
+
+class ProtoState(object):
+    def __init__ (self, proto, scenario_name, variables):
+        self.proto = proto
+        self.scenario_name = scenario_name
+        self.vars = variables
+        self.reset()
     
+    def reset(self):
+        # setup internal state
+        self.scenario = None
+        self.sequence_nb = 0
+        self.sequence = None
+        self.sentence_nb = 0
+        self.sentence = None
+        self.expect_acknowledge = False
+
+    def _find_current_sentence(self):
+        if self.scenario is None:
+            self.scenario = self.proto._get_scenario(self.scenario_name)
+        if self.sequence is None:
+            self.sequence = self.proto._get_sequence(self.scenario, self.sequence_nb)
+        if self.sentence is None:
+            self.sentence = self.proto._get_sentence(self.sequence, self.sentence_nb)
+
+    def execute_one(self, actionengine, msg = None):
+        self._find_current_sentence()
+        if self.expect_acknowledge:
+            actionengine.log("expecting acknowledge")
+            if msg == actionengine.ownsock.ACK:
+                # we got the ack... time to forget about it...
+                self.expect_acknowledge = False
+                actionengine.log("got ack, advancing")
+                return self.advance(actionengine)
+            # we didn't get ack... that's an error
+            return False
+        state = self.sentence.execute(actionengine, msg, self.vars)
+        actionengine.log("sentence returned : %s"%(actionengine.STATES[state]))
+        if state == actionengine.PARSE_ERROR:
+            # something happened.
+            return False
+        self.expect_acknowledge = self.sentence.expect_ack()
+        if self.expect_acknowledge:
+            # skip advancing if we're expecting ack
+            return True
+        if state == actionengine.OK:
+            return self.advance(actionengine)
+
+    def advance(self, actionengine):
+        if (self.scenario is None) or (self.sequence is None) or (self.sentence is None):
+            return False
+        actionengine.log("%d elements in sequence"%(len(self.sequence)))
+        if self.sentence_nb >= len(self.sequence):
+            actionengine.log("went passed the end of the sequence")
+            return False
+        self.sentence_nb += 1
+        self.sentence = self.proto._get_sentence(self.sequence, self.sentence_nb)
+        actionengine.log("new sentence : '%s'"%(str(self.sentence)))
+        if self.sentence.is_tx():
+            return self.execute_one(actionengine)
+        return True
 #
 # takes data from actions.json
 # executes the series of requests
 #
 class ActionEngine (object):
+    NOT_HANDLED = 0
+    OK = 1
+    SAME = 2
+    PARSE_ERROR = 3
+    STATES = ['NotHandled', 'OK', 'Same', 'ParseError']
+
     def __init__ (self, logger = None):
         self._logger = logger
+        self._error = False
         # load the json
         self.load_protocol_data ("actions.json")
 
@@ -242,16 +420,16 @@ class ActionEngine (object):
         self._error = True
         return
 
-    def run (self, context):
-        self._context = context
-        self.start_scenario ()
-    
+    def run (self, scenario_name, variables):
+        self._state = ProtoState(self._proto, scenario_name, variables)
+        
     def ready_callback (self, ownsock):
         if self._proto.error:
             self.log ("ERROR on ActionEngine initialization - not doing anything")
             return
         self.log ("ActionEngine ready")
         self.ownsock = ownsock
+        self._state.reset()
         # start the scenario
         self.run_open_sentence()
 
@@ -261,48 +439,34 @@ class ActionEngine (object):
         self.log ("ActionEngine data '"+unicode(msg)+"'")
         if self._error:
             return
-
-    @property
-    def scenario (self):
-        if "scenario" not in self._context:
-            self.log ("ERROR: no 'scenario' in context")
-            return None
-        return self._context["scenario"]
-
-    def start_scenario (self):
-        self._sequence = 0
-        self._sentence = 0
+        self.run_open_sentence(msg)
 
     def run_open_sentence (self, msg = None):
         self._proto.log ("Run next sentence")
         # get sentence
-        data = self._proto.get_sentence (self.scenario, self._sequence, self._sentence)
-        self.log(data)
+        status = self._state.execute_one(self, msg)
 
-class ScanNetwork (object):
-    def __init__ (self, logger = None):
+class ScanNetwork(object):
+    def __init__(self, logger = None):
         self.logger = logger
         self.ae = ActionEngine(logger)
-        context = {}
-        context["scenario"] = "ScanByAID"
-        data = {}
-        data["who"] = "1001"
-        context["data"] = data
-        self.ae.run (context)
+        variables = {}
+        variables["who"] = "1001"
+        self.ae.run('ScanByAID', variables)
 
     @property
-    def ready_callback (self):
+    def ready_callback(self):
         return self.ae.ready_callback
 
     @property
-    def scan_callback (self):
+    def scan_callback(self):
         return self.ae.data_callback
 
 if __name__ == "__main__":
     logger = myOpenLayer1.SYSTEM_LOGGER
     sl = myOpenLayer1.MainLoop(logger)
-    sn = ScanNetwork(logger)
     config.set_main_loop(sl)
+    sn = ScanNetwork(logger)
     cs = config.command_socket(config.nb_systems-1, sn.ready_callback, sn.scan_callback)
     sl.add_task(cs)
     sl.run ()
