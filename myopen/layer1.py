@@ -10,17 +10,18 @@
 
 from __future__ import print_function
 
-# system includes
-import sys
+import datetime
+import errno
+import re
 import select
 import socket
-import re
+# system includes
+import sys
 import time
-import errno
-import datetime
-# application includes
-import myOpenPass
 from threading import Thread
+
+# application includes
+from . import openpass
 
 DEBUG = True
 LOGFILE = 'myopenlog-2.log'
@@ -74,7 +75,7 @@ class MainLoop(object):
         self.timeout = timeout
 
     def add_task(self, task):
-        print("adding task "+unicode(task))
+        print("adding task "+str(task))
         self.tasks.append(task)
 
 
@@ -84,13 +85,13 @@ class MainLoop(object):
         then joins them
         """
         for task in self.tasks:
-            self.logger.log("waiting on server "+unicode(task))
+            self.logger.log("waiting on server "+str(task))
             task.stop()
             try:
                 task.join()
             except KeyboardInterrupt:
                 pass
-        self.logger.log(unicode("all remaining servers stopped"))
+        self.logger.log(str("all remaining servers stopped"))
 
     def run(self):
         """
@@ -193,7 +194,7 @@ class OwnSocket(Thread):
                                     try:
                                         self.recv()
                                     except socket.error as e:
-                                        self.log(unicode(e))
+                                        self.log(str(e))
                                         if e.errno == errno.ETIMEDOUT:
                                             self.close()
                                 elif flags & select.EPOLLHUP:
@@ -215,7 +216,7 @@ class OwnSocket(Thread):
                                 # nothing to be read, pass
                                 pass
                             else:
-                                self.log(unicode(error))
+                                self.log(str(error))
                         else:
                             if len(data) == 0:
                                 self.log('socket disconnected')
@@ -259,7 +260,7 @@ class OwnSocket(Thread):
         self.sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPINTVL, 1)
         self.sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPCNT, 2)
         # set socket as non-blocking (to avoid the idiotic timeout on connect)
-        self.log("Initializing connection to "+unicode(self.address)+" port "+unicode(self.port))
+        self.log("Initializing connection to "+str(self.address)+" port "+str(self.port))
         try:
             self.sock.settimeout(1)
             self.sock.connect((self.address, self.port))
@@ -290,7 +291,7 @@ class OwnSocket(Thread):
 
     def recv(self):
         data = self.sock.recv(4096)
-        self.buf += data
+        self.buf += data.decode('latin1')
         while True:
             position = self.buf.find('##')
             if position == -1:
@@ -327,11 +328,11 @@ class OwnSocket(Thread):
             if self.data_callback is not None:
                 self.data_callback(msg)
             else:
-                self.log('<-RX '+unicode(msg))
+                self.log('<-RX '+str(msg))
 
     def send(self, msg):
-        self.log('TX-> '+unicode(msg))
-        self.sock.send(msg)
+        self.log('TX-> '+str(msg))
+        self.sock.send(msg.encode('latin1'))
 
     def set_socket_mode(self):
         self.log('initializing connection')
@@ -346,7 +347,7 @@ class OwnSocket(Thread):
 
     def send_response(self, nonce):
         self.log('got nonce '+nonce)
-        password_message = '*#'+str(myOpenPass.ownCalcPass(self.passwd, nonce))+'##'
+        password_message = '*#'+str(openpass.ownCalcPass(self.passwd, nonce))+'##'
         self.log('logging in with password packet '+password_message)
         self.state = self.AUTH
         self.send(password_message)

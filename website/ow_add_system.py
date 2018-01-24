@@ -3,9 +3,8 @@
 
 import re
 import urllib
-import myOpenLayer1
+from myopen import layer1
 import config
-import BaseHTTPServer
 
 #--------------------------------------------------------------------------------------------------
 #
@@ -71,6 +70,7 @@ class OW_add_system (object):
             self.generate_basic_form(request)
         else:
             # we already have a system, present the page integrated in the menus
+            
             pass
 
     def is_ipv4 (self, value):
@@ -89,13 +89,13 @@ class OW_add_system (object):
         names = value.split('.')
         if len(names)==0:
             return False
-        myOpenLayer1.system_logger.log(unicode(names))
+        layer1.SYSTEM_LOGGER.log(str(names))
         for n in names:
             # TODO: check against the dns spec
             m = re.match("^[a-z][a-z0-9\-_]{0,62}$", n.lower())
             if m is None:
                 return False
-            myOpenLayer1.system_logger.log(n)
+            layer1.SYSTEM_LOGGER.log(n)
         return True
 
     def is_ipv4_or_domain (self, value):
@@ -141,5 +141,9 @@ class OW_add_system (object):
         # add the new gateway
         config.config.add_system(self.gateway, int(self.openwebnet_port), self.password_open)
 
-        request.html_response('<pre>ok\n%s\n%s\n%s\n%s</pre>'% (self.action, self.gateway, self.openwebnet_port, self.password_open))
+        request.html_response(('<pre>ok\n%s\n%s\n%s\n%s</pre>'%
+                               (self.action, 
+                                self.gateway, 
+                                self.openwebnet_port, 
+                                self.password_open)))
 

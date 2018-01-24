@@ -12,7 +12,7 @@ import sys
 import json
 
 import config
-import myOpenLayer1
+from . import layer1
 
 PLUGINS_DIRS                = "plugins/"
 
@@ -45,12 +45,12 @@ SYSTEM_NAMES = {
 
 def map_device_lighting (device):
     if (type(device) is dict) and ('group' in device.keys()):
-        return 'G-'+unicode(device['group'])
+        return 'G-'+str(device['group'])
     return None
 
 def map_device_temp_control (device):
     if (type(device) is dict) and ('zone' in device.keys()) and ('sensor' in device.keys()):
-        return '['+unicode(device['zone'])+'-'+unicode(device['sensor'])+']'
+        return '['+str(device['zone'])+'-'+str(device['sensor'])+']'
     return None
 
 DEVICE_MAPPINGS = {
@@ -75,11 +75,11 @@ class OWNMonitor (object) :
         self.callbacks = None
         system = config.config[system_id]
         gw = system['gateway']
-        self.monitor_socket = myOpenLayer1.OwnSocket(
+        self.monitor_socket = layer1.OwnSocket(
                 gw['ip'],
                 gw['port'],
                 gw['password'],
-                myOpenLayer1.OwnSocket.MONITOR)
+                layer1.OwnSocket.MONITOR)
         # set the callback to get messages from the layer 1
         self.monitor_socket.set_data_callback(self.data_callback)
         self.update_callbacks(system)
@@ -87,7 +87,7 @@ class OWNMonitor (object) :
         self.sl.add_task(self.monitor_socket)
 
     def log (self, msg) :
-        msg = unicode(msg)
+        msg = str(msg)
         if self.monitor_socket is not None: 
             self.monitor_socket.log (msg)
         else:
@@ -167,7 +167,7 @@ class OWNMonitor (object) :
             func (self, params, device, data)
 
     def callback_key (self, system, order, device):
-        k = unicode(system)+"-"+unicode(order)
+        k = str(system)+"-"+str(order)
         dk = DEVICE_MAPPINGS[system](device)
         if dk is None:
             return None    
@@ -257,10 +257,10 @@ class OWNMonitor (object) :
             system["callbacks"] = []
         callbacks = system["callbacks"]
         for cb in callbacks:
-            print (unicode(cb))
+            print (str(cb))
             # generate the key
             ck = self.map_key (cb["conditions"])
-            print (unicode(ck))
+            print (str(ck))
             action = self.map_action(cb)
             if (ck is not None) and (action is not None):
                 print ("action", action)
@@ -282,14 +282,14 @@ class OWNMonitor (object) :
         m = re.match('^\*(?P<command>[01])\*(?P<light>\d{2,4})##$',msg)
         if m is not None:
             data = m.groupdict()
-            self.log (unicode(data))
+            self.log (str(data))
             device = { 'light': data['light'] }
             self.execute_callback(SYSTEM__LIGHTING, data['command'], device, None)
             return
         m = re.match('^\*(?P<command>[01])\*#(?P<group>\d{1,3})##$',msg)
         if m is not None:
             data = m.groupdict()
-            self.log (unicode(data))
+            self.log (str(data))
             device = { 'group': data['group'] }
             self.execute_callback(SYSTEM__LIGHTING, data['command'], device, None)
             return

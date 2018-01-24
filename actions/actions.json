@@ -71,9 +71,9 @@
             "id": 13,
             "openlist": [
                 { "id": "cmd_reset", "mandatory": true, "onNAK": 3 },
-                { "id": "cmd_scan_all", "mandatory": true, "repeat": true },
-                { "id": "res_id" , "repeat": true },
-                { "id": "cmd_scan_check", "repeat": true },
+                { "id": "cmd_scan_all", "mandatory": true},
+                { "id": "res_id" , "repeat": true, "vars_map": {"id": "vars.id" }, "end_with": "res_ack"},
+                { "id": "cmd_scan_check", "repeat": true, "loopon": "" },
                 { "id": "cmd_reset", "mandatory": true, "onNAK": 3 }
             ]
         },
@@ -265,6 +265,12 @@
             "str": "*#[who]*[where]*310*[slot]*[val_par]##",
             "has_params": true,
             "diag_open": true
+        },
+        "res_ack": {
+            "id": 79,
+            "description": "ack message from gateway",
+            "type": "RX",
+            "str": "*#*1##"
         },
         "cmd_param_all_ko": {
             "id": 83,

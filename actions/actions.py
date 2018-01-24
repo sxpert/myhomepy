@@ -1,6 +1,6 @@
-#!/usr/bin/python
-import myOpenLayer1
-from config import config
+# -*- coding: utf-8 -*-
+
+import os
 
 class ProtoObject (object):
     def __init__ (self, proto = None):
@@ -37,6 +37,7 @@ class ProtoObject (object):
         v = self._optional (varname, dataset)
         if v is None:
             return False
+        return v
 
 class Sentence (ProtoObject):
     RX = 0
@@ -86,7 +87,7 @@ class Sentence (ProtoObject):
                     out_sentence += char
         return out_sentence
 
-    def parse(self, actionengine, msg, data):
+    def parse(self, actionengine, msg, data=None, vars_map=None):
         actionengine.log("parsing sentence \'%s\'"%(msg))
         actionengine.log("expecting format \'%s\'"%(self.str))
         var_name = ''
@@ -106,7 +107,30 @@ class Sentence (ProtoObject):
                             if pchar == char:
                                 break
                             var_value += pchar
-                        actionengine.log("%s = %s"%(var_name, var_value))
+                        var_state = "ignored"
+                        # if defined, set the variable into the proper location
+                        if (data is not None) and (vars_map is not None):
+                            if type(vars_map) is dict:
+                                if var_name in vars_map.keys():
+                                    var_path = vars_map[var_name]
+                                    actionengine.log("%s => %s"%(var_path, str(type(var_path))))
+                                    if type(var_path) in [str, unicode]:
+                                        var_path = var_path.split(".")
+                                        search_path = var_path[:-1]
+                                        tmpvar = data
+                                        for path_bit in search_path:
+                                            if path_bit not in tmpvar.keys():
+                                                tmpvar[path_bit] = {}
+                                            tmpvar = tmpvar[path_bit]
+                                        path_bit = var_path[-1]
+                                        if path_bit in tmpvar.keys():
+                                            values = tmpvar[path_bit]
+                                            if type(values) is list:
+                                                values.append(var_value)
+                                            else:
+                                                tmpvar[path_bit] = [values, var_value]
+                                        else:
+                                            tmpvar[path_bit] = var_value
                         var_name = ''
                 elif char == ']':
                     var_name = var_name[1:]
@@ -125,7 +149,7 @@ class Sentence (ProtoObject):
                     msg = msg[1:]
         return True
 
-    def execute(self, actionengine, msg, data):
+    def execute(self, actionengine, msg, data, vars_map=None):
         if self.type == self.TX:
             sentence = self.replace_vars(actionengine, data)
             if sentence != False:
@@ -133,8 +157,12 @@ class Sentence (ProtoObject):
                 actionengine.ownsock.send(sentence)
                 return actionengine.OK
         elif self.type == self.RX:
-            state = self.parse(actionengine, msg, data)
+            state = self.parse(actionengine, msg, data, vars_map)
             actionengine.log("parse returned %d"%(state))
+            if state:
+                return actionengine.OK
+            else:
+                return actionengine.PARSE_ERROR
         else:
             actionengine.log('Type not handled %s'%(self.TYPES[self.type]))
         return actionengine.NOT_HANDLED
@@ -149,6 +177,7 @@ class SequenceItem (ProtoObject):
         self.sentence = self._proto.sentences[self.id]
         self.mandatory = self._boolean ("mandatory", data)
         self.repeat = self._boolean ("repeat", data)
+        self.vars_map = self._optional ("vars_map", data)
         self.onNAK = self._optional ("onNAK", data)
         self.onERR = self._optional ("onERR", data)
         return self
@@ -164,11 +193,13 @@ class SequenceItem (ProtoObject):
         return self.onNAK
 
     def execute(self, actionengine, msg, data):
-        state = self.sentence.execute(actionengine, msg, data)
+        actionengine.log("SequenceItem.execute (%s)"%(str(self.repeat)))
+        state = self.sentence.execute(actionengine, msg, data, self.vars_map)
         if state == actionengine.OK:
             if self.repeat:
                 actionengine.log('Repeat == True')
                 state = actionengine.SAME
+        
         return state
 
 class Sequence (ProtoObject):
@@ -333,6 +364,9 @@ class ProtoState(object):
         self.sentence = None
         self.expect_acknowledge = False
 
+    def __repr__(self):
+        return str(self.vars)
+
     def _find_current_sentence(self):
         if self.scenario is None:
             self.scenario = self.proto._get_scenario(self.scenario_name)
@@ -355,14 +389,21 @@ class ProtoState(object):
         state = self.sentence.execute(actionengine, msg, self.vars)
         actionengine.log("sentence returned : %s"%(actionengine.STATES[state]))
         if state == actionengine.PARSE_ERROR:
-            # something happened.
+            # error while parsing... advance and retry parsing
+            if self.advance(actionengine):
+                return self.execute_one(actionengine, msg)
             return False
         self.expect_acknowledge = self.sentence.expect_ack()
         if self.expect_acknowledge:
             # skip advancing if we're expecting ack
             return True
         if state == actionengine.OK:
-            return self.advance(actionengine)
+            actionengine.log("repeat : %s"%(str(self.sentence.repeat)))
+            if self.sentence.repeat:
+                actionengine.log("repeat on")
+            else:
+                actionengine.log("next sentence")
+                return self.advance(actionengine)
 
     def advance(self, actionengine):
         if (self.scenario is None) or (self.sequence is None) or (self.sentence is None):
@@ -392,7 +433,9 @@ class ActionEngine (object):
         self._logger = logger
         self._error = False
         # load the json
-        self.load_protocol_data ("actions.json")
+        protocol_data_file = os.path.join(os.path.dirname(__file__), "actions.json")
+        self.log(protocol_data_file)
+        self.load_protocol_data (protocol_data_file)
 
     def load_protocol_data (self, protocol_data_file):
         import json
@@ -423,50 +466,40 @@ class ActionEngine (object):
     def run (self, scenario_name, variables):
         self._state = ProtoState(self._proto, scenario_name, variables)
         
-    def ready_callback (self, ownsock):
+    def ready_callback (self, ownsock=None):
         if self._proto.error:
-            self.log ("ERROR on ActionEngine initialization - not doing anything")
+            self.log("ERROR: ActionEngine.ready_callback - not doing anything")
             return
-        self.log ("ActionEngine ready")
+        if ownsock is None:
+            self.log("ERROR: ActionEngine.ready_callback - no OwnSock object")
+            return
         self.ownsock = ownsock
         self._state.reset()
         # start the scenario
+        self.log ("ActionEngine ready")
         self.run_open_sentence()
-
-    def data_callback (self, msg):
+    
+    def data_callback (self, msg=None):
         if self._proto.error:
+            return
+        if msg is None:
+            self.log("ERROR: ActionEngine.data_callback - no data")
             return
         self.log ("ActionEngine data '"+unicode(msg)+"'")
         if self._error:
             return
         self.run_open_sentence(msg)
+        self.log("ActionEngine.data_callback end : %s"%(repr(self._state)))
 
     def run_open_sentence (self, msg = None):
         self._proto.log ("Run next sentence")
         # get sentence
         status = self._state.execute_one(self, msg)
 
-class ScanNetwork(object):
+class ScanNetwork(ActionEngine):
     def __init__(self, logger = None):
-        self.logger = logger
-        self.ae = ActionEngine(logger)
+        super(ScanNetwork, self).__init__(logger)
         variables = {}
         variables["who"] = "1001"
-        self.ae.run('ScanByAID', variables)
-
-    @property
-    def ready_callback(self):
-        return self.ae.ready_callback
-
-    @property
-    def scan_callback(self):
-        return self.ae.data_callback
-
-if __name__ == "__main__":
-    logger = myOpenLayer1.SYSTEM_LOGGER
-    sl = myOpenLayer1.MainLoop(logger)
-    config.set_main_loop(sl)
-    sn = ScanNetwork(logger)
-    cs = config.command_socket(config.nb_systems-1, sn.ready_callback, sn.scan_callback)
-    sl.add_task(cs)
-    sl.run ()
+        self.run('ScanByAID', variables)
+     

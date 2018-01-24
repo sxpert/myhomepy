@@ -1,12 +1,13 @@
-#!/usr/bin/python
+#!/usr/bin/python3.6
+# -*- coding: utf-8 -*-
+
 # myOpenApplication webserver
 
 import os, sys
 import re
 import urllib
-import myOpenLayer1
+from myopen import layer1
 import config
-import BaseHTTPServer
 
 STATIC_FILES = "static"
 

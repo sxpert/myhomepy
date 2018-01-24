@@ -3,12 +3,13 @@
 # Licenced under the terms of the GNU GPL v3.0 or later
 #
 
+import json
+
+from myopen import layer1
+
 CONFIG_FILE_NAME = 'config.json'
 
-import json
-import myOpenLayer1
-
-class Config (object):
+class Config(object):
     def __init__ (self, config_file=None):
         if config_file is None:
             self.config_file = CONFIG_FILE_NAME
@@ -17,7 +18,7 @@ class Config (object):
         self.load()
 
     def log(self, msg):
-        myOpenLayer1.SYSTEM_LOGGER.log ('[CONF] '+msg)
+        layer1.SYSTEM_LOGGER.log ('[CONF] '+msg)
 
     # sets the main loop
     # starts up all loaded systems
@@ -83,9 +84,9 @@ class Config (object):
         self._add_system(sys_id)
 
     def _add_system(self, sys_id):    
-        self.log("added system with system id="+unicode(sys_id))
-        import myOpenLayer2
-        sys = myOpenLayer2.OWNMonitor(self.main_loop, sys_id)
+        self.log("added system with system id="+str(sys_id))
+        from myopen import layer2
+        sys = layer2.OWNMonitor(self.main_loop, sys_id)
         self.monitors.append(sys)
 
     @property
@@ -93,14 +94,13 @@ class Config (object):
         return len(self.systems)
 
     def command_socket (self, sys_id, ready_callback, data_callback):
-        import myOpenLayer1
         system = self.systems[sys_id]
         gw = system['gateway']
-        sock = myOpenLayer1.OwnSocket(
+        sock =layer1.OwnSocket(
                 gw['ip'],
                 gw['port'],
                 gw['password'],
-                myOpenLayer1.OwnSocket.COMMAND)
+                layer1.OwnSocket.COMMAND)
         sock.set_ready_callback(ready_callback)
         sock.set_data_callback(data_callback)
         return sock

@@ -1,4 +1,5 @@
-#!/usr/bin/python2.7 -3
+#!/usr/bin/python3.6
+##!/usr/bin/python2.7 -3
 #-*- coding: utf-8 -*-
 
 #!/usr/bin/python3
@@ -13,7 +14,7 @@ Main application module
 #
 
 #import config
-import myOpenLayer1
+from myopen import layer1
 import config
 import webserver
 import website
@@ -25,7 +26,7 @@ class TestApplication(object):
 
     def __init__(self):
         # create the system loop
-        self.system_loop = myOpenLayer1.MainLoop(myOpenLayer1.SYSTEM_LOGGER)
+        self.system_loop = layer1.MainLoop(layer1.SYSTEM_LOGGER)
         config.config.set_main_loop(self.system_loop)
 
         # initializes the web server
@@ -34,8 +35,9 @@ class TestApplication(object):
 
         self.web.register_routes(
             [
-                ["^/API/$", website.ow_index.OW_index],
+                ["^/$", website.ow_index.OW_index],
                 ["^/API/add_system(.*)$", website.ow_add_system.OW_add_system],
+                ["^/API/temperatures(.*)$", website.ow_temperatures.OW_list_temperatures],
             ]
         )
         self.web.default_route(website.ow_static.OW_static)

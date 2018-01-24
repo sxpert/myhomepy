@@ -1,37 +1,39 @@
-#!/usr/bin/python
+#!/usr/bin/python3.6
+# -*- coding: utf-8 -*-
 # myOpenApplication webserver
 
+import cgi
+import mimetypes
 import os
-import sys
 import re
 import shutil
 import socket
-from threading import Thread
+import sys
 import urllib
-import myOpenLayer1
+import json
+import traceback
+from io import StringIO
+from threading import Thread
+
 import config
-import SocketServer
-import BaseHTTPServer
-import mimetypes
-import cgi
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
+import http.server
+import socketserver
+from myopen import layer1
+
 
 #--------------------------------------------------------------------------------------------------
 #
 #
 #
 
-class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
+class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
 
     @property
     def _srv(self):
-        return '['+unicode(self.server.server_name)+':'+unicode(self.server.server_port)+' WEB]'
+        return '['+str(self.server.server_name)+':'+str(self.server.server_port)+' WEB]'
 
     def __log(self, msg):
-        myOpenLayer1.SYSTEM_LOGGER.log(msg)
+        layer1.SYSTEM_LOGGER.log(msg)
 
     def _log(self, msg):
         self.__log(self._srv+' '+msg)
@@ -46,10 +48,10 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
                 # note: there is no path to display
                 req = self.address_string()+' [Unknown Command] '
             else:
-                req = self.address_string()+' '+self.command+' '+unicode(self.path)
-            res = unicode(code)
+                req = self.address_string()+' '+self.command+' '+str(self.path)
+            res = str(code)
             if size is not None:
-                res += ' '+unicode(size)
+                res += ' '+str(size)
             msg = req+' '+res
             self._log(msg)
         else:
@@ -73,7 +75,23 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
         self.send_response(200)
         self.send_header('Content-type', 'text/html; charset=utf-8')
         self.end_headers()
-        self.wfile.write(html)
+        self.wfile.write(html.encode('utf-8'))
+
+    def json_response(self, json_data):
+        try:
+            json_string = json.dumps(json_data)
+        except Exception as error:
+            print("Error while dumping data to json format")
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            for traceback_line in traceback.format_tb(exc_traceback):
+                print(traceback_line)
+            print(str(exc_type.__name__)+" : "+str(exc_value))
+            self.send_error(500)
+        else:
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json; charset=utf-8')
+            self.end_headers()
+            self.wfile.write(json_string.encode('utf-8'))
 
     def file_response(self, basedir, path):
         """
@@ -112,7 +130,7 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
         self.send_response(200)
         self.send_header("Content-type", ctype)
         fs = os.fstat(f.fileno())
-        self.send_header("Content-length", unicode(fs[6]))
+        self.send_header("Content-length", str(fs[6]))
         self.send_header("Last-modified", self.date_time_string(fs.st_mtime))
         self.end_headers()
         shutil.copyfileobj(f, self.wfile)
@@ -131,7 +149,7 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
             return None
         l.sort(key=lambda a: a.lower())
         f = StringIO()
-        displaypath = cgi.escape(urllib.unquote(self.path))
+        displaypath = cgi.escape(urllib.parse.unquote(self.path))
         f.write('<!DOCTYPE html>')
         f.write("<html>\n<title>Directory listing for %s</title>\n"%displaypath)
         f.write("<body>\n<h2>Directory listing for %s</h2>\n"%displaypath)
@@ -144,16 +162,16 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
                 linkname = name + '/'
             if os.path.islink(fullname):
                 displayname = name + '@'
-            f.write('<li><a href="%s">%s</a>\n'%(urllib.quote(linkname), cgi.escape(displayname)))
+            f.write('<li><a href="%s">%s</a>\n'%(urllib.parse.quote(linkname), cgi.escape(displayname)))
         f.write("</ul>\n<hr>\n</body>\n</html>\n")
         length = f.tell()
         f.seek(0)
         self.send_response(200)
         encoding = sys.getfilesystemencoding()
         self.send_header("Content-type", "text/html; charset=%s"%encoding)
-        self.send_header("Content-length", unicode(length))
+        self.send_header("Content-length", str(length))
         self.end_headers()
-        shutil.copyfileobj(f, self.wfile)
+        self.wfile.write(f.getvalue().encode('utf-8'))
         f.close()
 
     def guess_type(self, path):
@@ -189,7 +207,7 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
                 if m is not None:
                     g = m.groups()
                     if len(g) > 0:
-                        self.__log(unicode(m.groups()))
+                        self.__log("find_route : [match groups] "+str(m.groups()))
                     o = c()
                     return o
             if self.server.default is not None:
@@ -208,8 +226,17 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
             self.send_error(501, "Unsupported method (%r)" % self.command)
             return
         method = getattr(o, mname)
-        method(self)
-    
+        try:
+            method(self)
+        except Exception as error:
+            print("ERROR WHILE do_request : ")
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            for traceback_line in traceback.format_tb(exc_traceback):
+                print(traceback_line)
+            print(str(exc_type.__name__)+" : "+str(exc_value))
+            print("sending 500 error")
+            self.send_error(500)
+
     def do_GET(self):
         self.do_request()
 
@@ -246,8 +273,8 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
         for b in blocks:
             pos = b.find('=')
             if pos != -1:
-                k = urllib.unquote(b[0:pos])
-                v = urllib.unquote_plus(b[pos+1:])
+                k = urllib.parse.unquote(b[0:pos])
+                v = urllib.parse.unquote_plus(b[pos+1:])
                 if len(k)>2 and k[-2:]=='[]':
                     k = k[:-2]
                     try:
@@ -270,7 +297,8 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
         # limit check on length
         d = self.rfile.read(int(l))
         # parse variable stream
-        self.parse_variables_string(d)
+        # note: d is bytes
+        self.parse_variables_string(d.decode('utf-8'))
         return True
 
     def parse_variables(self):
@@ -323,7 +351,7 @@ class OpenWebHandler(BaseHTTPServer.BaseHTTPRequestHandler, object):
 # web server object
 #
 
-class OWNHTTPServer(SocketServer.TCPServer):
+class OWNHTTPServer(socketserver.TCPServer):
     allow_reuse_address = 1    # Seems to make sense in testing environment
 
     def process_request(self, request, client_address):
@@ -336,7 +364,7 @@ class OWNHTTPServer(SocketServer.TCPServer):
 
     def server_bind(self):
         """Override server_bind to store the server name."""
-        SocketServer.TCPServer.server_bind(self)
+        socketserver.TCPServer.server_bind(self)
         host, port = self.socket.getsockname()[:2]
         self.server_name = socket.getfqdn(host)
         self.server_port = port
@@ -372,13 +400,13 @@ class OpenWeb(Thread):
 
     def log(self, message):
         try:
-            server_name = unicode(self.httpd.server_name)
-            server_port = unicode(self.httpd.server_port)
+            server_name = str(self.httpd.server_name)
+            server_port = str(self.httpd.server_port)
             server = "%s:%s "% (server_name, server_port)
         except AttributeError:
             server = ""
-        message = unicode(message)
-        myOpenLayer1.SYSTEM_LOGGER.log('[%sWEB] %s'% (server, message))
+        message = str(message)
+        layer1.SYSTEM_LOGGER.log('[%sWEB] %s'% (server, message))
 
     def register_routes(self, routes):
         self.routes = routes
@@ -413,8 +441,7 @@ class OpenWeb(Thread):
 if __name__ == '__main__':
     addr = ('', 8000)
     srv = OpenWeb(addr)
-    import myOpenLayer1
-    system_loop = myOpenLayer1.MainLoop(myOpenLayer1.SYSTEM_LOGGER)
-    print srv.sock.fileno()
+    system_loop = layer1.MainLoop(layer1.SYSTEM_LOGGER)
+    print(srv.sock.fileno())
     system_loop.add_socket(srv)
     system_loop.run()
