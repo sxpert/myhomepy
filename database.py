@@ -21,7 +21,7 @@ class Database (object):
             self.log ("[database/init] WARNING: Can't find the version table.")
             version = 0
         else:
-            # read version 
+            # read version
             c.execute ("select version from version;")
             version_row = c.fetchone()
             self.log ("[database/init] info: version_row : "+str(version_row))
@@ -41,7 +41,6 @@ class Database (object):
                 table = t[0]
                 self.log ("[database/init] info: > "+table)
                 c.execute (("drop table %s;"%table))
-                
             # create version table
             self.log ("[database/init] info: create the version table")
             c.execute ("create table if not exists version (version integer);")
@@ -75,9 +74,8 @@ class Database (object):
             return None
         self.log ("[database/execute] SQL >> "+request+" "+str(params))
         return True
-            
 
-    def execute (self, request, params):
+    def execute(self, request, params):
         c = self.conn.cursor()
         # execute contents of the queue
         try:
@@ -112,10 +110,25 @@ class Database (object):
             self.conn.rollback()
         else:
             self.conn.commit()
-        return ok
+        # return the cursor
+        return c
+
+    #--------------------------------------------------------------------------
+    # temperatures
 
     # time is unix timestamp
     # sensor is sensor id
     # temp is in celcius
-    def log_temperature (self, time, sensor, temp):
-        self.execute ("insert into temperatures (time, sensor, temp) values (?,?,?);", (time, sensor, temp,))
+    def log_temperature(self, time, sensor, temp):
+        self.execute("insert into temperatures (time, sensor, temp) values (?,?,?);", (time, sensor, temp,))
+
+    # lists all temperature sensors that logged something so far
+    def list_temperature_sensors(self):
+        c = self.execute("select distinct sensor from temperatures;")
+        sensors = []
+        for r in c:
+            sensors.append(r[0])
+        return sensors
+
+    def read_temperatures(self, start, end, sensor):
+        pass
