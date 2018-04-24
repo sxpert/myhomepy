@@ -89,7 +89,7 @@ class Database(object):
     def log_temperature(self, time, sensor, temp):
         conn = sqlite3.connect(self.dbname)
         c = conn.cursor()
-        res = self.execute(c, 
+        res = self.execute(c,
                            "insert into temperatures (time, sensor, temp) "
                            "values (?,?,?);", (time, sensor, temp,))
         conn.close()

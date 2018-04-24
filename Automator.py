@@ -1,8 +1,5 @@
 #!/usr/bin/python3.6
-##!/usr/bin/python2.7 -3
-#-*- coding: utf-8 -*-
-
-#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 """
 Main application module
@@ -13,11 +10,12 @@ Main application module
 # Licenced under the terms of the GNU GPL v3.0 or later
 #
 
-#import config
+# import config
 from myopen import layer1
 import config
 import webserver
 import website
+
 
 class TestApplication(object):
     """
@@ -37,7 +35,8 @@ class TestApplication(object):
             [
                 ["^/$", website.ow_index.OW_index],
                 ["^/API/add_system(.*)$", website.ow_add_system.OW_add_system],
-                ["^/API/temperatures(.*)$", website.ow_temperatures.OW_list_temperatures],
+                ["^/API/temperatures(.*)$",
+                 website.ow_temperatures.OW_list_temperatures],
             ]
         )
         self.web.default_route(website.ow_static.OW_static)

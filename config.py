@@ -9,8 +9,9 @@ from myopen import layer1
 
 CONFIG_FILE_NAME = 'config.json'
 
+
 class Config(object):
-    def __init__ (self, config_file=None):
+    def __init__(self, config_file=None):
         if config_file is None:
             self.config_file = CONFIG_FILE_NAME
         self.systems = []
@@ -18,7 +19,7 @@ class Config(object):
         self.load()
 
     def log(self, msg):
-        layer1.SYSTEM_LOGGER.log ('[CONF] '+msg)
+        layer1.SYSTEM_LOGGER.log('[CONF] '+msg)
 
     # sets the main loop
     # starts up all loaded systems
@@ -28,18 +29,18 @@ class Config(object):
             self._add_system(sys_id)
 
     def load(self):
-        try: 
+        try:
             f = open(self.config_file, 'r')
         except IOError as e:
             if e.errno == 2:
-                self.log ('unable to find a configuration file to load')
+                self.log('unable to find a configuration file to load')
         else:
-            self.log ('configuration file opened successfully')
+            self.log('configuration file opened successfully')
             # read the configuration file
             d = f.read()
             f.close()
             self.systems = json.loads(d)
-        
+
     def save(self):
         f = open(self.config_file, 'w')
         f.write(json.dumps(self.systems))
@@ -52,8 +53,8 @@ class Config(object):
         # key must be an integer, between 0 and len-1
         return self.systems[key]
 
-    def add_system (self, ip, port, password):
-        #search if we already have this system
+    def add_system(self, ip, port, password):
+        # search if we already have this system
         for s in self.systems:
             try:
                 gw = s['gateway']
@@ -67,8 +68,9 @@ class Config(object):
             except KeyError as e:
                 self.log("gateway entry missing one of (ip, port, password)")
                 continue
-            if gw_ip==ip and gw_port==port and gw_password==password:
-                self.log("a system with identical values has already been configured")
+            if gw_ip == ip and gw_port == port and gw_password == password:
+                self.log("a system with identical values has already been "
+                         "configured")
                 return False
         # couldn't find system
         system = {}
@@ -80,23 +82,22 @@ class Config(object):
         sys_id = len(self.systems)
         self.systems.append(system)
         self.save()
-       
         self._add_system(sys_id)
 
-    def _add_system(self, sys_id):    
+    def _add_system(self, sys_id):
         self.log("added system with system id="+str(sys_id))
         from myopen import layer2
         sys = layer2.OWNMonitor(self.main_loop, sys_id)
         self.monitors.append(sys)
 
     @property
-    def nb_systems (self):
+    def nb_systems(self):
         return len(self.systems)
 
-    def command_socket (self, sys_id, ready_callback, data_callback):
+    def command_socket(self, sys_id, ready_callback, data_callback):
         system = self.systems[sys_id]
         gw = system['gateway']
-        sock =layer1.OwnSocket(
+        sock = layer1.OwnSocket(
                 gw['ip'],
                 gw['port'],
                 gw['password'],
