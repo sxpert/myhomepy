@@ -12,7 +12,6 @@ class OW_list_temperatures (object):
     def do_GET(self, request):
         if config.nb_systems == 1:
             sensors = config.monitors[0].database.list_temperature_sensors()
-
         else:
             sensors = None
         data = {
