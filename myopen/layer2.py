@@ -336,4 +336,26 @@ class OWNMonitor(object):
 
     def send_command(self, command):
         print("sending command", command)
+        socket = CommandDialog(self.monitor_socket)
+        self.sl.add_task(socket)
+        socket.start()
         return True
+
+
+class CommandDialog(layer1.OwnSocket):
+    def __init__(self, clone):
+        super().__init__(clone.address,
+                         clone.port,
+                         clone.passwd,
+                         self.COMMAND,
+                         clone.timeout,
+                         # auto_reconnect is false
+                         False)
+        self.ready_callback = self.dialog_ready
+        self.data_callback = self.dialog_data
+
+    def dialog_ready(self):
+        print("DIALOG: ready")
+
+    def dialog_data(self, msg):
+        print("DIALOG: msg")

@@ -138,11 +138,13 @@ class OwnSocket(Thread):
     NACK = '*#*0##'
     ACK = '*#*1##'
 
-    def __init__(self, address, port, passwd, mode, timeout=0.2):
+    def __init__(self, address, port, passwd, mode,
+                 timeout=0.2, auto_reconnect=True):
         self.address = address
         self.port = port
         self.passwd = passwd
         self.mode = mode
+        self.auto_reconnect = auto_reconnect
         self.buf = ''
         self.sock = None
         self.sockfd = None
@@ -154,6 +156,14 @@ class OwnSocket(Thread):
         self.cnxfailcnt = 0
         self.poller = select.epoll()
         Thread.__init__(self)
+
+    def create_clone(self, mode):
+        new_socket = OwnSocket(self.address,
+                               self.port,
+                               self.passwd,
+                               mode,
+                               self.timeout)
+        return new_socket
 
     def stop(self):
         self.stopping = True
@@ -226,7 +236,11 @@ class OwnSocket(Thread):
                             if len(data) == 0:
                                 self.log('socket disconnected')
                                 self.poller.unregister(self.sockfd)
-                                self.reconnect()
+                                if self.auto_reconnect:
+                                    self.reconnect()
+                                else:
+                                    self.log('disconnecting socket')
+                                    self.stopping = True
                         # no event, check timers
                         # handle timers
                         # while len(self.timers) > 0:
@@ -327,7 +341,7 @@ class OwnSocket(Thread):
                     self.log('successfully connected')
                     self.state = self.LOGGED
                     if self.ready_callback is not None:
-                        self.ready_callback(self)
+                        self.ready_callback()
                 else:
                     self.log('unable to log in')
                     self.state = self.FAILED
