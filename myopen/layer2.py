@@ -320,3 +320,6 @@ class OWNMonitor (object) :
     def status_gateway (self, msg):
         self.log ('gateway status '+msg) 
         
+    def send_command(self, command):
+        print("sending command", command)
+        return True

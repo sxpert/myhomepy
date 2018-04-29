@@ -35,6 +35,7 @@ class TestApplication(object):
             [
                 ["^/$", website.ow_index.OW_index],
                 ["^/API/add_system(.*)$", website.ow_add_system.OW_add_system],
+                ["^/API/GeneralOff$", website.ow_general_off.OW_general_off],
                 ["^/API/temperatures(.*)$",
                  website.ow_temperatures.OW_list_temperatures],
             ]

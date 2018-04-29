@@ -47,14 +47,14 @@ class OW_add_system(object):
         if 'openwebnet_port' in errors:
             r += '<div class="error">'+errors['openwebnet_port']+'</div>\n'
         r += '<div class="field"><label for="openwebnet_port">Port OpenWebNet'\
-             '</label><input type="text" name="openwebnet_port" value="' +
-        openwebnet_port + '"></input></div>\n'
+             '</label><input type="text" name="openwebnet_port" value="' + \
+             openwebnet_port + '"></input></div>\n'
 
         if 'password_open' in errors:
             r += '<div class="error">'+errors['password_open']+'</div>\n'
-        r += '<div class="field"><label for="password_open">Password OPEN'
-        '</label><input type="text" name="password_open" value="' +
-        password_open + '"></input></div>\n'
+        r += '<div class="field"><label for="password_open">Password OPEN'\
+            '</label><input type="text" name="password_open" value="' + \
+            password_open + '"></input></div>\n'
 
         r += '<button name="action" value="add_system">add gateway</button>\n'\
             '</form>\n'\
