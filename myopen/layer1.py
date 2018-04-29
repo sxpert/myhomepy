@@ -1,7 +1,7 @@
 #!/usr/bin/python3
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
-##!/usr/bin/python2.7 -3
+# #!/usr/bin/python2.7 -3
 
 #
 # (c) Raphael Jacquot 2014
@@ -26,7 +26,8 @@ from . import openpass
 DEBUG = True
 LOGFILE = 'myopenlog-2.log'
 
-#--------------------------------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------------------------------
 #
 # System Logger
 #
@@ -38,7 +39,7 @@ class Logger(object):
     def log(self, msg):
         # generate datetime string
         current_date = datetime.datetime.today()
-        date_string = "%04d-%02d-%02d %02d:%02d:%02d"%(
+        date_string = "%04d-%02d-%02d %02d:%02d:%02d" % (
             current_date.year,
             current_date.month,
             current_date.day,
@@ -57,7 +58,8 @@ class Logger(object):
 
 SYSTEM_LOGGER = Logger(LOGFILE)
 
-#--------------------------------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------------------------------
 #
 # System main loop, handles events
 #
@@ -77,7 +79,6 @@ class MainLoop(object):
     def add_task(self, task):
         print("adding task "+str(task))
         self.tasks.append(task)
-
 
     def wait_all(self):
         """
@@ -115,7 +116,8 @@ class MainLoop(object):
             self.wait_all()
             sys.exit(0)
 
-#--------------------------------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------------------------------
 #
 # Layer 1 : tcp socket handling
 #
@@ -136,7 +138,7 @@ class OwnSocket(Thread):
     NACK = '*#*0##'
     ACK = '*#*1##'
 
-    def __init__(self, address, port, passwd, mode, timeout = 0.2):
+    def __init__(self, address, port, passwd, mode, timeout=0.2):
         self.address = address
         self.port = port
         self.passwd = passwd
@@ -176,7 +178,8 @@ class OwnSocket(Thread):
                     try:
                         time.sleep(timeout)
                     except KeyboardInterrupt:
-                        self.log('KeyboardInterrupt while waiting for network event')
+                        self.log('KeyboardInterrupt while waiting for '
+                                 'network event')
                         self.stopping = True
             else:
                 try:
@@ -185,11 +188,11 @@ class OwnSocket(Thread):
                         for event in events:
                             filedesc, flags = event
                             if self.sockfd != filedesc:
-                                self.log('problem, socket\'s fd (%d) is'\
-                                         ' different from given fd (%d)'%(
+                                self.log('problem, socket\'s fd (%d) is'
+                                         ' different from given fd (%d)' % (
                                              self.sockfd, filedesc,))
                             else:
-                                #self.log("flags: "+bin(flags)[2:])
+                                # self.log("flags: "+bin(flags)[2:])
                                 if flags & (select.EPOLLIN | select.EPOLLPRI):
                                     try:
                                         self.recv()
@@ -198,12 +201,14 @@ class OwnSocket(Thread):
                                         if e.errno == errno.ETIMEDOUT:
                                             self.close()
                                 elif flags & select.EPOLLHUP:
-                                    self.log('socket '+str(self)+' is hanged-up')
+                                    self.log('socket '+str(self) +
+                                             ' is hanged-up')
                                     # remove from poller and reconnect
                                     self.poller.unregister(self.sockfd)
                                     self.reconnect()
                                 elif flags & select.EPOLLERR:
-                                    self.log('socket '+str(self)+' is in error state')
+                                    self.log('socket '+str(self) +
+                                             ' is in error state')
                                     # remove from poller and reconnect
                                     self.poller.unregister(self.sockfd)
                                     self.reconnect()
@@ -248,7 +253,8 @@ class OwnSocket(Thread):
         col_out = '\033[0m'
         if self.mode == self.COMMAND:
             col_in = '\033[94m'
-        _msg = '['+self.address+':'+str(self.port)+' '+self.MODES[self.mode]+'] '+col_in+msg+col_out
+        _msg = '[' + self.address + ':' + str(self.port) + ' ' + \
+            self.MODES[self.mode] + '] ' + col_in + msg + col_out
         SYSTEM_LOGGER.log(_msg)
 
     def connect(self):
@@ -260,7 +266,8 @@ class OwnSocket(Thread):
         self.sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPINTVL, 1)
         self.sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPCNT, 2)
         # set socket as non-blocking (to avoid the idiotic timeout on connect)
-        self.log("Initializing connection to "+str(self.address)+" port "+str(self.port))
+        self.log("Initializing connection to " + str(self.address) +
+                 " port " + str(self.port))
         try:
             self.sock.settimeout(1)
             self.sock.connect((self.address, self.port))
@@ -276,7 +283,7 @@ class OwnSocket(Thread):
         self.cnxfailcnt = 0
         self.sockfd = self.sock.fileno()
         self.sock.setblocking(0)
-        
+
     def close(self):
         if self.sock is not None:
             self.log('OwnSocket : Closing socket')
@@ -347,7 +354,8 @@ class OwnSocket(Thread):
 
     def send_response(self, nonce):
         self.log('got nonce '+nonce)
-        password_message = '*#'+str(openpass.ownCalcPass(self.passwd, nonce))+'##'
+        password_message = '*#%s##' % (
+            str(openpass.ownCalcPass(self.passwd, nonce)))
         self.log('logging in with password packet '+password_message)
         self.state = self.AUTH
         self.send(password_message)
@@ -364,7 +372,7 @@ class OwnSocket(Thread):
         """
         self.data_callback = callback
 
-#--------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
 #
 # test program
 #
@@ -373,6 +381,9 @@ if __name__ == '__main__':
     import config
     SYSTEM_LOOP = MainLoop(SYSTEM_LOGGER)
     # test program
-    OWN_SOCK = OwnSocket(config.host, config.port, config.password, OwnSocket.MONITOR)
+    OWN_SOCK = OwnSocket(config.host,
+                         config.port,
+                         config.password,
+                         OwnSocket.MONITOR)
     SYSTEM_LOOP.add_socket(OWN_SOCK)
     SYSTEM_LOOP.run()
