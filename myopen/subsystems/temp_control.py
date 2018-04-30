@@ -38,7 +38,7 @@ class TempControl(OWNParser):
 
     def map_device(self, device):
         if (type(device) is dict) and \
-        ('zone' in device.keys()) and \
-        ('sensor' in device.keys()):
+           ('zone' in device.keys()) and \
+           ('sensor' in device.keys()):
             return '['+str(device['zone'])+'-'+str(device['sensor'])+']'
         return None

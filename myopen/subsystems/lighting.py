@@ -24,8 +24,9 @@ class Lighting(OWNParser):
             data = m.groupdict()
             self.log(str(data))
             device = {'light': data['light']}
+
             self.execute_callback(self.SYSTEM_WHO,
-                                  data['command'],
+                                  int(data['command']),
                                   device, None)
             return
         m = re.match('^\*(?P<command>[01])\*#(?P<group>\d{1,3})##$', msg)
@@ -34,7 +35,7 @@ class Lighting(OWNParser):
             self.log(str(data))
             device = {'group': data['group']}
             self.execute_callback(self.SYSTEM_WHO,
-                                  data['command'],
+                                  int(data['command']),
                                   device, None)
             return
         self.log('lighting command '+msg)
