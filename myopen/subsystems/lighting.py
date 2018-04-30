@@ -16,6 +16,8 @@ class Lighting(OWNParser):
         'ON': OP_LIGHTING_ON
     }
 
+    TARGET_GENERAL = {'light': '0'}
+
     def parse_command(self, msg):
         # light command
         # '*0*#1##'
@@ -43,4 +45,14 @@ class Lighting(OWNParser):
     def map_device(self, device):
         if (type(device) is dict) and ('group' in device.keys()):
             return 'G-'+str(device['group'])
+        return None
+
+    # command generators
+
+    def gen_command(self, operation, target):
+        self.log("%s %s" % (str(operation), str(target)))
+        if operation in [self.OP_LIGHTING_OFF, self.OP_LIGHTING_ON]:
+            if 'light' in target.keys():
+                destination = target['light']
+                return '*1*%s*%s##' % (str(operation), destination)
         return None
