@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
+from .parser import OWNParser
 
 
-class TempControl(object):
+class TempControl(OWNParser):
     SYSTEM_WHO = 4
-
-    def __init__(self, monitor=None):
-        self.monitor = monitor
-
-    def parse(self, mode, msg):
-        pass

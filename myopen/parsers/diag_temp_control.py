@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
+from .parser import OWNParser
 
 
-class DiagTempControl(object):
+class DiagTempControl(OWNParser):
     SYSTEM_WHO = 1004
-
-    def __init__(self, monitor=None):
-        self.monitor = monitor
-
-    def parse(self, mode, msg):
-        pass
