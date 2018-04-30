@@ -6,7 +6,7 @@ from .diag_temp_control import DiagTempControl
 from .diag_gateway import DiagGateway
 
 
-Systems = [Lighting,
+SubSystems = [Lighting,
            TempControl,
            Gateway,
            DiagLighting,

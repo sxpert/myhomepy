@@ -14,37 +14,10 @@ import sys
 import config
 
 from . import layer1
-from .parsers import Systems
+from .subsystems import SubSystems
 
 
 PLUGINS_DIRS = "plugins/"
-
-SYSTEM__LIGHTING = 1
-SYSTEM__TEMP_CONTROL = 4
-SYSTEM__GATEWAY = 13
-SYSTEM__DIAG__LIGHTING = 1001
-SYSTEM__DIAG__TEMP_CONTROL = 1004
-
-LIGHTING__OFF = 0
-LIGHTING__ON = 1
-
-TEMP_CONTROL__REPORT_TEMP = 0
-
-SYSTEM_NAMES = {
-    "LIGHTING": {
-        "id": SYSTEM__LIGHTING,
-        "orders": {
-            "OFF": LIGHTING__OFF,
-            "ON":  LIGHTING__ON
-        }
-    },
-    "TEMP_CONTROL": {
-        "id": SYSTEM__TEMP_CONTROL,
-        "orders": {
-            "REPORT_TEMP": TEMP_CONTROL__REPORT_TEMP
-        }
-    }
-}
 
 
 def map_device_lighting(device):
@@ -53,37 +26,16 @@ def map_device_lighting(device):
     return None
 
 
-def map_device_temp_control(device):
-    if (type(device) is dict) and \
-       ('zone' in device.keys()) and \
-       ('sensor' in device.keys()):
-        return '['+str(device['zone'])+'-'+str(device['sensor'])+']'
-    return None
-
-DEVICE_MAPPINGS = {
-    SYSTEM__LIGHTING:       map_device_lighting,
-    SYSTEM__TEMP_CONTROL:   map_device_temp_control
-}
-
-
 class OWNMonitor(object):
     COMMAND = 0
     STATUS = 1
     MSG_TYPES = ['Command', 'Status', ]
 
     def __init__(self, system_loop, system_id):
-        print("Known systems :")
-        for s in Systems:
-            system = s()
-            print("%s (%d)" % (system.__class__.__name__, system.SYSTEM_WHO))
 
         self.system_id = system_id
         self.plugins = None
         self.sl = system_loop
-        # prepare the app startup
-        self.routes = [{'1': self.cmd_lighting},
-                       {'4': self.status_tempcontrol,
-                        '13': self.status_gateway}, ]
         # initializes callbacks
         self.callbacks = None
         system = config.config[system_id]
@@ -95,6 +47,14 @@ class OWNMonitor(object):
                 layer1.OwnSocket.MONITOR)
         # set the callback to get messages from the layer 1
         self.monitor_socket.set_data_callback(self.data_callback)
+        # system information
+        self.log("Known systems :")
+        for s in SubSystems:
+            subsystem = s()
+            self.log("    %s (%d)" % ( \
+                     subsystem.__class__.__name__, 
+                     subsystem.SYSTEM_WHO))
+        # end of system info
         self.update_callbacks(system)
         # add the monitor socket to the system loop
         self.sl.add_task(self.monitor_socket)
@@ -147,28 +107,16 @@ class OWNMonitor(object):
             if m is not None:
                 msgtype = self.STATUS
         if msgtype is not None:
-            r = self.routes[msgtype]
             who, msg = m.groups()
-            # first, use the plugins approach
             i_who = int(who)
             ok = False
-            for s in Systems:
+            for s in SubSystems:
                 if i_who == s.SYSTEM_WHO:
-                    system = s(self)
-                    print("found system %d => %s" % (
-                          system.SYSTEM_WHO, system.__class__.__name__))
-                    ok = system.parse(msgtype, msg)
+                    subsystem = s(self)
+                    ok = subsystem.parse(msgtype, msg)
                     if ok is not None and ok:
                         return
-                    print("plugin was not able to parse message, "
-                          "going to old system")
                     break
-            # if it failed, the thing is not implemented yet
-            if who in r:
-                func = r[who]
-                if func is not None:
-                    func(msg)
-                    return
             msg = 'found ' + self.MSG_TYPES[msgtype] + ' message \'' + who + \
                   '\' remains \'' + msg + '\''
         else:
@@ -187,20 +135,30 @@ class OWNMonitor(object):
 
     def register_callback(self, system, order, device, callback, params):
         k = self.callback_key(system, order, device)
+        self.log("callback key %s => %s %s" % (k, callback, params))
         self.update_callback(k, (callback, params,))
 
     def execute_callback(self, system, order, device, data=None):
         if self.callbacks is None:
+            self.log("no callbacks found")
             return
         k = self.callback_key(system, order, device)
         if k in self.callbacks.keys():
             func, params = self.callbacks[k]
+            # self.log("found callback %s %s" % (str(func), str(params)))
             func(self, params, device, data)
+        else:
+            self.log("ERROR: key %s not in callbacks" % (k))
 
     def callback_key(self, system, order, device):
         k = str(system)+"-"+str(order)
-        dk = DEVICE_MAPPINGS[system](device)
+        dk = None
+        for s in SubSystems:
+            if s.SYSTEM_WHO == system:
+                dk = s().map_device(device)
+                break
         if dk is None:
+            self.log("unable to map device %s" % (str(device)))
             return None
         key = k+"-"+dk
         return key
@@ -216,12 +174,19 @@ class OWNMonitor(object):
             self.log("WARNING: condition has no system")
             return None
         system = conditions["system"]
-        if system not in SYSTEM_NAMES.keys():
+        # search for system in all parser SYSTEM_NAME variables
+        sys = None
+        for s in SubSystems:
+            if hasattr(s,'SYSTEM_NAME') and s.SYSTEM_NAME == system:
+                sys = s()
+        if not sys:
             self.log("WARNING: unknown system \'"+system+"\'")
             return None
-        sys = SYSTEM_NAMES[system]
-        system = sys["id"]
-        orders = sys["orders"]
+        #system = sys["id"]
+        system = sys.SYSTEM_WHO
+        orders = sys.SYSTEM_CALLBACKS
+        self.log('subsystem %s (%d) => %s' % (sys.__class__.__name__,
+            system, str(orders)))
 
         # order
         if "order" not in conditions:
@@ -288,17 +253,14 @@ class OWNMonitor(object):
             system["callbacks"] = []
         callbacks = system["callbacks"]
         for cb in callbacks:
-            print (str(cb))
             # generate the key
             ck = self.map_key(cb["conditions"])
-            print (str(ck))
             action = self.map_action(cb)
             if (ck is not None) and (action is not None):
-                print ("action", action)
                 self.update_callback(ck, action)
             else:
                 self.log("WARNING: problem while parsing callback definition")
-        print ("Callbacks updated")
+        self.log("Callbacks updated")
 
     # ------------------------------------------------------------------------------------------------------------------
     #
@@ -329,28 +291,6 @@ class OWNMonitor(object):
                                   device, None)
             return
         self.log('lighting command '+msg)
-
-    # Temperature control systems
-
-    def status_tempcontrol(self, msg):
-        # temperature report
-        # '101*0*0270##'
-        m = re.match('^\*(?P<probe>\d{3})\*0\*(?P<temperature>\d{4})##$', msg)
-        if m is not None:
-            data = m.groupdict()
-            js_data = json.dumps(data)
-            self.log(js_data)
-            # generate the device key
-            zone = int(data['probe'][0])
-            sensor = int(data['probe'][1:])
-            device = {'zone': zone, 'sensor': sensor}
-            temp = float(data['temperature'])/10.0
-            data = {'temp': temp, 'unit': '°C'}
-            self.execute_callback(SYSTEM__TEMP_CONTROL,
-                                  TEMP_CONTROL__REPORT_TEMP,
-                                  device, data)
-            return
-        self.log('temp control status ' + msg)
 
     # gateway
 
