@@ -76,8 +76,13 @@ class MainLoop(object):
         self.logger = logger
         self.timeout = timeout
 
+    def log(self, msg):
+        col_in = '\033[91m'
+        col_out = '\033[0m'
+        self.logger.log('[LOOP] ' + col_in + msg + col_out)
+
     def add_task(self, task):
-        print("adding task "+str(task))
+        self.log("adding task "+str(task))
         self.tasks.append(task)
 
     def wait_all(self):
@@ -92,7 +97,7 @@ class MainLoop(object):
                 task.join()
             except KeyboardInterrupt:
                 pass
-        self.logger.log(str("all remaining servers stopped"))
+        self.log(str("all remaining servers stopped"))
 
     def run(self):
         """
@@ -108,11 +113,11 @@ class MainLoop(object):
                 # hah, task already started, ignore
                 pass
         try:
-            print("running thread")
+            self.log("running main loop")
             while not self.stopped:
                 time.sleep(1)
         except KeyboardInterrupt:
-            self.logger.log("^C forcing program exit")
+            self.log("^C forcing program exit")
             self.wait_all()
             sys.exit(0)
 
@@ -400,10 +405,10 @@ class CommandDialog(OwnSocket):
         self.data_callback = self.dialog_data
 
     def dialog_ready(self):
-        print("DIALOG: ready")
+        self.log("DIALOG: ready")
 
     def dialog_data(self, msg):
-        print("DIALOG: msg")
+        self.log("DIALOG: msg")
 
 # --------------------------------------------------------------------------------------------------
 #
