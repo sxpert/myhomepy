@@ -20,12 +20,6 @@ from .subsystems import SubSystems
 PLUGINS_DIRS = "plugins/"
 
 
-def map_device_lighting(device):
-    if (type(device) is dict) and ('group' in device.keys()):
-        return 'G-'+str(device['group'])
-    return None
-
-
 class OWNMonitor(object):
     COMMAND = 0
     STATUS = 1
@@ -261,41 +255,6 @@ class OWNMonitor(object):
             else:
                 self.log("WARNING: problem while parsing callback definition")
         self.log("Callbacks updated")
-
-    # ------------------------------------------------------------------------------------------------------------------
-    #
-    # message parsers by system, calls appropriate registered callbacks
-    #
-
-    # Lighting systems
-
-    def cmd_lighting(self, msg):
-        # light command
-        # '*0*#1##'
-        m = re.match('^\*(?P<command>[01])\*(?P<light>\d{2,4})##$', msg)
-        if m is not None:
-            data = m.groupdict()
-            self.log(str(data))
-            device = {'light': data['light']}
-            self.execute_callback(SYSTEM__LIGHTING,
-                                  data['command'],
-                                  device, None)
-            return
-        m = re.match('^\*(?P<command>[01])\*#(?P<group>\d{1,3})##$', msg)
-        if m is not None:
-            data = m.groupdict()
-            self.log(str(data))
-            device = {'group': data['group']}
-            self.execute_callback(SYSTEM__LIGHTING,
-                                  data['command'],
-                                  device, None)
-            return
-        self.log('lighting command '+msg)
-
-    # gateway
-
-    def status_gateway(self, msg):
-        self.log('gateway status ' + msg)
 
     def send_command(self, command=layer1.CommandDialog):
         socket = command(self.monitor_socket)
