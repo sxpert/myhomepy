@@ -1,4 +1,4 @@
-#!/usr/bin/python2.7 -3
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 #
@@ -45,8 +45,8 @@ class OWNMonitor(object):
         self.log("Known systems :")
         for s in SubSystems:
             subsystem = s()
-            self.log("    %s (%d)" % ( \
-                     subsystem.__class__.__name__, 
+            self.log("    %s (%d)" % (
+                     subsystem.__class__.__name__,
                      subsystem.SYSTEM_WHO))
         # end of system info
         self.update_callbacks(system)
@@ -58,7 +58,7 @@ class OWNMonitor(object):
         if self.monitor_socket is not None:
             self.monitor_socket.log(msg)
         else:
-            print (msg)
+            print(msg)
 
     #
     # getters and setters
@@ -171,16 +171,17 @@ class OWNMonitor(object):
         # search for system in all parser SYSTEM_NAME variables
         sys = None
         for s in SubSystems:
-            if hasattr(s,'SYSTEM_NAME') and s.SYSTEM_NAME == system:
+            if hasattr(s, 'SYSTEM_NAME') and s.SYSTEM_NAME == system:
                 sys = s()
         if not sys:
             self.log("WARNING: unknown system \'"+system+"\'")
             return None
-        #system = sys["id"]
+        # system = sys["id"]
         system = sys.SYSTEM_WHO
         orders = sys.SYSTEM_CALLBACKS
-        self.log('subsystem %s (%d) => %s' % (sys.__class__.__name__,
-            system, str(orders)))
+        self.log('subsystem %s (%d) => %s' % (
+                 sys.__class__.__name__,
+                 system, str(orders)))
 
         # order
         if "order" not in conditions:
