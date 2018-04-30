@@ -6,13 +6,16 @@
 # Licenced under the terms of the GNU GPL v3.0 or later
 #
 
-import re
-import os
-import sys
 import json
+import os
+import re
+import sys
 
 import config
+
 from . import layer1
+from .parsers import Systems
+
 
 PLUGINS_DIRS = "plugins/"
 
@@ -69,6 +72,11 @@ class OWNMonitor(object):
     MSG_TYPES = ['Command', 'Status', ]
 
     def __init__(self, system_loop, system_id):
+        print("Known systems :")
+        for s in Systems:
+            system = s()
+            print("%s (%d)" % (system.__class__.__name__, system.SYSTEM_WHO))
+
         self.system_id = system_id
         self.plugins = None
         self.sl = system_loop
@@ -141,6 +149,21 @@ class OWNMonitor(object):
         if msgtype is not None:
             r = self.routes[msgtype]
             who, msg = m.groups()
+            # first, use the plugins approach
+            i_who = int(who)
+            ok = False
+            for s in Systems:
+                if i_who == s.SYSTEM_WHO:
+                    system = s(self)
+                    print("found system %d => %s" % (
+                          system.SYSTEM_WHO, system.__class__.__name__))
+                    ok = system.parse(msgtype, msg)
+                    if ok is not None and ok:
+                        return
+                    print("plugin was not able to parse message, "
+                          "going to old system")
+                    break
+            # if it failed, the thing is not implemented yet
             if who in r:
                 func = r[who]
                 if func is not None:
@@ -334,28 +357,9 @@ class OWNMonitor(object):
     def status_gateway(self, msg):
         self.log('gateway status ' + msg)
 
-    def send_command(self, command):
-        print("sending command", command)
-        socket = CommandDialog(self.monitor_socket)
+    def send_command(self, command=layer1.CommandDialog):
+        socket = command(self.monitor_socket)
+        print("sending command", socket.__class__.__name__)
         self.sl.add_task(socket)
         socket.start()
         return True
-
-
-class CommandDialog(layer1.OwnSocket):
-    def __init__(self, clone):
-        super().__init__(clone.address,
-                         clone.port,
-                         clone.passwd,
-                         self.COMMAND,
-                         clone.timeout,
-                         # auto_reconnect is false
-                         False)
-        self.ready_callback = self.dialog_ready
-        self.data_callback = self.dialog_data
-
-    def dialog_ready(self):
-        print("DIALOG: ready")
-
-    def dialog_data(self, msg):
-        print("DIALOG: msg")

@@ -19,7 +19,7 @@ class OW_general_off (object):
             error = "ERROR: Too many systems"
 
         if monitor:
-            ok = monitor.send_command("general off")
+            ok = monitor.send_command()
         data = {
             'ok': ok,
         }
