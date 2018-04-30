@@ -16,7 +16,6 @@ import config
 from . import layer1
 from .subsystems import SubSystems
 
-
 PLUGINS_DIRS = "plugins/"
 
 

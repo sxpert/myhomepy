@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import re
+
 from .parser import OWNParser
 
 
@@ -37,7 +39,6 @@ class Lighting(OWNParser):
             return
         self.log('lighting command '+msg)
 
- 
     def map_device(self, device):
         if (type(device) is dict) and ('group' in device.keys()):
             return 'G-'+str(device['group'])
