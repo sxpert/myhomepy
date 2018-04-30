@@ -258,7 +258,7 @@ class OWNMonitor(object):
 
     def send_command(self, command=layer1.CommandDialog):
         socket = command(self.monitor_socket)
-        print("sending command", socket.__class__.__name__)
+        self.log("sending command %s" % (socket.__class__.__name__))
         self.sl.add_task(socket)
         socket.start()
         return True

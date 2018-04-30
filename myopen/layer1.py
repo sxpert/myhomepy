@@ -116,6 +116,19 @@ class MainLoop(object):
             self.log("running main loop")
             while not self.stopped:
                 time.sleep(1)
+                # cleanup dead threads
+                tasklist = []
+                changed = False
+                for t in self.tasks:
+                    if not t.is_alive():
+                        self.log("task %s is dead" % (str(t)))
+                        t.join(0.1)
+                        changed = True
+                    else:
+                        tasklist.append(t)
+                if changed:
+                    # self.log("task list %s" % (str(tasklist)))
+                    self.tasks = tasklist
         except KeyboardInterrupt:
             self.log("^C forcing program exit")
             self.wait_all()
@@ -160,7 +173,7 @@ class OwnSocket(Thread):
         self.timeout = timeout
         self.cnxfailcnt = 0
         self.poller = select.epoll()
-        Thread.__init__(self)
+        super().__init__()
 
     def create_clone(self, mode):
         new_socket = OwnSocket(self.address,
@@ -245,7 +258,9 @@ class OwnSocket(Thread):
                                     self.reconnect()
                                 else:
                                     self.log('disconnecting socket')
+
                                     self.stopping = True
+
                         # no event, check timers
                         # handle timers
                         # while len(self.timers) > 0:
@@ -266,6 +281,7 @@ class OwnSocket(Thread):
                     # should not happen, normally caught by the main loop class
                     self.log("Keyboard Interrupt in OWNSocket thread")
                     self.stopping = True
+        self.log("quitting task %s" % (str(self)))
 
     def log(self, msg):
         col_in = '\033[92m'
