@@ -21,7 +21,7 @@ import socketserver
 from myopen import layer1
 
 
-#--------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------
 #
 #
 #
@@ -30,7 +30,8 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
 
     @property
     def _srv(self):
-        return '['+str(self.server.server_name)+':'+str(self.server.server_port)+' WEB]'
+        return '[%s:%s WEB]' % (str(self.server.server_name),
+                                str(self.server.server_port))
 
     def __log(self, msg):
         layer1.SYSTEM_LOGGER.log(msg)
@@ -40,7 +41,6 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
 
     def _log_error(self, msg):
         self.__log((self._srv[:-1]+'_ERROR]')+' '+msg)
-
 
     def log(self, code=None, size=None, msg=None):
         if msg is None:
@@ -61,9 +61,9 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
         self.log(code, size)
 
     def log_error(self, format, *args):
-        self.log(None, None, format%args)
+        self.log(None, None, format % args)
 
-    #----------------------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------------------
     # responses
 
     def redirect(self, url):
@@ -121,7 +121,7 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
                 return self.directory_list_response(basedir, path)
         ctype = self.guess_type(destpath)
         if ctype == "text/html":
-            ctype += "; charset=%s"%sys.getfilesystemencoding()
+            ctype += "; charset=%s" % sys.getfilesystemencoding()
         try:
             f = open(destpath, 'rb')
         except IOError:
@@ -136,12 +136,11 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
         shutil.copyfileobj(f, self.wfile)
         f.close()
 
-
     def directory_list_response(self, basedir, path):
-        self.log("basedir : '%s' path : '%s'"%(basedir, path))
+        self.log("basedir : '%s' path : '%s'" % (basedir, path))
         basepath = os.path.abspath(os.path.dirname(sys.argv[0]))
         destpath = os.path.join(basepath, basedir, path)
-        self.log("destpath : '%s'"%(destpath))
+        self.log("destpath : '%s'" % (destpath))
         try:
             l = os.listdir(destpath)
         except os.error:
@@ -151,8 +150,9 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
         f = StringIO()
         displaypath = cgi.escape(urllib.parse.unquote(self.path))
         f.write('<!DOCTYPE html>')
-        f.write("<html>\n<title>Directory listing for %s</title>\n"%displaypath)
-        f.write("<body>\n<h2>Directory listing for %s</h2>\n"%displaypath)
+        f.write("<html>\n<title>Directory listing for %s</title>\n" %
+                displaypath)
+        f.write("<body>\n<h2>Directory listing for %s</h2>\n" % displaypath)
         f.write("<hr>\n<ul>\n")
         for name in l:
             fullname = os.path.join(destpath, name)
@@ -162,13 +162,14 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
                 linkname = name + '/'
             if os.path.islink(fullname):
                 displayname = name + '@'
-            f.write('<li><a href="%s">%s</a>\n'%(urllib.parse.quote(linkname), cgi.escape(displayname)))
+            f.write('<li><a href="%s">%s</a>\n' %
+                    (urllib.parse.quote(linkname), cgi.escape(displayname)))
         f.write("</ul>\n<hr>\n</body>\n</html>\n")
         length = f.tell()
         f.seek(0)
         self.send_response(200)
         encoding = sys.getfilesystemencoding()
-        self.send_header("Content-type", "text/html; charset=%s"%encoding)
+        self.send_header("Content-type", "text/html; charset=%s" % encoding)
         self.send_header("Content-length", str(length))
         self.end_headers()
         self.wfile.write(f.getvalue().encode('utf-8'))
@@ -195,7 +196,7 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
         '.c': 'text/plain'
     })
 
-    #----------------------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------------------
 
     def find_route(self):
         if self.server.routes is None:
@@ -207,12 +208,13 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
                 if m is not None:
                     g = m.groups()
                     if len(g) > 0:
-                        self.__log("find_route : [match groups] "+str(m.groups()))
+                        self.__log("find_route : [match groups] %s" %
+                                   (str(m.groups())))
                     o = c()
                     return o
             if self.server.default is not None:
                 # handle default route
-                o = self.server.default ()
+                o = self.server.default()
                 return o
             self.send_error(404)
             return None
@@ -243,11 +245,10 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
     def do_POST(self):
         if not self.parse_variables():
             # response already sent in this case
-            return 
+            return
         self.do_request()
 
-
-    #----------------------------------------------------------------------------------------------
+    # ----------------------------------------------------------------------------------------------
     # variables management
 
     def parse_variables_string(self, data):
@@ -259,7 +260,7 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
             if pos != -1:
                 t = data[pos:pos+4]
                 if t == '&amp;':
-                    # continue  
+                    # continue
                     start = pos+5
                 else:
                     b = data[0:pos]
@@ -275,7 +276,7 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
             if pos != -1:
                 k = urllib.parse.unquote(b[0:pos])
                 v = urllib.parse.unquote_plus(b[pos+1:])
-                if len(k)>2 and k[-2:]=='[]':
+                if len(k) > 2 and k[-2:] == '[]':
                     k = k[:-2]
                     try:
                         tv = self.variables[k]
@@ -286,13 +287,14 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
                 self.variables[k] = v
 
     def parse_url_variables(self):
-        self.variables={}
-    
+        self.variables = {}
+
     def parse_post_urlencoded_variables(self):
         try:
             l = self.headers['content-length']
         except KeyError as e:
-            self.send_error(501, "unable to find content length for posted data")
+            self.send_error(501,
+                            "unable to find content length for posted data")
             return False
         # limit check on length
         d = self.rfile.read(int(l))
@@ -334,15 +336,19 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
                 v += c
         return v
 
-#--------------------------------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------------------------------
 #
 # TODO: ssl mode
 #
 # import BaseHTTPServer, SimpleHTTPServer
 # import ssl
 #
-# httpd = BaseHTTPServer.HTTPServer(('localhost', 4443), SimpleHTTPServer.SimpleHTTPRequestHandler)
-# httpd.socket = ssl.wrap_socket (httpd.socket, certfile='path/to/localhost.pem', server_side=True)
+# httpd = BaseHTTPServer.HTTPServer(('localhost', 4443),
+#                                   SimpleHTTPServer.SimpleHTTPRequestHandler)
+# httpd.socket = ssl.wrap_socket (httpd.socket,
+#                                 certfile='path/to/localhost.pem',
+#                                 server_side=True)
 # httpd.serve_forever()
 #
 
@@ -354,6 +360,22 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
 class OWNHTTPServer(socketserver.TCPServer):
     allow_reuse_address = 1    # Seems to make sense in testing environment
 
+    def __init__(self,
+                 server_address,
+                 RequestHandlerClass,
+                 bind_and_activate=True):
+        super().__init__(server_address, RequestHandlerClass, False)
+
+        # do ssl initialization here
+
+        if bind_and_activate:
+            try:
+                self.server_bind()
+                self.server_activate()
+            except:
+                self.server_close()
+                raise
+
     def process_request(self, request, client_address):
         """Call finish_request.
         TODO: Override to catch errno 32 in finish request
@@ -361,13 +383,13 @@ class OWNHTTPServer(socketserver.TCPServer):
         self.finish_request(request, client_address)
         self.shutdown_request(request)
 
-
     def server_bind(self):
         """Override server_bind to store the server name."""
         socketserver.TCPServer.server_bind(self)
         host, port = self.socket.getsockname()[:2]
         self.server_name = socket.getfqdn(host)
         self.server_port = port
+
 
 #
 #
@@ -402,11 +424,11 @@ class OpenWeb(Thread):
         try:
             server_name = str(self.httpd.server_name)
             server_port = str(self.httpd.server_port)
-            server = "%s:%s "% (server_name, server_port)
+            server = "%s:%s " % (server_name, server_port)
         except AttributeError:
             server = ""
         message = str(message)
-        layer1.SYSTEM_LOGGER.log('[%sWEB] %s'% (server, message))
+        layer1.SYSTEM_LOGGER.log('[%sWEB] %s' % (server, message))
 
     def register_routes(self, routes):
         self.routes = routes
@@ -416,27 +438,6 @@ class OpenWeb(Thread):
 
     def stop(self):
         self.httpd.shutdown()
-    
-#    def connect(self):
-#        pass
-
-#    def recv(self):
-#        from socket import error as SocketError
-#        import errno
-#        try:
-#            self._handle_request_noblock()
-#        except SocketError as e:
-#            # ignore connection reset by peer...
-#            if e.errno != errno.ECONNRESET:
-#                raise
-#            else:
-#                self.log('client connection aborted')
-#            pass
-
-
-#    @property
-#    def sock(self):
-#        return self.socket
 
 if __name__ == '__main__':
     addr = ('', 8000)
