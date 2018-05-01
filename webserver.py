@@ -8,6 +8,7 @@ import os
 import re
 import shutil
 import socket
+import ssl
 import sys
 import urllib
 import json
@@ -363,11 +364,19 @@ class OWNHTTPServer(socketserver.TCPServer):
     def __init__(self,
                  server_address,
                  RequestHandlerClass,
-                 bind_and_activate=True):
+                 bind_and_activate=True,
+                 log=None):
         super().__init__(server_address, RequestHandlerClass, False)
 
         # do ssl initialization here
-
+        if config.config.tls_available:
+            log("we'll be using TLS")
+            key_file = config.config.tls['key']
+            cert_file = config.config.tls['cert']
+            self.socket = ssl.wrap_socket(self.socket,
+                                          keyfile=key_file,
+                                          certfile=cert_file,
+                                          cert_reqs=ssl.CERT_NONE)
         if bind_and_activate:
             try:
                 self.server_bind()
@@ -409,7 +418,7 @@ class OpenWeb(Thread):
     def run(self):
         self.log("starting thread")
 #        self.httpd = BaseHTTPServer.HTTPServer(self.address, OpenWebHandler)
-        self.httpd = OWNHTTPServer(self.address, OpenWebHandler)
+        self.httpd = OWNHTTPServer(self.address, OpenWebHandler, log=self.log)
         if self.routes is None:
             self.log("error, no routes set")
             return

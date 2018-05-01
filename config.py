@@ -39,11 +39,57 @@ class Config(object):
             # read the configuration file
             d = f.read()
             f.close()
-            self.systems = json.loads(d)
+            data = json.loads(d)
+            if 'tls' in data.keys():
+                self.tls = data['tls']
+                # check for the presence of "key" and "cert"
+                self.tls_available = True
+                if 'key' in self.tls:
+                    # check if file is readable
+                    try:
+                        f = open(self.tls['key'])
+                    except OSError as e:
+                        self.log("ERROR: unable to open TLS 'key' file")
+                        self.log(str(e))
+                        self.tls_available = False
+                    else:
+                        d = f.read()
+                        f.close()
+                        self.log("TLS 'key' file successfully loaded")
+                else:
+                    self.tls_available = False
+                    self.log("ERROR: unable to find TLS 'key' filename")
+                if 'cert' in self.tls:
+                    try:
+                        f = open(self.tls['cert'])
+                    except OSError as e:
+                        self.log("ERROR: unable to open TLS 'cert' file")
+                        self.log(str(e))
+                        self.tls_available = False
+                    else:
+                        d = f.read()
+                        f.close()
+                        self.log("TLS 'cert' file successfully loaded")
+                else:
+                    self.tls_available = False
+                    self.log("ERROR: unable to find TLS 'cert' filename")
+                if not self.tls_available:
+                    self.log("WARNING: Error in TLS configuration. "
+                             "TLS will not be available")
+            else:
+                self.tls = None
+            if 'systems' in data.keys():
+                self.systems = data['systems']
+            else:
+                self.log("WARNING: no systems configured yet")
 
     def save(self):
         f = open(self.config_file, 'w')
-        f.write(json.dumps(self.systems))
+        data = {}
+        if self.tls is not None:
+            data['tls'] = self.tls
+        data['systems'] = self.systems
+        f.write(json.dumps(data))
         f.close()
 
     def __len__(self):

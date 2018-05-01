@@ -9,3 +9,4 @@ myOpenProto.py
 devices.txt
 *.db
 *.swp
+*.pem
