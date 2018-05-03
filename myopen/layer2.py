@@ -26,22 +26,12 @@ class OWNMonitor(object):
     STATUS = 1
     MSG_TYPES = ['Command', 'Status', ]
 
-    def __init__(self, system_loop, system_id):
-
-        self.system_id = system_id
+    def __init__(self, system):
+        self.system = system
         self.plugins = None
-        self.sl = system_loop
         # initializes callbacks
         self.callbacks = None
-        system = config.config.systems[system_id]
-        # gw = system['gateway']
         self.monitor_socket = system.socket(layer1.OwnSocket.MONITOR)
-        # self.monitor_socket = layer1.OwnSocket(
-        #         gw['ip'],
-        #         gw['port'],
-        #         gw['password'],
-        #         layer1.OwnSocket.MONITOR)
-        # set the callback to get messages from the layer 1
         self.monitor_socket.set_data_callback(self.data_callback)
         # system information
         self.log("Known systems :")
@@ -53,7 +43,7 @@ class OWNMonitor(object):
         # end of system info
         self.update_callbacks(system)
         # add the monitor socket to the system loop
-        self.sl.add_task(self.monitor_socket)
+        self.system.main_loop.add_task(self.monitor_socket)
 
     def log(self, msg):
         msg = str(msg)
@@ -70,13 +60,12 @@ class OWNMonitor(object):
         try:
             db = self._db
         except AttributeError as e:
-            system = config.config[self.system_id]
-            if system.database is None:
+            if self.system.database is None:
                 self.log("WARNING: unable to find a value for "
                          "\'database\' in the config for the system")
                 return None
             # open database, and store a link
-            self._db = database.Database(system.database, self.log)
+            self._db = database.Database(self.system.database, self.log)
             return self._db
         else:
             return db
@@ -176,7 +165,6 @@ class OWNMonitor(object):
         if not sys:
             self.log("WARNING: unknown system \'"+system+"\'")
             return None
-        # system = sys["id"]
         system = sys.SYSTEM_WHO
         orders = sys.SYSTEM_CALLBACKS
         self.log('subsystem %s (%d) => %s' % (
@@ -260,6 +248,6 @@ class OWNMonitor(object):
     def send_command(self, command=layer1.CommandDialog):
         socket = command(self.monitor_socket)
         self.log("sending command %s" % (socket.__class__.__name__))
-        self.sl.add_task(socket)
+        self.system.main_loop.add_task(socket)
         socket.start()
         return True

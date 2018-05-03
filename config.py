@@ -162,18 +162,22 @@ class System(object):
             return None
         return self.systems.index(self)
 
+    @property
+    def main_loop(self):
+        if not self.systems:
+            self.log("ERROR: Unable to access the systems list object")
+            return None
+        return self.systems.main_loop
+
     def __repr__(self):
         return "<%s %s>" % (
             self.__class__.__name__, self.gateway)
 
     def run(self):
-        if self.systems is None:
-            self.log("ERROR: Unable to access the systems list object")
-            return False
-        if self.systems.main_loop is None:
+        if self.main_loop is None:
             self.log("ERROR: Unable to start system, there is no system loop")
             return False
-        self.monitor = layer2.OWNMonitor(self.systems.main_loop, self.id)
+        self.monitor = layer2.OWNMonitor(self)
         self.log("added system with system id=%d" % (self.id))
 
     def socket(self, mode):
