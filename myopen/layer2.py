@@ -12,6 +12,8 @@ import re
 import sys
 
 import config
+import database
+
 
 from . import layer1
 from .subsystems import SubSystems
@@ -31,13 +33,14 @@ class OWNMonitor(object):
         self.sl = system_loop
         # initializes callbacks
         self.callbacks = None
-        system = config.config[system_id]
-        gw = system['gateway']
-        self.monitor_socket = layer1.OwnSocket(
-                gw['ip'],
-                gw['port'],
-                gw['password'],
-                layer1.OwnSocket.MONITOR)
+        system = config.config.systems[system_id]
+        # gw = system['gateway']
+        self.monitor_socket = system.socket(layer1.OwnSocket.MONITOR)
+        # self.monitor_socket = layer1.OwnSocket(
+        #         gw['ip'],
+        #         gw['port'],
+        #         gw['password'],
+        #         layer1.OwnSocket.MONITOR)
         # set the callback to get messages from the layer 1
         self.monitor_socket.set_data_callback(self.data_callback)
         # system information
@@ -68,14 +71,12 @@ class OWNMonitor(object):
             db = self._db
         except AttributeError as e:
             system = config.config[self.system_id]
-            if "database" not in system.keys():
+            if system.database is None:
                 self.log("WARNING: unable to find a value for "
                          "\'database\' in the config for the system")
                 return None
-            db_name = system["database"]
             # open database, and store a link
-            import database
-            self._db = database.Database(db_name, self.log)
+            self._db = database.Database(system.database, self.log)
             return self._db
         else:
             return db
@@ -243,9 +244,9 @@ class OWNMonitor(object):
     #
 
     def update_callbacks(self, system):
-        if "callbacks" not in system.keys():
-            system["callbacks"] = []
-        callbacks = system["callbacks"]
+        if system.callbacks is None:
+            return
+        callbacks = system.callbacks
         for cb in callbacks:
             # generate the key
             ck = self.map_key(cb["conditions"])

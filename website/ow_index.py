@@ -23,3 +23,11 @@ class OW_index(object):
             return
         request.html_response('<html><body>' + str(len(config.config)) +
                               ' systems configured</body></html>')
+
+
+class OW_test(object):
+    def do_GET(self, request):
+        data = {}
+        data['ok'] = True
+        data['ping'] = 'pong'
+        request.json_response(data)

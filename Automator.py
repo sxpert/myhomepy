@@ -12,7 +12,7 @@ Main application module
 
 # import config
 from myopen import layer1
-import config
+from config import config
 import webserver
 import website
 
@@ -25,7 +25,7 @@ class TestApplication(object):
     def __init__(self):
         # create the system loop
         self.system_loop = layer1.MainLoop(layer1.SYSTEM_LOGGER)
-        config.config.set_main_loop(self.system_loop)
+        config.set_main_loop(self.system_loop)
 
         # initializes the web server
         addr = ('', 8000)
@@ -34,6 +34,7 @@ class TestApplication(object):
         self.web.register_routes(
             [
                 ["^/$", website.ow_index.OW_index],
+                ["^/API/test$", website.ow_index.OW_test],
                 ["^/API/add_system(.*)$", website.ow_add_system.OW_add_system],
                 ["^/API/GeneralOff$", website.ow_general_off.OW_general_off],
                 ["^/API/temperatures(.*)$",

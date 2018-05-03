@@ -46,7 +46,9 @@ class Logger(object):
             current_date.hour,
             current_date.minute,
             current_date.second)
-        logmsg = date_string+' '+msg
+        if type(msg) is not str:
+            msg = str(msg)
+        logmsg = '%s %s' % (date_string, msg)
         print(logmsg)
         try:
             # TODO: syslog ?

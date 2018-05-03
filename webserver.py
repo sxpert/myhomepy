@@ -16,7 +16,7 @@ import traceback
 from io import StringIO
 from threading import Thread
 
-import config
+from config import config
 import http.server
 import socketserver
 from myopen import layer1
@@ -369,10 +369,10 @@ class OWNHTTPServer(socketserver.TCPServer):
         super().__init__(server_address, RequestHandlerClass, False)
 
         # do ssl initialization here
-        if config.config.tls_available:
+        if config.tls.available:
             log("we'll be using TLS")
-            key_file = config.config.tls['key']
-            cert_file = config.config.tls['cert']
+            key_file = config.tls.key
+            cert_file = config.tls.cert
             self.socket = ssl.wrap_socket(self.socket,
                                           keyfile=key_file,
                                           certfile=cert_file,
