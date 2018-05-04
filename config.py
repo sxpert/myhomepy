@@ -270,7 +270,7 @@ class System(Json):
         if self.main_loop is None:
             self.log("ERROR: Unable to start system, there is no system loop")
             return False
-        self.monitor = monitor.OWNMonitor(self)
+        self.monitor = OWNMonitor(self)
         self.log("added system with system id=%d" % (self.id))
 
     def socket(self, mode):
