@@ -219,8 +219,8 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
             return None
 
     def do_request(self):
-        if self.config is None:
-            self.config = config
+        # if self.config is None:
+        #     self.config = config
         o = self.find_route()
         if o is None:
             return
