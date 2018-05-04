@@ -16,11 +16,24 @@ CONFIG_FILE_NAME = 'config.json'
 
 
 class Tls(object):
-    def __init__(self, log_func=None):
+    def __init__(self, obj=None):
         self.cert = None
         self.key = None
-        self.available = True
-        self.log = log_func
+        self.available = False
+        if obj is not None:
+            if isinstance(obj, Config):
+                self.config = obj
+                self._log = self.config.log
+            else:
+                self.log("WARNING: wrong object passed "
+                         "to Systems.__init__ %s" % (str(obj)))
+        self.log("initializing systems")
+
+    def log(self, msg):
+        if self._log is not None:
+            self._log(msg)
+        else:
+            print(msg)
 
     def load(self, data):
         if type(data) is not dict:
@@ -51,6 +64,7 @@ class Tls(object):
             d = f.read()
             f.close()
             self.log("TLS '%s' file '%s' successfully loaded" % (key, fname))
+            self.available = True
         return fname
 
     def __repr__(self):
@@ -66,13 +80,33 @@ class Tls(object):
 
 
 class Gateway(object):
-    def __init__(self, log_func=None):
-        self.log = log_func
+    def __init__(self, obj=None):
         self.address = None
         self.port = None
         self.passwd = None
         self.available = False
+        self._log = None
+        if isinstance(obj, System):
+            self.system = None
+            self._log = self.system.log
+
+    def __init__(self, address, port, passwd):
+        self.address = address
+        self.port = port
+        self.passwd = passwd
+        self.available = True
+        self._log = None
         self.system = None
+
+    def set_system(self, system):
+        self.system = system
+        self._log = system.log
+
+    def log(self, msg):
+        if self._log is not None:
+            self._log(msg)
+        else:
+            print(msg)
 
     def load(self, data):
         if type(data) is not dict:
@@ -145,9 +179,7 @@ class System(object):
             self.log('database: %s' % (self.database))
             self.gateway = data.get('gateway', None)
             if self.gateway:
-                self.gateway = Gateway(self.log).load(self.gateway)
-                if self.gateway:
-                    self.gateway.system = self
+                self.gateway = Gateway(self).load(self.gateway)
             else:
                 self.log("WARNING: no gateway entry in system")
             self.devices = data.get('devices', None)
@@ -171,6 +203,7 @@ class System(object):
 
     def set_gateway(self, gateway):
         self.gateway = gateway
+        gateway.set_system(self)
         return self
 
     def __repr__(self):
@@ -242,10 +275,10 @@ class Config(object):
     def __init__(self, config_file=None):
         if config_file is None:
             self.config_file = CONFIG_FILE_NAME
-        self.tls = None
+        self.tls = Tls(self)
         self.systems = None
-        self.systems = []
-        self.monitors = []
+        self.systems = Systems(self)
+        # self.monitors = []
         self.load()
 
     def log(self, msg):
@@ -261,9 +294,9 @@ class Config(object):
         if type(data) is dict:
             k = data.keys()
             if 'tls' in k:
-                self.tls = Tls(self.log).load(data['tls'])
+                self.tls.load(data['tls'])
             if 'systems' in k:
-                self.systems = Systems(self).load(data['systems'])
+                self.systems.load(data['systems'])
 
         else:
             self.log("invalid configuration format")
@@ -289,19 +322,8 @@ class Config(object):
 
     def save(self):
         f = open(self.config_file, 'w')
-        # data = {}
-        # if self.tls is not None:
-        #     data['tls'] = self.tls
-        # data['systems'] = self.systems
         f.write(json.dumps(self))
         f.close()
-
-    # def __len__(self):
-    #     return len(self.systems)
-
-    # def __getitem__(self, key):
-    #     # key must be an integer, between 0 and len-1
-    #     return self.systems[key]
 
     def add_system(self, ip, port, password):
         # search if we already have this system
@@ -324,50 +346,20 @@ class Config(object):
                          "configured")
                 return False
         # couldn't find system
-        self.systems.append(System(self.log)
-                            .set_gateway(Gateway(ip, port, password))
-                            ).run()
-        # self.save()
-        # system = {}
-        # gateway = {}
-        # gateway['ip'] = ip
-        # gateway['port'] = port
-        # gateway['password'] = password
-        # system['gateway'] = gateway
-        # sys_id = len(self.systems)
-        # self.systems.append(system)
-        # self.save()
-        # self._add_system(sys_id)
-
-    # replaced by system.run()
-
-    # def _add_system(self, sys_id):
-    #     self.log("added system with system id="+str(sys_id))
-    #     from myopen import layer2
-    #     sys = layer2.OWNMonitor(self.main_loop, sys_id)
-    #     self.monitors.append(sys)
+        gateway = Gateway(ip, port, password)
+        system = System(self.log)
+        system.set_gateway(gateway)
+        self.systems.append(system)
+        system.run()
 
     @property
     def nb_systems(self):
         return len(self.systems)
 
-    # def command_socket(self, sys_id, ready_callback, data_callback):
-    #     system = self.systems[sys_id]
-    #     gw = system['gateway']
-    #     sock = layer1.OwnSocket(
-    #             gw['ip'],
-    #             gw['port'],
-    #             gw['password'],
-    #             layer1.OwnSocket.COMMAND)
-    #     sock.set_ready_callback(ready_callback)
-    #     sock.set_data_callback(data_callback)
-    #     return sock
 
 config = Config()
 
 if __name__ == '__main__':
-    # config.save()
-    # print(config.tls)
     system_loop = layer1.MainLoop(layer1.SYSTEM_LOGGER)
     config.set_main_loop(system_loop)
     pass

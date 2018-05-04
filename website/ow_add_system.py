@@ -4,7 +4,6 @@
 import re
 import urllib
 from myopen import layer1
-import config
 
 # --------------------------------------------------------------------------------------------------
 #
@@ -68,7 +67,7 @@ class OW_add_system(object):
         self.password_open = ""
 
         # do the deed
-        nb_systems = len(config.config)
+        nb_systems = request.config.nb_systems
         if nb_systems == 0:
             # we have no systems configured, present the initial setup page
             self.generate_basic_form(request)
@@ -123,37 +122,37 @@ class OW_add_system(object):
 
     def do_POST(self, request):
         # get variables
-        self.errors = {}
-        self.action = request.get_variable('action')
-        self.gateway = request.get_variable('gateway')
-        self.openwebnet_port = request.get_variable('openwebnet_port')
-        self.password_open = request.get_variable('password_open')
+        errors = {}
+        action = request.get_variable('action')
+        gateway = request.get_variable('gateway')
+        openwebnet_port = request.get_variable('openwebnet_port')
+        password_open = request.get_variable('password_open')
         # check variables for stuff
-        if self.action is None or self.action != 'add_system':
+        if action is None or action != 'add_system':
             request.send_error(400, "unexpected value for \"action\"")
             return
-        if self.gateway is None or not self.is_ipv4_or_domain(self.gateway):
-            self.errors['gateway'] = "Expected value for gateway is IPv4 "\
+        if gateway is None or not self.is_ipv4_or_domain(gateway):
+            errors['gateway'] = "Expected value for gateway is IPv4 "\
                                      "or domain name"
-        if self.openwebnet_port is None or\
-           not self.is_port(self.openwebnet_port):
-            self.errors['openwebnet_port'] = "Expected value for port is an "\
+        if openwebnet_port is None or\
+           not self.is_port(openwebnet_port):
+            errors['openwebnet_port'] = "Expected value for port is an "\
                 "integer from 1 to 65535, default value is 20000"
-        if self.password_open is None or\
-           not self.is_password_open(self.password_open):
-            self.errors['password_open'] = "Expected value for Password OPEN "\
+        if password_open is None or\
+           not self.is_password_open(password_open):
+            errors['password_open'] = "Expected value for Password OPEN "\
                 "is 1 to 10 digits from 0 to 9"
-        if len(self.errors.keys()) > 0:
+        if len(errors.keys()) > 0:
             self.generate_basic_form(request)
             return
 
         # add the new gateway
-        config.config.add_system(self.gateway,
-                                 int(self.openwebnet_port),
-                                 self.password_open)
+        request.config.add_system(gateway,
+                                  int(openwebnet_port),
+                                  password_open)
 
         request.html_response(('<pre>ok\n%s\n%s\n%s\n%s</pre>' %
-                               (self.action,
-                                self.gateway,
-                                self.openwebnet_port,
-                                self.password_open)))
+                               (action,
+                                gateway,
+                                openwebnet_port,
+                                password_open)))

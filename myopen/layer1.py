@@ -122,6 +122,11 @@ class MainLoop(object):
                 tasklist = []
                 changed = False
                 for t in self.tasks:
+                    try:
+                        t.start()
+                    except RuntimeError:
+                        # thread already started, we're fine
+                        pass
                     if not t.is_alive():
                         self.log("task %s is dead" % (str(t)))
                         t.join(0.1)
