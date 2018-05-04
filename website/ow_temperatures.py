@@ -4,14 +4,14 @@
 import re
 import urllib
 from myopen import layer1
-from config import config
 
 
 class OW_list_temperatures (object):
 
     def do_GET(self, request):
-        if config.nb_systems == 1:
-            sensors = config.monitors[0].database.list_temperature_sensors()
+        if request.config.nb_systems == 1:
+            sensors = request.config.systems[0]\
+                        .monitor.database.list_temperature_sensors()
         else:
             sensors = None
         data = {

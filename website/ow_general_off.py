@@ -4,7 +4,6 @@
 import re
 import urllib
 
-from config import config
 from myopen import commands
 
 
@@ -12,8 +11,8 @@ class OW_general_off (object):
 
     def do_GET(self, request):
         error = None
-        if config.nb_systems == 1:
-            monitor = config.monitors[0]
+        if request.config.nb_systems == 1:
+            monitor = request.config.systems[0].monitor
         else:
             ok = False
             monitor = None

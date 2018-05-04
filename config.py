@@ -169,6 +169,10 @@ class System(object):
             return None
         return self.systems.main_loop
 
+    def set_gateway(self, gateway):
+        self.gateway = gateway
+        return self
+
     def __repr__(self):
         return "<%s %s>" % (
             self.__class__.__name__, self.gateway)
@@ -219,6 +223,7 @@ class Systems(list):
     def append(self, obj):
         super().append(obj)
         obj.systems = self
+        return obj
 
     @property
     def main_loop(self):
@@ -277,6 +282,11 @@ class Config(object):
             data = json.loads(d)
             self.parse_config(data)
 
+    # --------------------------------
+    #
+    # TODO: the below need to be fixed
+    #
+
     def save(self):
         f = open(self.config_file, 'w')
         # data = {}
@@ -286,16 +296,17 @@ class Config(object):
         f.write(json.dumps(self))
         f.close()
 
-    def __len__(self):
-        return len(self.systems)
+    # def __len__(self):
+    #     return len(self.systems)
 
-    def __getitem__(self, key):
-        # key must be an integer, between 0 and len-1
-        return self.systems[key]
+    # def __getitem__(self, key):
+    #     # key must be an integer, between 0 and len-1
+    #     return self.systems[key]
 
     def add_system(self, ip, port, password):
         # search if we already have this system
         for s in self.systems:
+            # TODO: fix
             try:
                 gw = s['gateway']
             except KeyError:
@@ -313,38 +324,44 @@ class Config(object):
                          "configured")
                 return False
         # couldn't find system
-        system = {}
-        gateway = {}
-        gateway['ip'] = ip
-        gateway['port'] = port
-        gateway['password'] = password
-        system['gateway'] = gateway
-        sys_id = len(self.systems)
-        self.systems.append(system)
-        self.save()
-        self._add_system(sys_id)
+        self.systems.append(System(self.log)
+                            .set_gateway(Gateway(ip, port, password))
+                            ).run()
+        # self.save()
+        # system = {}
+        # gateway = {}
+        # gateway['ip'] = ip
+        # gateway['port'] = port
+        # gateway['password'] = password
+        # system['gateway'] = gateway
+        # sys_id = len(self.systems)
+        # self.systems.append(system)
+        # self.save()
+        # self._add_system(sys_id)
 
-    def _add_system(self, sys_id):
-        self.log("added system with system id="+str(sys_id))
-        from myopen import layer2
-        sys = layer2.OWNMonitor(self.main_loop, sys_id)
-        self.monitors.append(sys)
+    # replaced by system.run()
+
+    # def _add_system(self, sys_id):
+    #     self.log("added system with system id="+str(sys_id))
+    #     from myopen import layer2
+    #     sys = layer2.OWNMonitor(self.main_loop, sys_id)
+    #     self.monitors.append(sys)
 
     @property
     def nb_systems(self):
         return len(self.systems)
 
-    def command_socket(self, sys_id, ready_callback, data_callback):
-        system = self.systems[sys_id]
-        gw = system['gateway']
-        sock = layer1.OwnSocket(
-                gw['ip'],
-                gw['port'],
-                gw['password'],
-                layer1.OwnSocket.COMMAND)
-        sock.set_ready_callback(ready_callback)
-        sock.set_data_callback(data_callback)
-        return sock
+    # def command_socket(self, sys_id, ready_callback, data_callback):
+    #     system = self.systems[sys_id]
+    #     gw = system['gateway']
+    #     sock = layer1.OwnSocket(
+    #             gw['ip'],
+    #             gw['port'],
+    #             gw['password'],
+    #             layer1.OwnSocket.COMMAND)
+    #     sock.set_ready_callback(ready_callback)
+    #     sock.set_data_callback(data_callback)
+    #     return sock
 
 config = Config()
 

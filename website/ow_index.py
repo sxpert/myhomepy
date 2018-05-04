@@ -3,7 +3,6 @@
 
 import re
 import urllib
-import config
 
 # --------------------------------------------------------------------------------------------------
 #
@@ -17,11 +16,11 @@ import config
 
 class OW_index(object):
     def do_GET(self, request):
-        nb_systems = len(config.config)
+        nb_systems = request.config.nb_systems
         if nb_systems == 0:
             request.redirect('/API/add_system')
             return
-        request.html_response('<html><body>' + str(len(config.config)) +
+        request.html_response('<html><body>' + str(nb_systems) +
                               ' systems configured</body></html>')
 
 

@@ -11,9 +11,7 @@ import os
 import re
 import sys
 
-import config
 import database
-
 
 from . import layer1
 from .subsystems import SubSystems

@@ -28,6 +28,7 @@ from myopen import layer1
 #
 
 class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
+    config = None
 
     @property
     def _srv(self):
@@ -221,6 +222,8 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
             return None
 
     def do_request(self):
+        if self.config is None:
+            self.config = config
         o = self.find_route()
         if o is None:
             return
