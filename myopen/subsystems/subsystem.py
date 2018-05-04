@@ -2,7 +2,7 @@
 import json
 
 
-class OWNParser(object):
+class OWNSubSystem(object):
 
     def __init__(self, monitor=None):
         self.monitor = monitor

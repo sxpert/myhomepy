@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from .parser import OWNParser
+from .subsystem import OWNSubSystem
 
 
-class DiagTempControl(OWNParser):
+class DiagTempControl(OWNSubSystem):
     SYSTEM_WHO = 1004

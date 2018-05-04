@@ -199,7 +199,8 @@ class Gateway(Json):
                      "unavailable gateway %s" % (str(self)))
             return None
         sock = layer1.OwnSocket(self.address, self.port, self.passwd, mode)
-        sock.set_logger(self._log)
+        # find the original system level logger
+        sock.set_logger(self.system.main_loop.logger.log)
         return sock
 
 

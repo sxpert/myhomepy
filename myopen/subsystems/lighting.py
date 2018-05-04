@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import re
 
-from .parser import OWNParser
+from .subsystem import OWNSubSystem
 
 
-class Lighting(OWNParser):
+class Lighting(OWNSubSystem):
     SYSTEM_NAME = "LIGHTING"
     SYSTEM_WHO = 1
 

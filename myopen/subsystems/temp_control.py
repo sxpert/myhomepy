@@ -2,10 +2,10 @@
 import json
 import re
 
-from .parser import OWNParser
+from .subsystem import OWNSubSystem
 
 
-class TempControl(OWNParser):
+class TempControl(OWNSubSystem):
     SYSTEM_NAME = 'TEMP_CONTROL'
     SYSTEM_WHO = 4
 

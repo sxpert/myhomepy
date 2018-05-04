@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from .parser import OWNParser
+from .subsystem import OWNSubSystem
 
 
-class DiagLighting(OWNParser):
+class DiagLighting(OWNSubSystem):
     SYSTEM_WHO = 1001

@@ -7,8 +7,8 @@ from .diag_gateway import DiagGateway
 
 
 SubSystems = [Lighting,
-           TempControl,
-           Gateway,
-           DiagLighting,
-           DiagTempControl,
-           DiagGateway, ]
+              TempControl,
+              Gateway,
+              DiagLighting,
+              DiagTempControl,
+              DiagGateway, ]

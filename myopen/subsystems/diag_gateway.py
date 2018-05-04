@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from .parser import OWNParser
+from .subsystem import OWNSubSystem
 
 
-class DiagGateway(OWNParser):
+class DiagGateway(OWNSubSystem):
     SYSTEM_WHO = 1013

@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-from .parser import OWNParser
+from .subsystem import OWNSubSystem
 
 
-class Gateway(OWNParser):
+class Gateway(OWNSubSystem):
     SYSTEM_WHO = 13
 
     def parse_status(self, msg):
         self.log('gateway status ' + msg)
-
