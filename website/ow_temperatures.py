@@ -10,6 +10,7 @@ class OW_list_temperatures (object):
 
     def do_GET(self, request):
         if request.config.nb_systems == 1:
+            # TODO: we may not have a database in this system
             sensors = request.config.systems[0]\
                         .monitor.database.list_temperature_sensors()
         else:

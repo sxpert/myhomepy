@@ -331,6 +331,8 @@ class Systems(list, Json):
 
 
 class Config(Json):
+    app = None
+
     def __init__(self, app, config_file=None):
         self.app = app
         if config_file is None:

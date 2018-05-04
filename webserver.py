@@ -25,7 +25,11 @@ from threading import Thread
 #
 
 class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
-    config = None
+
+    def __init__(self, request, client_address, server):
+        self.server = server
+        self.config = server.web.app.config
+        super().__init__(request, client_address, server)
 
     @property
     def _srv(self):
@@ -33,10 +37,10 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
                                 str(self.server.server_port))
 
     def __log(self, msg):
-        layer1.SYSTEM_LOGGER.log(msg)
+        self.server.web.app.system_logger.log(msg)
 
     def _log(self, msg):
-        self.__log(self._srv+' '+msg)
+        self.__log('%s %s' % (str(self._srv), str(msg)))
 
     def _log_error(self, msg):
         self.__log((self._srv[:-1]+'_ERROR]')+' '+msg)

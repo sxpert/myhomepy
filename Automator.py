@@ -40,7 +40,7 @@ class Automator(object):
         self.web.register_routes(
             [
                 ["^/$", website.ow_index.OW_index],
-                ["^/API/test$", website.ow_index.OW_test],
+                ["^/API/ping$", website.ow_index.OW_ping],
                 ["^/API/add_system(.*)$", website.ow_add_system.OW_add_system],
                 ["^/API/GeneralOff$", website.ow_general_off.OW_general_off],
                 ["^/API/temperatures(.*)$",

@@ -24,7 +24,7 @@ class OW_index(object):
                               ' systems configured</body></html>')
 
 
-class OW_test(object):
+class OW_ping(object):
     def do_GET(self, request):
         data = {}
         data['ok'] = True
