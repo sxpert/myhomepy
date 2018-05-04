@@ -15,7 +15,19 @@ from myopen import layer2
 CONFIG_FILE_NAME = 'config.json'
 
 
-class Tls(object):
+class Json(object):
+    def load(self, data):
+        # do nothing
+        pass
+
+    def serialize(self):
+        return None
+
+    def json(self):
+        return json.dumps(self.serialize(), indent=4)
+
+
+class Tls(Json):
     def __init__(self, obj=None):
         self.cert = None
         self.key = None
@@ -27,7 +39,7 @@ class Tls(object):
             else:
                 self.log("WARNING: wrong object passed "
                          "to Systems.__init__ %s" % (str(obj)))
-        self.log("initializing systems")
+        self.log("TLS initialized")
 
     def log(self, msg):
         if self._log is not None:
@@ -47,6 +59,12 @@ class Tls(object):
                 self.log("TLS unavailable")
         return self
 
+    def serialize(self):
+        data = {}
+        data['key'] = self.key
+        data['cert'] = self.cert
+        return data
+
     def check_for_file(self, key, data):
         if key not in data.keys():
             self.log("ERROR: key '%s' not present in data %s" %
@@ -54,6 +72,9 @@ class Tls(object):
             self.available = False
             return None
         fname = data[key]
+        if fname is None:
+            self.available = False
+            return None
         try:
             f = open(fname)
         except OSError as e:
@@ -79,24 +100,33 @@ class Tls(object):
             self.__class__.__name__, cert_s, key_s, avail_s)
 
 
-class Gateway(object):
-    def __init__(self, obj=None):
-        self.address = None
-        self.port = None
-        self.passwd = None
-        self.available = False
-        self._log = None
-        if isinstance(obj, System):
-            self.system = None
-            self._log = self.system.log
+class Gateway(Json):
+    address = None
+    port = None
+    passwd = None
+    available = False
+    _log = None
+    system = None
 
-    def __init__(self, address, port, passwd):
-        self.address = address
-        self.port = port
-        self.passwd = passwd
-        self.available = True
-        self._log = None
-        self.system = None
+    def __init__(self, *args, **kwargs):
+        if len(args) == 1:
+            obj = args[0]
+            if isinstance(obj, System):
+                self.system = obj
+                self._log = obj.log
+                return
+        elif len(args) == 3:
+            if isinstance(args[0], str) and \
+               isinstance(args[1], int) and \
+               isinstance(args[2], str):
+                self.address = args[0]
+                self.port = args[1]
+                self.passwd = args[2]
+                self.available = True
+                return
+        self.log("Invalid parameters on creating Gateway")
+        self.log(args)
+        self.log(kwargs)
 
     def set_system(self, system):
         self.system = system
@@ -104,7 +134,7 @@ class Gateway(object):
 
     def log(self, msg):
         if self._log is not None:
-            self._log(msg)
+            self._log(str(msg))
         else:
             print(msg)
 
@@ -137,6 +167,13 @@ class Gateway(object):
                 self.log("Gateway %s ready" % str(self))
         return self
 
+    def serialize(self):
+        data = {}
+        data['address'] = self.address
+        data['port'] = self.port
+        data['passwd'] = self.passwd
+        return data
+
     def set_available(self):
         if self.address and self.port and self.passwd:
             self.available = True
@@ -160,7 +197,7 @@ class Gateway(object):
         return sock
 
 
-class System(object):
+class System(Json):
     def __init__(self, log_func=None):
         self.log = log_func
         self.database = None
@@ -177,9 +214,10 @@ class System(object):
         else:
             self.database = data.get('database', None)
             self.log('database: %s' % (self.database))
-            self.gateway = data.get('gateway', None)
-            if self.gateway:
-                self.gateway = Gateway(self).load(self.gateway)
+            gateway_data = data.get('gateway', None)
+            if gateway_data is not None:
+                self.gateway = Gateway(self)
+                self.gateway.load(gateway_data)
             else:
                 self.log("WARNING: no gateway entry in system")
             self.devices = data.get('devices', None)
@@ -187,6 +225,14 @@ class System(object):
             self.callbacks = data.get('callbacks', None)
             self.log("system.callbacks %s" % (str(self.callbacks)))
         return self
+
+    def serialize(self):
+        data = {}
+        data['database'] = self.database
+        data['gateway'] = self.gateway.serialize()
+        data['devices'] = self.devices
+        data['callbacks'] = self.callbacks
+        return data
 
     @property
     def id(self):
@@ -221,7 +267,7 @@ class System(object):
         return self.gateway.socket(mode)
 
 
-class Systems(list):
+class Systems(list, Json):
     _log = None
 
     def __init__(self, obj=None):
@@ -253,6 +299,12 @@ class Systems(list):
             self.log("systems => %s" % str(self))
         return self
 
+    def serialize(self):
+        data = []
+        for s in self:
+            data.append(s.serialize())
+        return data
+
     def append(self, obj):
         super().append(obj)
         obj.systems = self
@@ -271,15 +323,13 @@ class Systems(list):
             s.run()
 
 
-class Config(object):
+class Config(Json):
     def __init__(self, config_file=None):
         if config_file is None:
             self.config_file = CONFIG_FILE_NAME
         self.tls = Tls(self)
-        self.systems = None
         self.systems = Systems(self)
-        # self.monitors = []
-        self.load()
+        self.load_file(self.config_file)
 
     def log(self, msg):
         layer1.SYSTEM_LOGGER.log('[CONF] '+str(msg))
@@ -290,20 +340,9 @@ class Config(object):
         self.main_loop = ml
         self.systems.run()
 
-    def parse_config(self, data):
-        if type(data) is dict:
-            k = data.keys()
-            if 'tls' in k:
-                self.tls.load(data['tls'])
-            if 'systems' in k:
-                self.systems.load(data['systems'])
-
-        else:
-            self.log("invalid configuration format")
-
-    def load(self):
+    def load_file(self, file):
         try:
-            f = open(self.config_file, 'r')
+            f = open(file, 'r')
         except IOError as e:
             if e.errno == 2:
                 self.log('unable to find a configuration file to load')
@@ -312,45 +351,61 @@ class Config(object):
             # read the configuration file
             d = f.read()
             f.close()
-            data = json.loads(d)
-            self.parse_config(data)
+            self.load(d)
 
-    # --------------------------------
-    #
-    # TODO: the below need to be fixed
-    #
+    def load(self, data):
+            if len(data) > 0:
+                data = json.loads(data)
+                if type(data) is dict:
+                    k = data.keys()
+                    if 'tls' in k:
+                        self.tls.load(data['tls'])
+                    if 'systems' in k:
+                        self.systems.load(data['systems'])
+                else:
+                    self.log("invalid configuration format")
+            else:
+                self.log("WARNING: configuration file is empty")
+
+    def serialize(self):
+        data = {}
+        data['tls'] = self.tls.serialize()
+        data['systems'] = self.systems.serialize()
+        return data
 
     def save(self):
         f = open(self.config_file, 'w')
-        f.write(json.dumps(self))
+        f.write(self.json())
         f.close()
 
     def add_system(self, ip, port, password):
         # search if we already have this system
-        for s in self.systems:
-            # TODO: fix
-            try:
-                gw = s['gateway']
-            except KeyError:
-                self.log("no gateway entry in system")
-                continue
-            try:
-                gw_ip = gw['ip']
-                gw_port = gw['port']
-                gw_password = gw['password']
-            except KeyError as e:
-                self.log("gateway entry missing one of (ip, port, password)")
-                continue
-            if gw_ip == ip and gw_port == port and gw_password == password:
-                self.log("a system with identical values has already been "
-                         "configured")
-                return False
-        # couldn't find system
+
+        # for s in self.systems:
+        #     # TODO: fix
+        #     try:
+        #         gw = s['gateway']
+        #     except KeyError:
+        #         self.log("no gateway entry in system")
+        #         continue
+        #     try:
+        #         gw_ip = gw['ip']
+        #         gw_port = gw['port']
+        #         gw_password = gw['password']
+        #     except KeyError as e:
+        #         self.log("gateway entry missing one of (ip, port, password)")
+        #         continue
+        #     if gw_ip == ip and gw_port == port and gw_password == password:
+        #         self.log("a system with identical values has already been "
+        #                  "configured")
+        #         return False
+        # # couldn't find system
         gateway = Gateway(ip, port, password)
         system = System(self.log)
         system.set_gateway(gateway)
         self.systems.append(system)
         system.run()
+        self.save()
 
     @property
     def nb_systems(self):
