@@ -8,9 +8,6 @@ import re
 import sys
 import urllib
 
-import config
-from myopen import layer1
-
 STATIC_FILES = "static"
 
 
