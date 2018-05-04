@@ -17,7 +17,7 @@ import webserver
 import website
 
 
-class TestApplication(object):
+class Automator(object):
     """
     This is the test application object
     """
@@ -50,4 +50,4 @@ class TestApplication(object):
 # main program
 if __name__ == '__main__':
     # create the application object, run the main loop
-    TestApplication()
+    Automator()
