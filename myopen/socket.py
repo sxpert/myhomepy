@@ -31,7 +31,7 @@ from . import openpass
 # Layer 1 : tcp socket handling
 #
 
-class OwnSocket(Thread):
+class OWNSocket(Thread):
     COMMAND = 1
     MONITOR = 2
     MODES = {
@@ -68,7 +68,7 @@ class OwnSocket(Thread):
         super().__init__()
 
     def create_clone(self, mode):
-        new_socket = OwnSocket(self.address,
+        new_socket = OWNSocket(self.address,
                                self.port,
                                self.passwd,
                                mode,
@@ -171,7 +171,8 @@ class OwnSocket(Thread):
                         pass
                 except KeyboardInterrupt:
                     # should not happen, normally caught by the main loop class
-                    self.log("Keyboard Interrupt in OWNSocket thread")
+                    self.log("Keyboard Interrupt in %s thread"
+                             % (self.__class__.__name__))
                     self.stopping = True
         self.log("quitting task %s" % (str(self)))
 
@@ -216,7 +217,7 @@ class OwnSocket(Thread):
 
     def close(self):
         if self.sock is not None:
-            self.log('OwnSocket : Closing socket')
+            self.log('%s : Closing socket' % (self.__class__.__name__))
             self.sock.close()
             self.sock = None
             self.sockfd = None
@@ -301,22 +302,3 @@ class OwnSocket(Thread):
         sets the data callback
         """
         self.data_callback = callback
-
-
-class CommandDialog(OwnSocket):
-    def __init__(self, clone):
-        super().__init__(clone.address,
-                         clone.port,
-                         clone.passwd,
-                         self.COMMAND,
-                         clone.timeout,
-                         # auto_reconnect is false
-                         False)
-        self.ready_callback = self.dialog_ready
-        self.data_callback = self.dialog_data
-
-    def dialog_ready(self):
-        self.log("DIALOG: ready")
-
-    def dialog_data(self, msg):
-        self.log("DIALOG: msg")

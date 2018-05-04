@@ -3,7 +3,6 @@
 
 import re
 import urllib
-from myopen import layer1
 
 
 class OW_list_temperatures (object):

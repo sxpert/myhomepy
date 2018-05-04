@@ -9,8 +9,8 @@
 import json
 import sys
 
-from myopen import layer1
-from myopen import monitor
+from myopen.socket import OWNSocket
+from myopen.monitor import OWNMonitor
 
 CONFIG_FILE_NAME = 'config.json'
 
@@ -198,13 +198,16 @@ class Gateway(Json):
             self.log("ERROR attempting to create a socket for "
                      "unavailable gateway %s" % (str(self)))
             return None
-        sock = layer1.OwnSocket(self.address, self.port, self.passwd, mode)
+        sock = OWNSocket(self.address, self.port, self.passwd, mode)
         # find the original system level logger
         sock.set_logger(self.system.main_loop.logger.log)
         return sock
 
 
 class System(Json):
+    COMMAND = OWNSocket.COMMAND
+    MONITOR = OWNSocket.MONITOR
+
     def __init__(self, log_func=None):
         self.log = log_func
         self.database = None

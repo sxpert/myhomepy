@@ -13,7 +13,7 @@ import sys
 
 import database
 
-from . import layer1
+from .dialog import CommandDialog
 from .subsystems import SubSystems
 
 PLUGINS_DIRS = "plugins/"
@@ -29,7 +29,7 @@ class OWNMonitor(object):
         self.plugins = None
         # initializes callbacks
         self.callbacks = None
-        self.monitor_socket = system.socket(layer1.OwnSocket.MONITOR)
+        self.monitor_socket = system.socket(system.MONITOR)
         self.monitor_socket.set_data_callback(self.data_callback)
         # system information
         self.log("Known systems :")
@@ -243,7 +243,7 @@ class OWNMonitor(object):
                 self.log("WARNING: problem while parsing callback definition")
         self.log("Callbacks updated")
 
-    def send_command(self, command=layer1.CommandDialog):
+    def send_command(self, command=CommandDialog):
         socket = command(self.monitor_socket)
         self.log("sending command %s" % (socket.__class__.__name__))
         self.system.main_loop.add_task(socket)

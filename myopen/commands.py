@@ -1,4 +1,6 @@
-from .layer1 import CommandDialog
+# -*- coding: utf-8 -*-
+
+from .dialog import CommandDialog
 from .subsystems import Lighting
 
 

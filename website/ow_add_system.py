@@ -3,7 +3,6 @@
 
 import re
 import urllib
-from myopen import layer1
 
 # --------------------------------------------------------------------------------------------------
 #
@@ -93,13 +92,13 @@ class OW_add_system(object):
         names = value.split('.')
         if len(names) == 0:
             return False
-        layer1.SYSTEM_LOGGER.log(str(names))
+        self.request._log(str(names))
         for n in names:
             # TODO: check against the dns spec
             m = re.match("^[a-z][a-z0-9\-_]{0,62}$", n.lower())
             if m is None:
                 return False
-            layer1.SYSTEM_LOGGER.log(n)
+            self.request._log(n)
         return True
 
     def is_ipv4_or_domain(self, value):
