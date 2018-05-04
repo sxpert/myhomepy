@@ -186,7 +186,10 @@ class OWNSocket(Thread):
             col_in = '\033[94m'
         _msg = '[' + self.address + ':' + str(self.port) + ' ' + \
             self.MODES[self.mode] + '] ' + col_in + msg + col_out
-        self._log(_msg)
+        if self._log is not None:
+            self._log(_msg)
+        else:
+            print(_msg)
 
     def connect(self):
         self.state = self.NONE

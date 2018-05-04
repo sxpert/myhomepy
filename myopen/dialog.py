@@ -12,6 +12,7 @@ class CommandDialog(OWNSocket):
                          clone.timeout,
                          # auto_reconnect is false
                          False)
+        self.set_logger(clone._log)
         self.ready_callback = self.dialog_ready
         self.data_callback = self.dialog_data
 
