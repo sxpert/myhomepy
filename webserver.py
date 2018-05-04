@@ -3,23 +3,20 @@
 # myOpenApplication webserver
 
 import cgi
+import http.server
+import json
 import mimetypes
 import os
 import re
 import shutil
 import socket
+import socketserver
 import ssl
 import sys
-import urllib
-import json
 import traceback
+import urllib
 from io import StringIO
 from threading import Thread
-
-from config import config
-import http.server
-import socketserver
-from myopen import layer1
 
 
 # --------------------------------------------------------------------------------------------------
@@ -362,24 +359,33 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
 #
 
 class OWNHTTPServer(socketserver.TCPServer):
+    web = None
     allow_reuse_address = 1    # Seems to make sense in testing environment
 
     def __init__(self,
                  server_address,
                  RequestHandlerClass,
                  bind_and_activate=True,
-                 log=None):
+                 web=None):
+        self.web = web
         super().__init__(server_address, RequestHandlerClass, False)
 
         # do ssl initialization here
-        if config.tls.available:
-            log("we'll be using TLS")
-            key_file = config.tls.key
-            cert_file = config.tls.cert
-            self.socket = ssl.wrap_socket(self.socket,
-                                          keyfile=key_file,
-                                          certfile=cert_file,
-                                          cert_reqs=ssl.CERT_NONE)
+        tls_ok = False
+        if self.web is not None:
+            config = self.web.app.config
+            if config.tls.available:
+                self.log("we'll be using TLS")
+                key_file = config.tls.key
+                cert_file = config.tls.cert
+                self.socket = ssl.wrap_socket(self.socket,
+                                              keyfile=key_file,
+                                              certfile=cert_file,
+                                              cert_reqs=ssl.CERT_NONE)
+                tls_ok = True
+        if not tls_ok:
+            self.log("WARNING: All web communications are in CLEARTEXT")
+
         if bind_and_activate:
             try:
                 self.server_bind()
@@ -387,6 +393,12 @@ class OWNHTTPServer(socketserver.TCPServer):
             except:
                 self.server_close()
                 raise
+
+    def log(self, message):
+        if self.web is None:
+            print(message)
+            return
+        self.web.log(message)
 
     def process_request(self, request, client_address):
         """Call finish_request.
@@ -409,19 +421,22 @@ class OWNHTTPServer(socketserver.TCPServer):
 #
 
 class OpenWeb(Thread):
-    def __init__(self, address):
-        self.log("initializing thread")
+    app = None
+    address = None
+    routes = None
+    default = None
+    httpd = None
+
+    def __init__(self, app, address):
+        self.app = app
+        self.log("initializing webserver thread")
         Thread.__init__(self)
         self.address = address
-        self.routes = None
-        self.default = None
-        self.httpd = None
-        self.start()
 
     def run(self):
-        self.log("starting thread")
+        self.log("starting Webserver thread")
 #        self.httpd = BaseHTTPServer.HTTPServer(self.address, OpenWebHandler)
-        self.httpd = OWNHTTPServer(self.address, OpenWebHandler, log=self.log)
+        self.httpd = OWNHTTPServer(self.address, OpenWebHandler, web=self)
         if self.routes is None:
             self.log("error, no routes set")
             return
@@ -440,21 +455,18 @@ class OpenWeb(Thread):
         except AttributeError:
             server = ""
         message = str(message)
-        layer1.SYSTEM_LOGGER.log('[%sWEB] %s' % (server, message))
+        if self.app is None:
+            print(message)
+            return
+        self.app.system_logger.log('[%sWEB] %s' % (server, message))
 
     def register_routes(self, routes):
         self.routes = routes
+        self.log("%d Routes initialized" % (len(routes)))
+        self.start()
 
     def default_route(self, dr):
         self.default = dr
 
     def stop(self):
         self.httpd.shutdown()
-
-if __name__ == '__main__':
-    addr = ('', 8000)
-    srv = OpenWeb(addr)
-    system_loop = layer1.MainLoop(layer1.SYSTEM_LOGGER)
-    print(srv.sock.fileno())
-    system_loop.add_socket(srv)
-    system_loop.run()

@@ -10,7 +10,7 @@ import json
 import sys
 
 from myopen import layer1
-from myopen import layer2
+from myopen import monitor
 
 CONFIG_FILE_NAME = 'config.json'
 
@@ -28,10 +28,11 @@ class Json(object):
 
 
 class Tls(Json):
+    cert = None
+    key = None
+    available = False
+
     def __init__(self, obj=None):
-        self.cert = None
-        self.key = None
-        self.available = False
         if obj is not None:
             if isinstance(obj, Config):
                 self.config = obj
@@ -48,18 +49,22 @@ class Tls(Json):
             print(msg)
 
     def load(self, data):
-        if type(data) is not dict:
+        if data is None:
+            pass
+        elif type(data) is not dict:
             self.log("ERROR loading TLS configuration, dictionnary expected")
         else:
             self.key = self.check_for_file('key', data)
             self.cert = self.check_for_file('cert', data)
-            if self.available:
-                self.log("TLS available")
-            else:
-                self.log("TLS unavailable")
+        if self.available:
+            self.log("TLS available")
+        else:
+            self.log("TLS unavailable")
         return self
 
     def serialize(self):
+        if self.key is None and self.cert is None:
+            return None
         data = {}
         data['key'] = self.key
         data['cert'] = self.cert
@@ -194,6 +199,7 @@ class Gateway(Json):
                      "unavailable gateway %s" % (str(self)))
             return None
         sock = layer1.OwnSocket(self.address, self.port, self.passwd, mode)
+        sock.set_logger(self._log)
         return sock
 
 
@@ -260,7 +266,7 @@ class System(Json):
         if self.main_loop is None:
             self.log("ERROR: Unable to start system, there is no system loop")
             return False
-        self.monitor = layer2.OWNMonitor(self)
+        self.monitor = monitor.OWNMonitor(self)
         self.log("added system with system id=%d" % (self.id))
 
     def socket(self, mode):
@@ -324,7 +330,8 @@ class Systems(list, Json):
 
 
 class Config(Json):
-    def __init__(self, config_file=None):
+    def __init__(self, app, config_file=None):
+        self.app = app
         if config_file is None:
             self.config_file = CONFIG_FILE_NAME
         self.tls = Tls(self)
@@ -332,7 +339,12 @@ class Config(Json):
         self.load_file(self.config_file)
 
     def log(self, msg):
-        layer1.SYSTEM_LOGGER.log('[CONF] '+str(msg))
+        msg_s = '[CONF] '+str(msg)
+        if self.app is not None:
+            if self.app.system_logger is not None:
+                self.app.system_logger.log(msg_s)
+                return
+        print(msg_s)
 
     # sets the main loop
     # starts up all loaded systems
@@ -380,6 +392,7 @@ class Config(Json):
 
     def add_system(self, ip, port, password):
         # search if we already have this system
+        # TODO: restore this functionnality
 
         # for s in self.systems:
         #     # TODO: fix
@@ -410,11 +423,3 @@ class Config(Json):
     @property
     def nb_systems(self):
         return len(self.systems)
-
-
-config = Config()
-
-if __name__ == '__main__':
-    system_loop = layer1.MainLoop(layer1.SYSTEM_LOGGER)
-    config.set_main_loop(system_loop)
-    pass

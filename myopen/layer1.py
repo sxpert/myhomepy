@@ -8,138 +8,22 @@
 # Licenced under the terms of the GNU GPL v3.0 or later
 #
 
-from __future__ import print_function
+# from __future__ import print_function
 
-import datetime
+# import datetime
 import errno
 import re
 import select
 import socket
 # system includes
-import sys
-import time
+# import sys
+# import time
 from threading import Thread
+
+from core.mainloop import MainLoop
 
 # application includes
 from . import openpass
-
-DEBUG = True
-LOGFILE = 'myopenlog-2.log'
-
-
-# --------------------------------------------------------------------------------------------------
-#
-# System Logger
-#
-
-class Logger(object):
-    def __init__(self, logfile):
-        self.logfile = logfile
-
-    def log(self, msg):
-        # generate datetime string
-        current_date = datetime.datetime.today()
-        date_string = "%04d-%02d-%02d %02d:%02d:%02d" % (
-            current_date.year,
-            current_date.month,
-            current_date.day,
-            current_date.hour,
-            current_date.minute,
-            current_date.second)
-        if type(msg) is not str:
-            msg = str(msg)
-        logmsg = '%s %s' % (date_string, msg)
-        print(logmsg)
-        try:
-            # TODO: syslog ?
-            log_file = open(self.logfile, "a+")
-            log_file.write(logmsg+'\n')
-            log_file.close()
-        except:
-            pass
-
-SYSTEM_LOGGER = Logger(LOGFILE)
-
-
-# --------------------------------------------------------------------------------------------------
-#
-# System main loop, handles events
-#
-
-class MainLoop(object):
-    """
-    main program loop
-    manages threads
-    """
-    def __init__(self, logger, timeout=0.2):
-        self.tasks = []
-        self.timers = []
-        self.stopped = False
-        self.logger = logger
-        self.timeout = timeout
-
-    def log(self, msg):
-        col_in = '\033[91m'
-        col_out = '\033[0m'
-        self.logger.log('[LOOP] ' + col_in + msg + col_out)
-
-    def add_task(self, task):
-        self.log("adding task "+str(task))
-        self.tasks.append(task)
-
-    def wait_all(self):
-        """
-        stops all registered tasks,
-        then joins them
-        """
-        for task in self.tasks:
-            self.logger.log("waiting on server "+str(task))
-            task.stop()
-            try:
-                task.join()
-            except KeyboardInterrupt:
-                pass
-        self.log(str("all remaining servers stopped"))
-
-    def run(self):
-        """
-        main program loop.
-        handles keyboard interrupt, stops all other threads in that case
-        """
-        # start all registered tasks
-        for task in self.tasks:
-            # try starting the task
-            try:
-                task.start()
-            except RuntimeError:
-                # hah, task already started, ignore
-                pass
-        try:
-            self.log("running main loop")
-            while not self.stopped:
-                time.sleep(1)
-                # cleanup dead threads
-                tasklist = []
-                changed = False
-                for t in self.tasks:
-                    try:
-                        t.start()
-                    except RuntimeError:
-                        # thread already started, we're fine
-                        pass
-                    if not t.is_alive():
-                        self.log("task %s is dead" % (str(t)))
-                        t.join(0.1)
-                        changed = True
-                    else:
-                        tasklist.append(t)
-                if changed:
-                    # self.log("task list %s" % (str(tasklist)))
-                    self.tasks = tasklist
-        except KeyboardInterrupt:
-            self.log("^C forcing program exit")
-            self.wait_all()
-            sys.exit(0)
 
 
 # --------------------------------------------------------------------------------------------------
@@ -165,6 +49,7 @@ class OwnSocket(Thread):
 
     def __init__(self, address, port, passwd, mode,
                  timeout=0.2, auto_reconnect=True):
+        self._log = None
         self.address = address
         self.port = port
         self.passwd = passwd
@@ -290,6 +175,9 @@ class OwnSocket(Thread):
                     self.stopping = True
         self.log("quitting task %s" % (str(self)))
 
+    def set_logger(self, logger):
+        self._log = logger
+
     def log(self, msg):
         col_in = '\033[92m'
         col_out = '\033[0m'
@@ -297,7 +185,7 @@ class OwnSocket(Thread):
             col_in = '\033[94m'
         _msg = '[' + self.address + ':' + str(self.port) + ' ' + \
             self.MODES[self.mode] + '] ' + col_in + msg + col_out
-        SYSTEM_LOGGER.log(_msg)
+        self._log(_msg)
 
     def connect(self):
         self.state = self.NONE
@@ -432,19 +320,3 @@ class CommandDialog(OwnSocket):
 
     def dialog_data(self, msg):
         self.log("DIALOG: msg")
-
-# --------------------------------------------------------------------------------------------------
-#
-# test program
-#
-
-if __name__ == '__main__':
-    import config
-    SYSTEM_LOOP = MainLoop(SYSTEM_LOGGER)
-    # test program
-    OWN_SOCK = OwnSocket(config.host,
-                         config.port,
-                         config.password,
-                         OwnSocket.MONITOR)
-    SYSTEM_LOOP.add_socket(OWN_SOCK)
-    SYSTEM_LOOP.run()
