@@ -61,6 +61,7 @@ class OW_add_system(object):
 
     def do_GET(self, request):
         # initialize variables
+        self.request = request
         self.gateway = ""
         self.openwebnet_port = ""
         self.password_open = ""
@@ -120,6 +121,7 @@ class OW_add_system(object):
         return False
 
     def do_POST(self, request):
+        self.request = request
         # get variables
         errors = {}
         action = request.get_variable('action')

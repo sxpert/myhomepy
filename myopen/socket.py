@@ -17,13 +17,59 @@ import select
 import socket
 # system includes
 # import sys
-# import time
+import time
 from threading import Thread
 
 from core.mainloop import MainLoop
 
 # application includes
 from . import openpass
+
+
+class GenericPoller(object):
+    PT_EPOLL = 0
+    PT_POLL = 1
+    POLLERS = ((PT_EPOLL, 'epoll', ),
+               (PT_POLL, 'poll', ))
+
+    _log = None
+    poller_type = None
+    poller_func = None
+    poller = None
+
+    def __init__(self, logger=None):
+        self._log = logger
+        select_module = dir(select)
+        for p_index, p_poller in self.POLLERS:
+            if p_poller in select_module:
+                self.poller_type = p_index
+                self.poller_func = getattr(select, p_poller)
+                break
+        if self.poller_type is None:
+            self._log("ERROR: unable to find a poll function in select module")
+            return
+        self.poller = self.poller_func()
+
+    def register(self, fd):
+        if self.poller_type == self.PT_EPOLL:
+            return self.poller.register(fd,
+                                        select.EPOLLIN | 
+                                        select.EPOLLPRI |
+                                        select.EPOLLHUP | 
+                                        select.EPOLLERR |
+                                        select.EPOLLET)
+        elif self.poller_type == self.PT_POLL:
+            return self.poller.register(fd,
+                                        select.POLLIN |
+                                        select.POLLPRI |
+                                        select.POLLHUP |
+                                        select.POLLERR)
+          
+    def poll(self, timeout):
+        return self.poller.poll(timeout)
+        
+    def unregister(self, fd):
+        return self.poller.unregister(fd)
 
 
 # --------------------------------------------------------------------------------------------------
@@ -47,24 +93,31 @@ class OWNSocket(Thread):
     NACK = '*#*0##'
     ACK = '*#*1##'
 
+    _log = None
+    address = '192.168.1.35'
+    auto_reconnect = True
+    buf = ''
+    cnxfailcnt = 0
+    data_callback = None
+    mode = None
+    ready_callback = None
+    poller = None
+    port = 20000
+    passwd = '12345'
+    sock = None
+    sockfd = None
+    state = NONE
+    stopping = False
+    timeout = 0.2
+    
     def __init__(self, address, port, passwd, mode,
                  timeout=0.2, auto_reconnect=True):
-        self._log = None
         self.address = address
         self.port = port
         self.passwd = passwd
         self.mode = mode
         self.auto_reconnect = auto_reconnect
-        self.buf = ''
-        self.sock = None
-        self.sockfd = None
-        self.state = self.NONE
-        self.ready_callback = None
-        self.data_callback = None
-        self.stopping = False
         self.timeout = timeout
-        self.cnxfailcnt = 0
-        self.poller = select.epoll()
         super().__init__()
 
     def create_clone(self, mode):
@@ -80,6 +133,9 @@ class OWNSocket(Thread):
 
     def run(self):
         while not self.stopping:
+            if self.poller is None:
+                self.poller = GenericPoller(self._log)
+                
             if self.sock is not None or self.cnxfailcnt < 3:
                 timeout = self.timeout
             else:
@@ -89,10 +145,7 @@ class OWNSocket(Thread):
                 self.connect()
                 # setup poller object after connecting
                 if self.sock is not None:
-                    self.poller.register(self.sockfd,
-                                         select.EPOLLIN | select.EPOLLPRI |
-                                         select.EPOLLHUP | select.EPOLLERR |
-                                         select.EPOLLET)
+                    self.poller.register(self.sockfd)
                 else:
                     self.log('unable to add socket to poller, sock==None')
                     try:
@@ -112,21 +165,25 @@ class OWNSocket(Thread):
                                          ' different from given fd (%d)' % (
                                              self.sockfd, filedesc,))
                             else:
+                                # NOTE: 
+                                # the select.EPOLL* have identical values to the
+                                # select.POLL* values
+                                # 
                                 # self.log("flags: "+bin(flags)[2:])
-                                if flags & (select.EPOLLIN | select.EPOLLPRI):
+                                if flags & (select.POLLIN | select.POLLPRI):
                                     try:
                                         self.recv()
                                     except socket.error as e:
                                         self.log(str(e))
                                         if e.errno == errno.ETIMEDOUT:
                                             self.close()
-                                elif flags & select.EPOLLHUP:
+                                elif flags & select.POLLHUP:
                                     self.log('socket '+str(self) +
                                              ' is hanged-up')
                                     # remove from poller and reconnect
                                     self.poller.unregister(self.sockfd)
                                     self.reconnect()
-                                elif flags & select.EPOLLERR:
+                                elif flags & select.POLLERR:
                                     self.log('socket '+str(self) +
                                              ' is in error state')
                                     # remove from poller and reconnect
@@ -195,10 +252,23 @@ class OWNSocket(Thread):
         self.state = self.NONE
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # set keepalive options
+
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-        self.sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPIDLE, 1)
-        self.sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPINTVL, 1)
-        self.sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPCNT, 2)
+        keepidle_supported = True
+        try:
+            self.sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPIDLE, 1)
+        except AttributeError:
+            # suspect we're on a platform that doesn't support this
+            # for instance, Mac OS X
+            keepidle_supported = False
+            # self.log("Running on a platform that doesn't suport KEEPIDLE")
+        if not keepidle_supported :    
+            self.sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPINTVL, 1)
+            self.sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPCNT, 2)
+        else:
+            # self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPALIVE, 2)
+            pass
+        
         # set socket as non-blocking (to avoid the idiotic timeout on connect)
         self.log("Initializing connection to " + str(self.address) +
                  " port " + str(self.port))
