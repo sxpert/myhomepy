@@ -1,23 +1,23 @@
 # -*- coding: utf-8 -*-
+
 import json
 
-
 class OWNSubSystem(object):
+    system = None
 
-    def __init__(self, monitor=None):
-        self.monitor = monitor
+    def __init__(self, system=None):
+        self.system = system
 
     def log(self, msg):
-        if self.monitor:
-            self.monitor.log(msg)
+        if self.system:
+            self.system.log(msg)
         else:
             print(self.__class__.__name__, msg)
 
-    def parse(self, mode, msg):
-        self.log(msg)
-        if mode == self.monitor.STATUS:
+    def parse(self, msg):
+        if msg.is_status:
             return self.parse_status(msg)
-        if mode == self.monitor.COMMAND:
+        if msg.is_command:
             return self.parse_command(msg)
         self.log("unknow")
 
@@ -34,4 +34,5 @@ class OWNSubSystem(object):
         self.log("EXECUTING CALLBACK -> %d %d %s %s" % (
             system, order, json.dumps(device), json.dumps(data),
         ))
-        self.monitor.execute_callback(system, order, device, data)
+        self.log(self.system)
+        self.system.execute_callback(system, order, device, data)

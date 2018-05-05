@@ -14,23 +14,21 @@ import sys
 import database
 
 from .dialog import CommandDialog
+from .message import Message
 from .subsystems import SubSystems
 
 PLUGINS_DIRS = "plugins/"
 
 
 class OWNMonitor(object):
-    COMMAND = 0
-    STATUS = 1
-    MSG_TYPES = ['Command', 'Status', ]
+    system = None
+    plugins = None
+    callbacks = None
+    monitor_socket = None
 
     def __init__(self, system):
         self.system = system
-        self.plugins = None
-        # initializes callbacks
-        self.callbacks = None
-        self.monitor_socket = system.socket(system.MONITOR)
-        self.monitor_socket.set_data_callback(self.data_callback)
+
         # system information
         self.log("Known systems :")
         for s in SubSystems:
@@ -39,7 +37,14 @@ class OWNMonitor(object):
                      subsystem.__class__.__name__,
                      subsystem.SYSTEM_WHO))
         # end of system info
+
+        # TODO: move this
+        # initializes callbacks
         self.update_callbacks(system)
+
+        self.monitor_socket = system.socket(system.MONITOR)
+        self.monitor_socket.set_data_callback(self.data_callback)
+
         # add the monitor socket to the system loop
         self.system.main_loop.add_task(self.monitor_socket)
 
@@ -47,17 +52,20 @@ class OWNMonitor(object):
         msg = str(msg)
         if self.monitor_socket is not None:
             self.monitor_socket.log(msg)
+        elif self.system is not None:
+            self.system.log(msg)
         else:
             print(msg)
 
     #
     # getters and setters
+    # this should be from system...
     #
     @property
     def database(self):
         try:
             db = self._db
-        except AttributeError as e:
+        except AttributeError:
             if self.system.database is None:
                 self.log("WARNING: unable to find a value for "
                          "\'database\' in the config for the system")
@@ -70,40 +78,10 @@ class OWNMonitor(object):
 
     # ----------------------------------------------------------------------------------------------
     # this is called for each open web net packet received
-    # parses the packet type, and calls the right function depending on the
-    # source.
-    # logs the packet as is if not understood
     #
     def data_callback(self, msg):
-        msgtype = None
-        # skip useless *1001*3*0## frame
-        if msg == '*1001*3*0##':
-            return
-        # analyze the content of messages passed from the layer 1
-        m = re.match('^\*(?P<who>\d+)(?P<msg>\*.*)', msg)
-        if m is not None:
-            msgtype = self.COMMAND
-        else:
-            m = re.match('^\*#(?P<who>\d+)(?P<msg>\*.*)', msg)
-            if m is not None:
-                msgtype = self.STATUS
-        if msgtype is not None:
-            who, msg = m.groups()
-            i_who = int(who)
-            ok = False
-            for s in SubSystems:
-                if i_who == s.SYSTEM_WHO:
-                    subsystem = s(self)
-                    ok = subsystem.parse(msgtype, msg)
-                    if ok is not None and ok:
-                        return
-                    break
-            msg = 'found ' + self.MSG_TYPES[msgtype] + ' message \'' + who + \
-                  '\' remains \'' + msg + '\''
-        else:
-            msg = 'Unknown first character in message '+msg
-        # log something
-        self.log(msg)
+        message = Message(msg, self)
+        message.dispatch()
 
     # ----------------------------------------------------------------------------------------------
     # managing callbacks

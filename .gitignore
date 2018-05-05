@@ -10,3 +10,4 @@ devices.txt
 *.db
 *.swp
 *.pem
+.vscode/*

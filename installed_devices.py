@@ -6,8 +6,8 @@ conf = {
 			},
 			'1' : {
 				'1' : 'Chambre - Plafonnier',
-				'2' ; 'Chambre - Applique',
-				'3' ; 'Chambre - Tête de lit Gauche',
+				'2' : 'Chambre - Applique',
+				'3' : 'Chambre - Tête de lit Gauche',
 				'4' : 'Chambre - Tête de lit Droit'
 			},
 			'2' : {	

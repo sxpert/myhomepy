@@ -21,7 +21,7 @@ class Lighting(OWNSubSystem):
     def parse_command(self, msg):
         # light command
         # '*0*#1##'
-        m = re.match('^\*(?P<command>[01])\*(?P<light>\d{2,4})##$', msg)
+        m = re.match(r'^\*(?P<command>[01])\*(?P<light>\d{2,4})##$', msg.msg)
         if m is not None:
             data = m.groupdict()
             self.log(str(data))
@@ -31,7 +31,7 @@ class Lighting(OWNSubSystem):
                                   int(data['command']),
                                   device, None)
             return
-        m = re.match('^\*(?P<command>[01])\*#(?P<group>\d{1,3})##$', msg)
+        m = re.match(r'^\*(?P<command>[01])\*#(?P<group>\\d{1,3})##$', msg,msg)
         if m is not None:
             data = m.groupdict()
             self.log(str(data))

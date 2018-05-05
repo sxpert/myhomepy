@@ -16,20 +16,19 @@ class TempControl(OWNSubSystem):
     }
 
     def parse_status(self, msg):
-        super().parse_status(msg)
         # temperature report
-        # '101*0*0270##'
-        m = re.match('^\*(?P<probe>\d{3})\*0\*(?P<temperature>\d{4})##$', msg)
+        # '*101*0*0270##'
+        m = re.match(r'^\*(?P<probe>\d{3})\*0\*(?P<temperature>\d{4})##$', msg.msg)
         if m is not None:
             data = m.groupdict()
-            js_data = json.dumps(data)
             # generate the device key
             zone = int(data['probe'][0])
             sensor = int(data['probe'][1:])
             device = {'zone': zone, 'sensor': sensor}
             temp = float(data['temperature'])/10.0
             data = {'temp': temp, 'unit': '°C'}
-            self.execute_callback(self.SYSTEM_WHO, self.OP_REPORT_TEMP,
+            self.execute_callback(self.SYSTEM_WHO, 
+                                  self.OP_REPORT_TEMP,
                                   device, data)
             return True
         else:
