@@ -12,6 +12,8 @@ import re
 import sys
 import threading
 
+from .socket import OWNSocket
+
 from .dialog import CommandDialog
 from .message import Message
 from .subsystems import SubSystems
@@ -19,14 +21,14 @@ from .subsystems import SubSystems
 PLUGINS_DIRS = "plugins/"
 
 
-class OWNMonitor(object):
+class OWNMonitor(OWNSocket):
     system = None
     plugins = None
     callbacks = None
-    monitor_socket = None
 
     def __init__(self, system):
         self.system = system
+        self.mode = self.MONITOR
 
         # system information
         self.log("OWNMonitor.__init__ Known systems :")
@@ -37,20 +39,14 @@ class OWNMonitor(object):
                      subsystem.SYSTEM_WHO))
         # end of system info
 
-        self.monitor_socket = system.socket(system.MONITOR)
-        self.monitor_socket.set_data_callback(self.data_callback)
+        address, port, passwd = system.gateway.socket_info
+        super().__init__(address, port, passwd)
 
-        # add the monitor socket to the system loop
-        self.system.main_loop.add_task(self.monitor_socket)
+        # add self to the system loop
+        self.system.main_loop.add_task(self)
 
-    def log(self, msg):
-        msg = str(msg)
-        if self.monitor_socket is not None:
-            self.monitor_socket.log(msg)
-        elif self.system is not None:
-            self.system.log(msg)
-        else:
-            print(msg)
+    def ready_callback(self):
+        self.log("MONITOR is ready")
 
     # ----------------------------------------------------------------------------------------------
     # this is called for each open web net packet received
@@ -60,7 +56,7 @@ class OWNMonitor(object):
         message.dispatch()
 
     def send_command(self, command=CommandDialog):
-        socket = command(self.monitor_socket)
+        socket = command(self)
         event = threading.Event()
         socket.event = event
         self.log("OWNMonitor.send_command %s" % (socket.__class__.__name__))

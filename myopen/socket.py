@@ -98,9 +98,9 @@ class OWNSocket(Thread):
     auto_reconnect = True
     buf = ''
     cnxfailcnt = 0
-    data_callback = None
+    # data_callback = None
     mode = None
-    ready_callback = None
+    # ready_callback = None
     poller = None
     port = 20000
     passwd = '12345'
@@ -110,12 +110,13 @@ class OWNSocket(Thread):
     stopping = False
     timeout = 0.2
     
-    def __init__(self, address, port, passwd, mode,
+    def __init__(self, address, port, passwd, mode=None,
                  timeout=0.2, auto_reconnect=True):
         self.address = address
         self.port = port
         self.passwd = passwd
-        self.mode = mode
+        if mode is not None:
+            self.mode = mode
         self.auto_reconnect = auto_reconnect
         self.timeout = timeout
         super().__init__()
@@ -330,16 +331,12 @@ class OWNSocket(Thread):
                 if msg == self.ACK:
                     self.log('successfully connected')
                     self.state = self.LOGGED
-                    if self.ready_callback is not None:
-                        self.ready_callback()
+                    self.ready_callback()
                 else:
                     self.log('unable to log in')
                     self.state = self.FAILED
                 return
-            if self.data_callback is not None:
-                self.data_callback(msg)
-            else:
-                self.log('<-RX '+str(msg))
+            self.data_callback(msg)
 
     def send(self, msg):
         self.log('TX-> '+str(msg))
@@ -364,14 +361,8 @@ class OWNSocket(Thread):
         self.state = self.AUTH
         self.send(password_message)
 
-    def set_ready_callback(self, callback):
-        """
-        sets the callback for when the connection is ready
-        """
-        self.ready_callback = callback
+    def ready_callback(self):
+        pass
 
-    def set_data_callback(self, callback):
-        """
-        sets the data callback
-        """
-        self.data_callback = callback
+    def data_callback(self, msg):
+        self.log('<-RX '+str(msg))

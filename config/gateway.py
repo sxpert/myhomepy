@@ -102,3 +102,7 @@ class Gateway(_json.Json):
         # find the original system level logger
         sock.set_logger(self.system.main_loop.logger.log)
         return sock
+
+    @property
+    def socket_info(self):
+        return (self.address, self.port, self.passwd, )

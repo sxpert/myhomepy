@@ -16,9 +16,6 @@ class CommandDialog(OWNSocket):
                          clone.timeout,
                          # auto_reconnect is false
                          False)
-        self.set_logger(clone._log)
-        self.ready_callback = self.dialog_ready
-        self.data_callback = self.dialog_data
 
     @property
     def event(self):
@@ -36,8 +33,8 @@ class CommandDialog(OWNSocket):
         if self._event is not None:
             self._event.set()
 
-    def dialog_ready(self):
+    def ready_callback(self):
         self.log("DIALOG: ready")
 
-    def dialog_data(self, msg):
+    def data_callback(self, msg):
         self.log("DIALOG: msg")
