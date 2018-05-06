@@ -110,7 +110,6 @@ class OWNSubSystem(object):
             json.dumps(device), json.dumps(data)
         ))
         callback_ok = self.system.callback(self, order, device, data)
-        self.log("callback_ok : %s %s" % (str(type(callback_ok)), str(callback_ok)))
         if callback_ok is bool and not callback_ok:
             self.log("WARNING: unable to execute callback")
         return callback_ok

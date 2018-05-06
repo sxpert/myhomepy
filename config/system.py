@@ -99,8 +99,5 @@ class System(_json.Json):
     def callback(self, *args, **kwargs):
         return self._callbacks.execute(*args, **kwargs)
 
-    # def execute_callback(self, *args, **kwargs):
-    #     self.monitor.execute_callback(*args, **kwargs)
-
     def socket(self, mode):
         return self.gateway.socket(mode)
