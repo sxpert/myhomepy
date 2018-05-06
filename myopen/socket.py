@@ -8,21 +8,17 @@
 # Licenced under the terms of the GNU GPL v3.0 or later
 #
 
-# from __future__ import print_function
-
-# import datetime
 import errno
 import re
 import select
 import socket
-# system includes
 import sys
 import time
 from threading import Thread
 
+from core.logger import SYSTEM_LOGGER
 from core.mainloop import MainLoop
 
-# application includes
 from . import openpass
 
 
@@ -234,9 +230,6 @@ class OWNSocket(Thread):
                     self.stopping = True
         self.log("quitting task %s" % (str(self)))
 
-    def set_logger(self, logger):
-        self._log = logger
-
     def log(self, msg):
         col_in = '\033[92m'
         col_out = '\033[0m'
@@ -244,10 +237,7 @@ class OWNSocket(Thread):
             col_in = '\033[94m'
         _msg = '[' + self.address + ':' + str(self.port) + ' ' + \
             self.MODES[self.mode] + '] ' + col_in + msg + col_out
-        if self._log is not None:
-            self._log(_msg)
-        else:
-            print(_msg)
+        SYSTEM_LOGGER.log(_msg)
 
     def connect(self):
         self.state = self.NONE
