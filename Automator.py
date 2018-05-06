@@ -27,7 +27,7 @@ class Automator(object):
 
     def __init__(self):
         # create the system loop
-        SYSTEM_LOGGER.debug = True
+        #SYSTEM_LOGGER.debug = True
         SYSTEM_LOGGER.logfile = LOGFILE
         self.system_loop = MainLoop(SYSTEM_LOGGER)
         self.config = Config(self)
