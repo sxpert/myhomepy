@@ -89,14 +89,16 @@ class Database(object):
     def log_temperature(self, time, sensor, temp):
         conn = sqlite3.connect(self.dbname)
         c = conn.cursor()
-        res = self.execute(c,
-                           "insert into temperatures (time, sensor, temp) "
-                           "values (?,?,?);", (time, sensor, temp,))
-        if res is bool and res:
-            self.log("%d rows written" % (c.rowcount))
-            conn.commit()
+        c.execute("insert into temperatures (time, sensor, temp) values (?,?,?);",
+                  (time, sensor, temp,))
+        # res = self.execute(c,
+        #                    "insert into temperatures (time, sensor, temp) "
+        #                    "values (?,?,?);", (time, sensor, temp,))
+        # if res is bool and res:
+        #     self.log("%d rows written" % (c.rowcount))
+        conn.commit()
         conn.close()
-        return res
+        return True
 
     # lists all temperature sensors that logged something so far
     def list_temperature_sensors(self):
