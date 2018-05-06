@@ -4,6 +4,7 @@ from ._json import Json
 from . import config
 
 
+
 class Tls(Json):
     cert = None
     key = None
@@ -66,7 +67,6 @@ class Tls(Json):
         else:
             f.read()
             f.close()
-            self.log("TLS '%s' file '%s' successfully loaded" % (key, fname))
             self.available = True
         return fname
 

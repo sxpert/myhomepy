@@ -12,7 +12,7 @@ Main application module
 
 import website
 from config import Config
-from core.logger import Logger
+from core.logger import SYSTEM_LOGGER
 from core.mainloop import MainLoop
 from webserver import OpenWeb
 
@@ -27,8 +27,9 @@ class Automator(object):
 
     def __init__(self):
         # create the system loop
-        self.system_logger = Logger(LOGFILE)
-        self.system_loop = MainLoop(self.system_logger)
+        SYSTEM_LOGGER.debug = True
+        SYSTEM_LOGGER.logfile = LOGFILE
+        self.system_loop = MainLoop(SYSTEM_LOGGER)
         self.config = Config(self)
         self.config.set_main_loop(self.system_loop)
 

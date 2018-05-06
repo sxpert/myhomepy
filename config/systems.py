@@ -33,8 +33,6 @@ class Systems(list, _json.Json):
             for s in data:
                 s = system.System(self.log).load(s)
                 self.append(s)
-                self.log("added system %s" % str(s.id))
-            self.log("systems => %s" % str(self))
         return self
 
     def serialize(self):

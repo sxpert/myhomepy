@@ -18,6 +18,7 @@ import urllib
 from io import StringIO
 from threading import Thread
 
+from core.logger import SYSTEM_LOGGER
 
 # --------------------------------------------------------------------------------------------------
 #
@@ -37,7 +38,7 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
                                 str(self.server.server_port))
 
     def __log(self, msg):
-        self.server.web.app.system_logger.log(msg)
+        SYSTEM_LOGGER.log(msg)
 
     def _log(self, msg):
         self.__log('%s %s' % (str(self._srv), str(msg)))
@@ -83,7 +84,7 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
     def json_response(self, json_data):
         try:
             json_string = json.dumps(json_data)
-        except Exception as error:
+        except Exception:
             print("Error while dumping data to json format")
             exc_type, exc_value, exc_traceback = sys.exc_info()
             for traceback_line in traceback.format_tb(exc_traceback):
@@ -180,7 +181,7 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
 
     def guess_type(self, path):
         import posixpath
-        base, ext = posixpath.splitext(path)
+        _, ext = posixpath.splitext(path)
         if ext in self.extension_map:
             return self.extension_map[ext]
         ext = ext.lower()
@@ -235,7 +236,7 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
         method = getattr(o, mname)
         try:
             method(self)
-        except Exception as error:
+        except Exception:
             print("ERROR WHILE do_request : ")
             exc_type, exc_value, exc_traceback = sys.exc_info()
             for traceback_line in traceback.format_tb(exc_traceback):
@@ -285,7 +286,7 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
                     k = k[:-2]
                     try:
                         tv = self.variables[k]
-                    except KeyError as e:
+                    except KeyError:
                         tv = []
                     tv.append(v)
                     v = tv
@@ -297,7 +298,7 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
     def parse_post_urlencoded_variables(self):
         try:
             l = self.headers['content-length']
-        except KeyError as e:
+        except KeyError:
             self.send_error(501,
                             "unable to find content length for posted data")
             return False
@@ -312,7 +313,7 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
         self.parse_url_variables()
         try:
             t = self.headers['content-type']
-        except KeyError as e:
+        except KeyError:
             pass
         if t == 'application/x-www-form-urlencoded':
             return self.parse_post_urlencoded_variables()
@@ -433,7 +434,6 @@ class OpenWeb(Thread):
 
     def __init__(self, app, address):
         self.app = app
-        self.log("initializing webserver thread")
         Thread.__init__(self)
         self.address = address
 
@@ -462,7 +462,7 @@ class OpenWeb(Thread):
         if self.app is None:
             print(message)
             return
-        self.app.system_logger.log('[%sWEB] %s' % (server, message))
+        SYSTEM_LOGGER.log('[%sWEB] %s' % (server, message))
 
     def register_routes(self, routes):
         self.routes = routes

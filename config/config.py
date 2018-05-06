@@ -2,11 +2,9 @@
 
 import json
 
-from . import _json
-from . import tls
-from . import gateway
-from . import system
-from . import systems
+from core.logger import SYSTEM_LOGGER
+
+from . import _json, gateway, system, systems, tls
 
 CONFIG_FILE_NAME = 'config.json'
 
@@ -24,11 +22,7 @@ class Config(_json.Json):
 
     def log(self, msg):
         msg_s = '[CONF] '+str(msg)
-        if self.app is not None:
-            if self.app.system_logger is not None:
-                self.app.system_logger.log(msg_s)
-                return
-        print(msg_s)
+        SYSTEM_LOGGER.log(msg_s)
 
     # sets the main loop
     # starts up all loaded systems
