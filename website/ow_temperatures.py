@@ -13,7 +13,7 @@ class OW_list_temperatures (object):
             # TODO: we may not have a database in this system
             system = request.config.systems[0]
             if system.database is not None:
-                database = system.monitor.database
+                database = system.database
                 sensors = database.list_temperature_sensors()
         data = {
             'start': '2017-07-01T23:53',

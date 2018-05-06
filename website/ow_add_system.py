@@ -15,11 +15,12 @@ import urllib
 
 
 class OW_add_system(object):
+    errors = None
 
     def generate_basic_form(self, request):
-        try:
+        if self.errors is not None:
             errors = self.errors
-        except:
+        else:
             errors = {}
 
         gateway = request.quote_value(self.gateway)
@@ -78,7 +79,7 @@ class OW_add_system(object):
 
     def is_ipv4(self, value):
         # check if ipv4
-        m = re.match("^(\d{1,3})\.(\d{1,3})\.(\d{1,3}).(\d{1,3})$", value)
+        m = re.match(r'^(\d{1,3})\.(\d{1,3})\.(\d{1,3}).(\d{1,3})$', value)
         if m is not None:
             for v in m.groups():
                 # should not fail at this point, also, values should only be
@@ -96,7 +97,7 @@ class OW_add_system(object):
         self.request._log(str(names))
         for n in names:
             # TODO: check against the dns spec
-            m = re.match("^[a-z][a-z0-9\-_]{0,62}$", n.lower())
+            m = re.match(r'^[a-z][a-z0-9\-_]{0,62}$', n.lower())
             if m is None:
                 return False
             self.request._log(n)
@@ -106,7 +107,7 @@ class OW_add_system(object):
         return self.is_ipv4(value) or self.is_domain(value)
 
     def is_port(self, value):
-        m = re.match("^\d{1,5}$", value)
+        m = re.match(r'^\d{1,5}$', value)
         if m is not None:
             v = int(value)
             if v > 65535:
@@ -115,7 +116,7 @@ class OW_add_system(object):
         return False
 
     def is_password_open(self, value):
-        m = re.match("^\d{1,10}$", value)
+        m = re.match(r'^\d{1,10}$', value)
         if m is not None:
             return True
         return False

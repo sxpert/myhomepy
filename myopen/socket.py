@@ -16,7 +16,7 @@ import re
 import select
 import socket
 # system includes
-# import sys
+import sys
 import time
 from threading import Thread
 

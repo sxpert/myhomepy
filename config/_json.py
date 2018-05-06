@@ -13,5 +13,3 @@ class Json(object):
 
     def json(self):
         return json.dumps(self.serialize(), indent=4)
-
-
