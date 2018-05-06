@@ -39,7 +39,14 @@ class Condition(_json.Json):
         if self._callback_id is None:
             self._log("Unable to find callback \'%s\'" % (self._order_str))
             return
-        
+
+    def serialize(self):
+        cn = {}
+        cn['system'] = self._system_str
+        cn['order'] = self._order_str
+        cn['device'] = self._device
+        return cn
+
     @property
     def device(self):
         return self._device
@@ -86,6 +93,14 @@ class Action(_json.Json):
             if self._method is None:
                 self._log("no method specified for plugin...")
         self._params = data.get("params", None)
+
+    def serialize(self):
+        ac = {}
+        if self._action_mode == self.AC_PLUGIN:
+            ac['module'] = self._module
+            ac['method'] = self._method
+            ac['params'] = self._params
+        return ac
 
     def execute(self, system, order, device, data):
         if self._action_mode == self.AC_PLUGIN:
@@ -158,6 +173,14 @@ class Callback(_json.Json):
             self.action = Action(self._log)
             self.action.load(action_data)
         self.log(str(self))
+
+    def serialize(self):
+        cb = {}
+        if self.condition:
+            cb['condition'] = self.condition.serialize()
+        if self.action:
+            cb['action'] = self.action.serialize()
+        return cb
 
     def map_callback(self):
         return self.condition.map_condition()

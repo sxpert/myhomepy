@@ -20,7 +20,6 @@ class System(_json.Json):
     _database = None
     gateway = None
     devices = None
-    callbacks = None
     _callbacks = None
     # system = None
     monitor = None
@@ -45,17 +44,16 @@ class System(_json.Json):
             self.log("system.devices %s" % (str(self.devices)))
             callbacks_data = data.get('callbacks', None)
             if callbacks_data is not None:
-                self.callbacks = callbacks_data
                 self._callbacks = callbacks.Callbacks(self)
                 self._callbacks.load(callbacks_data)
         return self
 
     def serialize(self):
         data = {}
-        data['database'] = self.database
+        data['database'] = self._database
         data['gateway'] = self.gateway.serialize()
         data['devices'] = self.devices
-        data['callbacks'] = self.callbacks
+        data['callbacks'] = self._callbacks.serialize()
         return data
 
     @property

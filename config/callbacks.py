@@ -37,7 +37,18 @@ class Callbacks(dict, _json.Json):
                 self.log("a callback for key %s is already present" % (key))
             else:
                 self[key] = cb
-        
+
+    def serialize(self):
+        cb = []
+        for k in self.keys():
+            _cb = self[k]
+            if isinstance(_cb, list):
+                for __cb in _cb:
+                    cb.append(__cb)
+            else:
+                cb.append(_cb)
+        return [item.serialize() for item in cb]
+
     def execute(self, subsystem, order, device, data):
         # subsystem is a subsystem instance
         key = subsystem.map_callback(order, device)
