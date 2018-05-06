@@ -48,6 +48,10 @@ class OWNMonitor(OWNSocket):
     def ready_callback(self):
         self.log("MONITOR is ready")
 
+        # do a scan of system devices
+        from .commands import CmdScanDeviceIds
+        self.send_command(CmdScanDeviceIds)
+
     # ----------------------------------------------------------------------------------------------
     # this is called for each open web net packet received
     #

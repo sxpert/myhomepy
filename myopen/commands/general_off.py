@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from .dialog import CommandDialog
-from .subsystems import Lighting
+from ..dialog import CommandDialog
+from ..subsystems import Lighting
 
 
 class CmdGeneralOff(CommandDialog):
@@ -23,3 +23,4 @@ class CmdGeneralOff(CommandDialog):
             self.log("Unexpected response '%s'" % (msg))
         self.stopping = True
         self.notify()
+ 
