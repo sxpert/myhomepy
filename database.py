@@ -26,16 +26,13 @@ class Database(object):
             # read version
             c.execute("select version from version;")
             version_row = c.fetchone()
-            self.log("[database/init] info: version_row : "+str(version_row))
             if version_row is None:
                 self.log("[database/init] WARNING: Can't find version number, "
                          "assume 0")
                 version = 0
             else:
                 version = version_row[0]
-                self.log("[database/init] info: Current version : " +
-                         str(version))
-
+            
         if version == 0:
             # remove all tables
             self.log("[database/init] info: remove all existing tables")
@@ -65,8 +62,6 @@ class Database(object):
             c.execute("insert into version (version) values (1);")
             self.log("[database/init] info: >> COMMIT")
             conn.commit()
-        else:
-            self.log("[database/init] info: Nothing to be done")
         conn.close()
 
     def execute(self, cursor, request, params):
@@ -80,6 +75,47 @@ class Database(object):
         self.log("[database/execute] SQL >> "+request+" "+str(params))
         return True
 
+    def _sql_log_error(self, error, data):
+        self.log("Error executing request %s" % (str(data)))
+        self.log(error)
+        return False
+
+    def _do_insert(self, table, fields, values):
+        # create request
+        if len(fields) != len(values):
+            self.log("ERROR, fields %s and values %s numbers mismatch" %
+                     (fields, values))
+            return False
+        _fields = '(%s)' % (', '.join(fields))
+        _placeholders = '(%s)'% (', '.join(['?'] * len(values)))
+        _request = "insert into %s %s values %s;" % (
+            table, _fields, _placeholders
+        )
+        # open connection
+        conn = sqlite3.connect(self.dbname)
+        # execute request
+        c = conn.cursor()
+        try:
+            c.execute(_request, values)
+        except sqlite3.IntegrityError as e:
+            return self._sql_log_error(e, (_request, values,))
+        except sqlite3.OperationalError as e:
+            return self._sql_log_error(e, (_request, values,))
+        # verify if all is ok - only one row here
+        _rc = c.rowcount
+        if _rc != 1:
+            return self._sql_log_error(
+                "wrong rowcount after insert, expected 1, got %d" % (_rc),
+                (_request, values,))
+        self.log("request successful %s rows: %d" 
+                 % (str((_request, values,)), _rc))
+        # commit
+        conn.commit()
+        # close connection
+        conn.close()
+        # return result
+        return True
+
     # --------------------------------------------------------------------------
     # temperatures
 
@@ -87,18 +123,9 @@ class Database(object):
     # sensor is sensor id
     # temp is in celcius
     def log_temperature(self, time, sensor, temp):
-        conn = sqlite3.connect(self.dbname)
-        c = conn.cursor()
-        c.execute("insert into temperatures (time, sensor, temp) values (?,?,?);",
-                  (time, sensor, temp,))
-        # res = self.execute(c,
-        #                    "insert into temperatures (time, sensor, temp) "
-        #                    "values (?,?,?);", (time, sensor, temp,))
-        # if res is bool and res:
-        #     self.log("%d rows written" % (c.rowcount))
-        conn.commit()
-        conn.close()
-        return True
+        return self._do_insert('temperatures', 
+                               ['time', 'sensor', 'temp'], 
+                               [time, sensor, temp])
 
     # lists all temperature sensors that logged something so far
     def list_temperature_sensors(self):
