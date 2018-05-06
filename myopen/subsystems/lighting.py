@@ -18,36 +18,30 @@ class Lighting(OWNSubSystem):
 
     TARGET_GENERAL = {'light': '0'}
 
-    def parse_command(self, msg):
+    SYSTEM_REGEXPS = {
+        'Command': [
+            (r'^\*(?P<command>[01])\*(?P<light>\d{2,4})##$', '_light_device', ),
+            (r'^\*(?P<command>[01])\*#(?P<group>\\d{1,3})##$', '_group_device', ),
+        ]
+    }
+
+    def _light_device(self, matches):
         # light command
         # '*0*#1##'
-        m = re.match(r'^\*(?P<command>[01])\*(?P<light>\d{2,4})##$', msg.msg)
-        if m is not None:
-            data = m.groupdict()
-            self.log(str(data))
-            device = {'light': data['light']}
-
-            self.execute_callback(self.SYSTEM_WHO,
-                                  int(data['command']),
-                                  device, None)
-            return
-        m = re.match(r'^\*(?P<command>[01])\*#(?P<group>\\d{1,3})##$', msg,msg)
-        if m is not None:
-            data = m.groupdict()
-            self.log(str(data))
-            device = {'group': data['group']}
-            self.execute_callback(self.SYSTEM_WHO,
-                                  int(data['command']),
-                                  device, None)
-            return
-        self.log('lighting command '+msg)
+        # TODO: something smarter here
+        _order = int(matches['command'])
+        _device = {'light': matches['light']}
+        return self.gen_callback_dict(_order, _device, None)
+        
+    def _group_device(self, matches):
+        _order = int(matches['command'])
+        _device = {'group': matches['group']}
+        return self.gen_callback_dict(_order, _device, None)
 
     def map_device(self, device):
         if (type(device) is dict) and ('group' in device.keys()):
             return 'G-'+str(device['group'])
         return None
-
-    # command generators
 
     def gen_command(self, operation, target):
         self.log("%s %s" % (str(operation), str(target)))

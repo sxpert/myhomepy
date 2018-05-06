@@ -15,25 +15,21 @@ class TempControl(OWNSubSystem):
         'REPORT_TEMP': OP_REPORT_TEMP,
     }
 
-    def parse_status(self, msg):
-        # temperature report
-        # '*101*0*0270##'
-        m = re.match(r'^\*(?P<probe>\d{3})\*0\*(?P<temperature>\d{4})##$', msg.msg)
-        if m is not None:
-            data = m.groupdict()
-            # generate the device key
-            zone = int(data['probe'][0])
-            sensor = int(data['probe'][1:])
-            device = {'zone': zone, 'sensor': sensor}
-            temp = float(data['temperature'])/10.0
-            data = {'temp': temp, 'unit': '°C'}
-            self.execute_callback(self.SYSTEM_WHO, 
-                                  self.OP_REPORT_TEMP,
-                                  device, data)
-            return True
-        else:
-            self.log("Temp control no match")
-        self.log('temp control status ' + msg)
+    SYSTEM_REGEXPS = {
+        'Status': [
+            (r'^\*(?P<probe>\d{3})\*0\*(?P<temperature>\d{4})##$', '_report_temperature')
+        ]
+    }
+
+    def _report_temperature(self, matches):
+        _zone = int(matches['probe'][0])
+        _sensor = int(matches['probe'][1:])
+        _temp = float(matches['temperature'])/10.0
+        
+        _order = self.OP_REPORT_TEMP
+        _device = {'zone': _zone, 'sensor': _sensor}
+        _data = {'temp': _temp, 'unit': '°C'}
+        return self.gen_callback_dict(_order, _device, _data)
 
     def map_device(self, device):
         if (type(device) is dict) and \

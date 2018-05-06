@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import re
-from .subsystems import SubSystems
+from .subsystems import find_subsystem
 
 
 class Message(object):
@@ -77,15 +77,14 @@ class Message(object):
 
     def dispatch(self):
         ok = False
-        for s in SubSystems:
-            if self._who == s.SYSTEM_WHO:
-                subsystem = s(self._src.system)
-                ok = subsystem.parse(self)
-                if ok is not None and ok:
-                    return
-                break
+        sub_class = find_subsystem(self._who)
+        if sub_class is not None:
+            subsystem = sub_class(self._src.system)
+            ok = subsystem.parse(self)
+            if ok is not None and ok:
+                return
         if not ok:
-            msg = "found %s message \'%d\' data \'%s\'" % \
+            msg = "UNHANDLED %s message \'%d\' data \'%s\'" % \
                   (self.type_name, self._who, self._msg)
             self.log(msg)
         

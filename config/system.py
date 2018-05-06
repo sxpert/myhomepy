@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from myopen.socket import OWNSocket
+import database
 from myopen.monitor import OWNMonitor
+from myopen.socket import OWNSocket
 
-from . import _json
-from . import gateway
+from . import _json, callbacks, gateway
 
 
 class System(_json.Json):
@@ -15,22 +15,26 @@ class System(_json.Json):
     COMMAND = OWNSocket.COMMAND
     MONITOR = OWNSocket.MONITOR
 
+    log = None
+    _db = None
+    _database = None
+    gateway = None
+    devices = None
+    callbacks = None
+    _callbacks = None
+    # system = None
+    monitor = None
+    systems = None
+
     def __init__(self, log_func=None):
         self.log = log_func
-        self.database = None
-        self.gateway = None
-        self.devices = None
-        self.callbacks = None
-        self.system = None
-        self.monitor = None
-        self.systems = None
 
     def load(self, data):
         if type(data) is not dict:
             self.log("ERROR loading System, dictionnary expected")
         else:
-            self.database = data.get('database', None)
-            self.log('database: %s' % (self.database))
+            self._database = data.get('database', None)
+            self.log('database: %s' % (self._database))
             gateway_data = data.get('gateway', None)
             if gateway_data is not None:
                 self.gateway = gateway.Gateway(self)
@@ -39,8 +43,11 @@ class System(_json.Json):
                 self.log("WARNING: no gateway entry in system")
             self.devices = data.get('devices', None)
             self.log("system.devices %s" % (str(self.devices)))
-            self.callbacks = data.get('callbacks', None)
-            self.log("system.callbacks %s" % (str(self.callbacks)))
+            callbacks_data = data.get('callbacks', None)
+            if callbacks_data is not None:
+                self.callbacks = callbacks_data
+                self._callbacks = callbacks.Callbacks(self)
+                self._callbacks.load(callbacks_data)
         return self
 
     def serialize(self):
@@ -51,6 +58,16 @@ class System(_json.Json):
         data['callbacks'] = self.callbacks
         return data
 
+    @property
+    def database(self):
+        if self._db is None:
+            if self._database is None:
+                self.log("No database specified anywhere")
+            else:
+                self.log("Opening database %s" % (self._database))
+                self._db = database.Database(self._database, self.log)
+        return self._db
+        
     @property
     def id(self):
         if not self.systems:
@@ -78,10 +95,12 @@ class System(_json.Json):
             self.log("ERROR: Unable to start system, there is no system loop")
             return False
         self.monitor = OWNMonitor(self)
-        self.log("added system with system id=%d" % (self.id))
 
-    def execute_callback(self, *args, **kwargs):
-        self.monitor.execute_callback(*args, **kwargs)
+    def callback(self, *args, **kwargs):
+        return self._callbacks.execute(*args, **kwargs)
+
+    # def execute_callback(self, *args, **kwargs):
+    #     self.monitor.execute_callback(*args, **kwargs)
 
     def socket(self, mode):
         return self.gateway.socket(mode)
