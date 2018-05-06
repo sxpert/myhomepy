@@ -5,6 +5,7 @@ import re
 import urllib
 
 from myopen import commands
+from core.logger import SYSTEM_LOGGER
 
 
 class OW_general_off (object):
@@ -20,6 +21,7 @@ class OW_general_off (object):
 
         if monitor:
             ok = monitor.send_command(commands.CmdGeneralOff)
+
         data = {
             'ok': ok,
         }

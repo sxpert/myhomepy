@@ -16,8 +16,10 @@ class CmdGeneralOff(CommandDialog):
         self.log("reading response %s" % (msg))
         if msg == self.ACK:
             self.log("Command executed successfully")
+            self._success = True
         elif msg == self.NACK:
             self.log("Command failed for unknown reason")
         else:
             self.log("Unexpected response '%s'" % (msg))
         self.stopping = True
+        self.notify()

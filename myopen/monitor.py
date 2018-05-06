@@ -10,6 +10,7 @@ import json
 import os
 import re
 import sys
+import threading
 
 from .dialog import CommandDialog
 from .message import Message
@@ -60,7 +61,10 @@ class OWNMonitor(object):
 
     def send_command(self, command=CommandDialog):
         socket = command(self.monitor_socket)
+        event = threading.Event()
+        socket.event = event
         self.log("OWNMonitor.send_command %s" % (socket.__class__.__name__))
         self.system.main_loop.add_task(socket)
         socket.start()
-        return True
+        event.wait()
+        return socket.success
