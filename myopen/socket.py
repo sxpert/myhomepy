@@ -33,6 +33,14 @@ class GenericPoller(object):
     poller_func = None
     poller = None
 
+    EPOLLIN = None
+    EPOLLPRI = None
+    EPOLLHUP = None
+    EPOLLERR = None
+    EPOLLET = None
+
+    POLL_REGISTER_FLAGS = None
+
     def __init__(self, logger=None):
         self._log = logger
         select_module = dir(select)
@@ -44,22 +52,31 @@ class GenericPoller(object):
         if self.poller_type is None:
             self._log("ERROR: unable to find a poll function in select module")
             return
+        if self.poller_type == self.PT_EPOLL:
+            self.EPOLLIN = self.find_flag('EPOLLIN')
+            self.EPOLLPRI = self.find_flag('EPOLLPRI')
+            self.EPOLLHUP = self.find_flag('EPOLLHUP')
+            self.EPOLLERR = self.find_flag('EPOLLERR')
+            self.EPOLLET = self.find_flag('EPOLLET')
+        if self.poller_type == self.PT_POLL:
+            self.EPOLLIN = self.find_flag('POLLIN')
+            self.EPOLLPRI = self.find_flag('POLLPRI')
+            self.EPOLLHUP = self.find_flag('POLLHUP')
+            self.EPOLLERR = self.find_flag('POLLERR')
+            self.EPOLLET = self.find_flag('POLLET')
+        self.POLL_REGISTER_FLAGS = self.EPOLLIN | self.EPOLLPRI | \
+                                   self.EPOLLHUP | self.EPOLLERR | \
+                                   self.EPOLLET
         self.poller = self.poller_func()
 
+    def find_flag(self, flag_name):
+        if flag_name in dir(select):
+            v = getattr(select, flag_name)
+            return v
+        return 0
+
     def register(self, fd):
-        if self.poller_type == self.PT_EPOLL:
-            return self.poller.register(fd,
-                                        select.EPOLLIN | 
-                                        select.EPOLLPRI |
-                                        select.EPOLLHUP | 
-                                        select.EPOLLERR |
-                                        select.EPOLLET)
-        elif self.poller_type == self.PT_POLL:
-            return self.poller.register(fd,
-                                        select.POLLIN |
-                                        select.POLLPRI |
-                                        select.POLLHUP |
-                                        select.POLLERR)
+        return self.poller.register(fd, self.POLL_REGISTER_FLAGS)
           
     def poll(self, timeout):
         return self.poller.poll(timeout)
@@ -89,14 +106,11 @@ class OWNSocket(Thread):
     NACK = '*#*0##'
     ACK = '*#*1##'
 
-    _log = None
     address = '192.168.1.35'
     auto_reconnect = True
     buf = ''
     cnxfailcnt = 0
-    # data_callback = None
     mode = None
-    # ready_callback = None
     poller = None
     port = 20000
     passwd = '12345'
@@ -131,7 +145,7 @@ class OWNSocket(Thread):
     def run(self):
         while not self.stopping:
             if self.poller is None:
-                self.poller = GenericPoller(self._log)
+                self.poller = GenericPoller(self.log)
                 
             if self.sock is not None or self.cnxfailcnt < 3:
                 timeout = self.timeout
@@ -162,25 +176,20 @@ class OWNSocket(Thread):
                                          ' different from given fd (%d)' % (
                                              self.sockfd, filedesc,))
                             else:
-                                # NOTE: 
-                                # the select.EPOLL* have identical values to the
-                                # select.POLL* values
-                                # 
-                                # self.log("flags: "+bin(flags)[2:])
-                                if flags & (select.POLLIN | select.POLLPRI):
+                                if flags & (self.poller.EPOLLIN | self.poller.EPOLLPRI):
                                     try:
                                         self.recv()
                                     except socket.error as e:
                                         self.log(str(e))
                                         if e.errno == errno.ETIMEDOUT:
                                             self.close()
-                                elif flags & select.POLLHUP:
+                                elif flags & self.poller.EPOLLHUP:
                                     self.log('socket '+str(self) +
                                              ' is hanged-up')
                                     # remove from poller and reconnect
                                     self.poller.unregister(self.sockfd)
                                     self.reconnect()
-                                elif flags & select.POLLERR:
+                                elif flags & self.poller.EPOLLERR:
                                     self.log('socket '+str(self) +
                                              ' is in error state')
                                     # remove from poller and reconnect
@@ -235,8 +244,14 @@ class OWNSocket(Thread):
         col_out = '\033[0m'
         if self.mode == self.COMMAND:
             col_in = '\033[94m'
-        _msg = '[' + self.address + ':' + str(self.port) + ' ' + \
-            self.MODES[self.mode] + '] ' + col_in + msg + col_out
+        _msg = '[%s:%d %s] %s%s%s' % (
+            self.address,
+            self.port,
+            self.MODES[self.mode],
+            col_in,
+            str(msg),
+            col_out
+        )
         SYSTEM_LOGGER.log(_msg)
 
     def connect(self):
