@@ -7,6 +7,7 @@ import re
 class OWNSubSystem(object):
     SYSTEM_NAME = "UNKNOWN"
     SYSTEM_WHO = None
+    SYSTEM_IS_SCANNABLE = False
     SYSTEM_CALLBACKS = None
     SYSTEM_REGEXPS = None
     system = None

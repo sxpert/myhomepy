@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from ..dialog import CommandDialog
+from ..subsystems import find_scannable
 
 
 class CmdScanDeviceIds(CommandDialog):
-    SCANNABLE_SYSTEMS = ['1001']
+    _scannable = []
     _current = None
 
     CMD_SCAN_SYSTEM = "*#[who]*0*13##"
@@ -35,16 +36,35 @@ class CmdScanDeviceIds(CommandDialog):
         return _cmd
 
     def get_next_scan_command(self):
+        if len(self._scannable) == 0:
+            return None
         if self._current is None:
             self._current = 0
         else:
             self._current += 1
-        return self.gen_command(self.CMD_SCAN_SYSTEM, 
-                                {'who': self.SCANNABLE_SYSTEMS[self._current]})
+            if self._current >= len(self._scannable):
+                return None
+        _who = self._scannable[self._current].SYSTEM_WHO
+        _vars = {'who': _who}
+        return self.gen_command(self.CMD_SCAN_SYSTEM, _vars)
+
+    def run(self):
+        self.log(self._system.devices)
+        self._scannable = find_scannable()
+        ok = True
+        if not isinstance(self._scannable, list):
+            ok = False
+        if len(self._scannable) == 0:
+            ok = False
+        if not ok:
+            self.log("No systems are scannable, aborting")
+            self.notify()
+            return
+        super().run()
 
     def ready_callback(self):
-        self.log("about to request device ids to the network")
         _cmd = self.get_next_scan_command()
+        self.log("about to request device ids to the network")
         self.log(_cmd)
         self.send(_cmd)
 
@@ -56,5 +76,10 @@ class CmdScanDeviceIds(CommandDialog):
         if data == self.NACK:
             return self._stop_task()            
         if data == self.ACK:
-            return self._stop_task()
+            # next system
+            _cmd = self.get_next_scan_command()
+            if _cmd is None:
+                return self._stop_task()
+            self.send(_cmd)
+            return
         

@@ -24,3 +24,10 @@ def find_subsystem(who):
             if s.SYSTEM_NAME == who:
                 return s
     return None
+
+def find_scannable():
+    _scan = []
+    for s in SubSystems:
+        if s.SYSTEM_IS_SCANNABLE:
+            _scan.append(s)
+    return _scan

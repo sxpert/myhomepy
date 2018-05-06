@@ -7,8 +7,11 @@ from threading import Condition
 class CommandDialog(OWNSocket):
     _event = None
     _success = False
+    _system = None
 
     def __init__(self, clone):
+        if 'system' in dir(clone):
+            self._system = clone.system
         super().__init__(clone.address,
                          clone.port,
                          clone.passwd,
