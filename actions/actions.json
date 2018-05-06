@@ -220,13 +220,6 @@
             "has_params": true,
             "diag_open": true
         },
-        "cmd_diag_abort": {
-            "id": 35,
-            "description": "programmer abort diagnostic",
-            "type": "TX",
-            "str": "*[who]*6*0##",
-            "diag_open": true
-        },
         "res_busy_ko_error": {
             "id": 37,
             "description": "device indicates the key/object is busy",
@@ -279,13 +272,22 @@
             "str": "*#[who]*0*38#0##",
             "diag_open": true
         },
-        "cmd_diag_abort": {
-            "id": 84,
-            "description": "device abort diagnostic",
-            "type": "RX",
-            "str": "*[who]*6*0##",
-            "error": [ "ERR", "INFO" ]
-        },
+        "cmd_diag_abort": [
+            {
+                "id": 35,
+                "description": "programmer abort diagnostic",
+                "type": "TX",
+                "str": "*[who]*6*0##",
+                "diag_open": true
+            },
+            {
+                "id": 84,
+                "description": "device abort diagnostic",
+                "type": "RX",
+                "str": "*[who]*6*0##",
+                "error": [ "ERR", "INFO" ]
+            }
+        ],
         "cmd_scan_start_addr": { 
             "id": 85,
             "description": "programmer start scan session with address",
