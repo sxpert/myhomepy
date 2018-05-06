@@ -92,6 +92,9 @@ class Database(object):
         res = self.execute(c,
                            "insert into temperatures (time, sensor, temp) "
                            "values (?,?,?);", (time, sensor, temp,))
+        if res is bool and res:
+            self.log("%d rows written" % (c.rowcount))
+            conn.commit()
         conn.close()
         return res
 
