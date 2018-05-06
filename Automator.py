@@ -43,6 +43,7 @@ class Automator(object):
                 ["^/$", website.ow_index.OW_index],
                 ["^/API/ping$", website.ow_index.OW_ping],
                 ["^/API/config$", website.ow_config.OW_config],
+                ["^/API/ScanIds$", website.ow_scan_ids.OW_scan_ids],
                 ["^/API/add_system(.*)$", website.ow_add_system.OW_add_system],
                 ["^/API/GeneralOff$", website.ow_general_off.OW_general_off],
                 ["^/API/temperatures(.*)$",

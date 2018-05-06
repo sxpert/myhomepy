@@ -50,7 +50,7 @@ class OWNMonitor(OWNSocket):
 
         # do a scan of system devices
         from .commands import CmdScanDeviceIds
-        self.send_command(CmdScanDeviceIds)
+        self.send_command(CmdScanDeviceIds, False)
 
     # ----------------------------------------------------------------------------------------------
     # this is called for each open web net packet received
@@ -59,12 +59,15 @@ class OWNMonitor(OWNSocket):
         message = Message(msg, self)
         message.dispatch()
 
-    def send_command(self, command=CommandDialog):
+    def send_command(self, command=CommandDialog, wait=True):
+        # todo: implement a queue, one command at a time
+
         socket = command(self)
         event = threading.Event()
         socket.event = event
         self.log("OWNMonitor.send_command %s" % (socket.__class__.__name__))
         self.system.main_loop.add_task(socket)
         socket.start()
-        event.wait()
+        if wait:
+            event.wait()
         return socket.success
