@@ -13,7 +13,7 @@ class Gateway(OWNSubSystem):
     }
 
     def _time_info(self, matches):
-        self.log('Gateway._date_info %s' % (str(matches)))
+        self.log('Gateway._time_info %s' % (str(matches)))
         return True
     
     def _date_info(self, matches):
