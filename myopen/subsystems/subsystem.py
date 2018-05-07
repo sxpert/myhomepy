@@ -32,6 +32,8 @@ class OWNSubSystem(object):
     def parse_status(self, msg):
         cb_data = self.parse_regexp(msg)
         if cb_data is not None:
+            if isinstance(cb_data,bool):
+                return cb_data
             return self._do_callback(cb_data)
         # say something only if we coudn't do anything with it
         self.log("STATUS %s -> %s" % (self.__class__.__name__, msg))
@@ -40,6 +42,8 @@ class OWNSubSystem(object):
     def parse_command(self, msg):
         cb_data = self.parse_regexp(msg)
         if cb_data is not None:
+            if isinstance(cb_data, bool):
+                return cb_data
             return self._do_callback(cb_data)
         # say something only if we coudn't do anything with it
         self.log("COMMAND %s -> %s" % (self.__class__.__name__, msg))
