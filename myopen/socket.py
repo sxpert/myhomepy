@@ -17,7 +17,8 @@ import time
 from threading import Thread
 
 from core.logger import SYSTEM_LOGGER
-from core.mainloop import MainLoop
+
+# from core.mainloop import MainLoop
 
 from . import openpass
 
@@ -105,6 +106,8 @@ class OWNSocket(Thread):
 
     NACK = '*#*0##'
     ACK = '*#*1##'
+
+    _main_loop = None
 
     address = '192.168.1.35'
     auto_reconnect = True
@@ -239,15 +242,28 @@ class OWNSocket(Thread):
                     self.stopping = True
         self.log("quitting task %s" % (str(self)))
 
+    @property
+    def mainloop(self):
+        return self._main_loop
+
+    @mainloop.setter
+    def mainloop(self, value):
+        self._main_loop = value
+
     def log(self, msg):
         col_in = '\033[92m'
         col_out = '\033[0m'
         if self.mode == self.COMMAND:
             col_in = '\033[94m'
-        _msg = '[%s:%d %s] %s%s%s' % (
+        if self._main_loop is not None:
+            _ident = '%d' % (self._main_loop.get_index(self))
+        else:
+            _ident = '<new>'
+        _msg = '[%s:%d %s-%s] %s%s%s' % (
             self.address,
             self.port,
             self.MODES[self.mode],
+            _ident,
             col_in,
             str(msg),
             col_out

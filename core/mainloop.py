@@ -28,7 +28,12 @@ class MainLoop(object):
 
     def add_task(self, task):
         self.log("adding task "+str(task))
+        if hasattr(task, 'mainloop'):
+            task.mainloop = self
         self.tasks.append(task)
+    
+    def get_index(self, thread):
+        return self.tasks.index(thread)
 
     def wait_all(self):
         """
