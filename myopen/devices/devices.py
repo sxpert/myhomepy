@@ -1,21 +1,42 @@
 # -*- coding: utf-8 -*-
 
-from config._json import Json
 from .basedevice import BaseDevice
 
-class Devices(dict, Json):
+class Devices(object):
     _system = None
+    _devs = {}
 
     def __init__(self, system):
         self._system = system
 
     def log(self, msg):
         self._system.log(msg)
+    
+    def load(self, data):
+        pass
 
-    def serialize(self):
-        if len(self) == 0:
+    def __to_json__(self):
+        if len(self._devs) == 0:
             return None
-        return self
+        # make a list of devices
+        data = []
+        for k in self._devs.keys():
+            data.append(self._devs[k])
+        return data
+
+    # dict interface
+
+    def keys(self):
+        return self._devs.keys()
+
+    def __len__(self):
+        return len(self._devs)
+
+    def __getitem__(self, key):
+        return self._devs[key]
+
+    def __setitem__(self, key, item):
+        self._devs[key] = item
 
     # def __str__(self):
     #     _s = '<%s>' % (self.__class__.__name__)

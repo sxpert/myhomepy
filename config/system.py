@@ -4,10 +4,10 @@ import database
 from myopen.monitor import OWNMonitor
 from myopen.socket import OWNSocket
 
-from . import _json, callbacks, gateway
+from . import callbacks, gateway
 
 
-class System(_json.Json):
+class System(object):
     #
     # NOTE: this should go, as OWNMonitor should
     # inherit from OWNSocket 
@@ -52,12 +52,12 @@ class System(_json.Json):
                 self._callbacks.load(callbacks_data)
         return self
 
-    def serialize(self):
+    def __to_json__(self):
         data = {}
         data['database'] = self._database
-        data['gateway'] = self.gateway.serialize()
-        data['devices'] = self.devices.serialize()
-        data['callbacks'] = self._callbacks.serialize()
+        data['gateway'] = self.gateway
+        data['devices'] = self.devices
+        data['callbacks'] = self._callbacks
         return data
 
     @property

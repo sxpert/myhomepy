@@ -4,12 +4,12 @@ import json
 
 from core.logger import SYSTEM_LOGGER
 
-from . import _json, gateway, system, systems, tls
+from . import gateway, system, systems, tls
 
 CONFIG_FILE_NAME = 'config.json'
 
 
-class Config(_json.Json):
+class Config():
     app = None
 
     def __init__(self, app, config_file=None):
@@ -57,15 +57,15 @@ class Config(_json.Json):
             else:
                 self.log("WARNING: configuration file is empty")
 
-    def serialize(self):
+    def __to_json__(self):
         data = {}
-        data['tls'] = self.tls.serialize()
-        data['systems'] = self.systems.serialize()
+        data['tls'] = self.tls
+        data['systems'] = self.systems
         return data
 
     def save(self):
         f = open(self.config_file, 'w')
-        f.write(self.json())
+        # f.write(self.json())
         f.close()
 
     def add_system(self, ip, port, password):

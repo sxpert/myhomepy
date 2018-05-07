@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from . import _json
 from . import config
 from . import system
 
 
-class Systems(list, _json.Json):
+class Systems(list):
     _log = None
 
     def __init__(self, obj=None):
@@ -35,11 +34,8 @@ class Systems(list, _json.Json):
                 self.append(s)
         return self
 
-    def serialize(self):
-        data = []
-        for s in self:
-            data.append(s.serialize())
-        return data
+    # def __to_json__(self):
+    #     return self
 
     def append(self, obj):
         super().append(obj)

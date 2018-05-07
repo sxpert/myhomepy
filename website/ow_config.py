@@ -10,5 +10,5 @@ from core.logger import SYSTEM_LOGGER
 class OW_config (object):
 
     def do_GET(self, request):
-        data = request.config.serialize()
+        data = request.config
         request.json_response(data)

@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*- 
 
-from ._json import Json
 from . import config
 
 
-
-class Tls(Json):
+class Tls(object):
     cert = None
     key = None
     available = False
@@ -40,7 +38,7 @@ class Tls(Json):
             self.log("TLS unavailable")
         return self
 
-    def serialize(self):
+    def __to_json__(self):
         if self.key is None and self.cert is None:
             return None
         data = {}

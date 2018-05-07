@@ -3,12 +3,12 @@
 from myopen.subsystems import find_subsystem
 import os
 import sys
-from . import _json, callbacks
+from . import callbacks
 
 PLUGINS_DIRS = "plugins/"
 
 
-class Condition(_json.Json):
+class Condition(object):
     _log = None
 
     _system_str = None
@@ -40,7 +40,7 @@ class Condition(_json.Json):
             self._log("Unable to find callback \'%s\'" % (self._order_str))
             return
 
-    def serialize(self):
+    def __to_json__(self):
         cn = {}
         cn['system'] = self._system_str
         cn['order'] = self._order_str
@@ -55,7 +55,7 @@ class Condition(_json.Json):
         return self._subsystem_class().map_callback(self._callback_id, self._device)
 
 
-class Action(_json.Json):
+class Action(object):
     _log = None
 
     AC_BUILT_IN = 1 
@@ -94,7 +94,7 @@ class Action(_json.Json):
                 self._log("no method specified for plugin...")
         self._params = data.get("params", None)
 
-    def serialize(self):
+    def __to_json__(self):
         ac = {}
         if self._action_mode == self.AC_PLUGIN:
             ac['module'] = self._module
@@ -132,7 +132,7 @@ class Action(_json.Json):
         return None
 
 
-class Callback(_json.Json):
+class Callback(object):
     _log = None
     callbacks = None
     condition = None
@@ -174,13 +174,13 @@ class Callback(_json.Json):
             self.action.load(action_data)
         self.log(str(self))
 
-    def serialize(self):
-        cb = {}
+    def __to_json__(self):
+        data = {}
         if self.condition:
-            cb['condition'] = self.condition.serialize()
+            data['condition'] = self.condition
         if self.action:
-            cb['action'] = self.action.serialize()
-        return cb
+            data['action'] = self.action
+        return data
 
     def map_callback(self):
         return self.condition.map_condition()

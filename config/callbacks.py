@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from . import _json
 from . import system
 from . import callback
 from myopen.subsystems import find_subsystem
 
-class Callbacks(dict, _json.Json):
+class Callbacks(object):
+    _callbacks = {}
     _log = None
 
     def __init__(self, obj=None):
-        super().__init__(self)
         if obj is not None:
             if isinstance(obj, system.System):
                 self.system = obj
@@ -38,16 +37,30 @@ class Callbacks(dict, _json.Json):
             else:
                 self[key] = cb
 
-    def serialize(self):
-        cb = []
-        for k in self.keys():
-            _cb = self[k]
-            if isinstance(_cb, list):
-                for __cb in _cb:
-                    cb.append(__cb)
-            else:
-                cb.append(_cb)
-        return [item.serialize() for item in cb]
+    def __to_json__(self):
+        if len(self._callbacks) == 0:
+            return None
+        # make a list of devices
+        data = []
+        for k in self._callbacks.keys():
+            # TODO: this may be a list of things
+            data.append(self._callbacks[k])
+        return data
+
+    # dict interface
+
+    def keys(self):
+        return self._callbacks.keys()
+
+    def __len__(self):
+        return len(self._callbacks)
+
+    def __getitem__(self, key):
+        return self._callbacks[key]
+
+    def __setitem__(self, key, item):
+        self._callbacks[key] = item
+
 
     def execute(self, subsystem, order, device, data):
         # subsystem is a subsystem instance

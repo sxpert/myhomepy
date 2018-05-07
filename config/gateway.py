@@ -2,16 +2,19 @@
 
 from myopen.socket import OWNSocket
 
-from . import _json, system
+from . import system
 
 
-class Gateway(_json.Json):
+class Gateway(object):
     address = None
     port = None
     passwd = None
     available = False
     _log = None
     system = None
+
+    _cur_date = None
+    _cur_time = None
 
     def __init__(self, *args, **kwargs):
         if len(args) == 1:
@@ -72,7 +75,7 @@ class Gateway(_json.Json):
                 self.log("Gateway %s ready" % str(self))
         return self
 
-    def serialize(self):
+    def __to_json__(self):
         data = {}
         data['address'] = self.address
         data['port'] = self.port
@@ -100,7 +103,7 @@ class Gateway(_json.Json):
             return None
         sock = OWNSocket(self.address, self.port, self.passwd, mode)
         # find the original system level logger
-        sock.set_logger(self.system.main_loop.logger.log)
+        # sock.set_logger(self.system.main_loop.logger.log)
         return sock
 
     @property

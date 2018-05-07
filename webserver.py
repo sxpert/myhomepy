@@ -4,7 +4,7 @@
 
 import cgi
 import http.server
-import json
+import core.json as json
 import mimetypes
 import os
 import re
@@ -82,8 +82,12 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
         self.wfile.write(html.encode('utf-8'))
 
     def json_response(self, json_data):
+        json_string = None
         try:
             json_string = json.dumps(json_data)
+        except TypeError as e:
+            self.log(e)
+            json_string = 'null'
         except Exception:
             print("Error while dumping data to json format")
             exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -95,7 +99,7 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
             self.send_response(200)
             self.send_header('Content-type', 'application/json; charset=utf-8')
             self.end_headers()
-            self.wfile.write(json_string.encode('utf-8'))
+        self.wfile.write(json_string.encode('utf-8'))
 
     def file_response(self, basedir, path):
         """

@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from config._json import Json
+import json
 
-class BaseDevice(Json):
+#from config._json import Json
+
+class BaseDevice(json.JSONEncoder):
     _subsystem = None
     _virt_id = None
     _hw_addr = None
@@ -23,6 +25,12 @@ class BaseDevice(Json):
         if self.valid:
             return '%sid: %s>' % (_class, self.hw_addr_hex_str)
         return '%sINVALID>' % (_class)
+
+    def __to_json__(self):
+        data = {}
+        data['virt_id'] = self._virt_id
+        data['hw_addr'] = self._hw_addr
+        return data
 
     @property
     def valid(self):
