@@ -1,4 +1,4 @@
-import arrow
+from datetime import datetime, timezone
 import database
 
 
@@ -22,7 +22,8 @@ def log_to_database(system, params, device, data):
         system.log("ERROR: no \'temp\' specified in data")
         return
     
-    _timestamp = "{:d}".format(arrow.utcnow().timestamp)
+    _ts_int = int(datetime.now(timezone.utc).timestamp())
+    _timestamp = "{:d}".format(_ts_int)
     _sensor = "{:d}{:02d}".format(_zone, _sensor)
     _temp = "{:.1f}".format(_temp)
     system.log(
