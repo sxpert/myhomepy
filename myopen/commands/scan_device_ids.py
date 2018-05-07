@@ -14,14 +14,10 @@ class CmdScanDeviceIds(CommandDialog):
         _cmd = ''
         _in_var = False
         _var = ''
-        self.log(cmdstr)
-        self.log(str(params))
         for c in cmdstr:
             if _in_var:
                 if c == ']':
                     # replace var
-
-                    self.log(_var)
                     if _var in params.keys():
                         _cmd += str(params[_var])
                     _in_var = False
@@ -65,7 +61,6 @@ class CmdScanDeviceIds(CommandDialog):
     def ready_callback(self):
         _cmd = self.get_next_scan_command()
         self.log("about to request device ids to the network")
-        self.log(_cmd)
         self.send(_cmd)
 
     def _stop_task(self):
