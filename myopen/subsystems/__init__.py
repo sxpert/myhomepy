@@ -14,6 +14,8 @@ SubSystems = [Lighting,
               DiagTempControl,
               DiagGateway, ]
 
+TX_CMD_SCAN_SYSTEM = "*#[who]*0*13##"
+
 # returns the appropriate class object
 def find_subsystem(who):
     for s in SubSystems:
@@ -31,3 +33,24 @@ def find_scannable():
         if s.SYSTEM_IS_SCANNABLE:
             _scan.append(s)
     return _scan
+
+def replace_in_command(command, params):
+    _cmd = ''
+    _in_var = False
+    _var = ''
+    for c in command:
+        if _in_var:
+            if c == ']':
+                # replace var
+                if _var in params.keys():
+                    _cmd += str(params[_var])
+                _in_var = False
+                _var = ''
+            else:
+                _var += c
+            continue
+        if c == '[':
+            _in_var = True
+            continue
+        _cmd += c
+    return _cmd
