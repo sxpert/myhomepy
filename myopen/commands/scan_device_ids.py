@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from ..dialog import CommandDialog
+from ..message import Message
 from ..subsystems import find_scannable
 
 
@@ -77,4 +78,5 @@ class CmdScanDeviceIds(CommandDialog):
                 return self._stop_task()
             self.send(_cmd)
             return
-        
+        message = Message(data, self)
+        message.dispatch()

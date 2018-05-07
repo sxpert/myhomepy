@@ -25,6 +25,10 @@ class CommandDialog(OWNSocket):
         return self._event
 
     @property
+    def system(self):
+        return self._system
+
+    @property
     def success(self):
         return self._success
 
