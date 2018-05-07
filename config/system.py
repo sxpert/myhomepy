@@ -40,7 +40,11 @@ class System(_json.Json):
                 self.gateway.load(gateway_data)
             else:
                 self.log("WARNING: no gateway entry in system")
-            self.devices = data.get('devices', None)
+            _devices = data.get('devices', None)
+            from myopen.devices import Devices
+            self.devices = Devices(self)
+            if _devices is not None:
+                self.devices.load(_devices)
             self.log("system.devices %s" % (str(self.devices)))
             callbacks_data = data.get('callbacks', None)
             if callbacks_data is not None:
@@ -52,7 +56,7 @@ class System(_json.Json):
         data = {}
         data['database'] = self._database
         data['gateway'] = self.gateway.serialize()
-        data['devices'] = self.devices
+        data['devices'] = self.devices.serialize()
         data['callbacks'] = self._callbacks.serialize()
         return data
 

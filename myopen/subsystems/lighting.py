@@ -19,7 +19,7 @@ class Lighting(OWNSubSystem):
     TARGET_GENERAL = {'light': '0'}
 
     SYSTEM_REGEXPS = {
-        'Command': [
+        'COMMAND': [
             (r'^\*(?P<command>[01])\*(?P<light>\d{2,4})##$', '_light_device', ),
             (r'^\*(?P<command>[01])\*#(?P<group>\d{1,3})##$', '_group_device', ),
         ]

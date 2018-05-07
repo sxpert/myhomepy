@@ -7,7 +7,7 @@ from .subsystems import find_subsystem
 class Message(object):
     MSG_COMMAND = 0
     MSG_STATUS = 1
-    MSG_TYPES = ['Command', 'Status', ]
+    MSG_TYPES = ['COMMAND', 'STATUS', ]
 
     _src = None
     _str = None

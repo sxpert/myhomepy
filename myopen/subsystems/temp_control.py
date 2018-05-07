@@ -16,7 +16,7 @@ class TempControl(OWNSubSystem):
     }
 
     SYSTEM_REGEXPS = {
-        'Status': [
+        'STATUS': [
             (r'^\*(?P<probe>\d{3})\*0\*(?P<temperature>\d{4})##$', '_report_temperature')
         ]
     }
