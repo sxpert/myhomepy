@@ -409,12 +409,18 @@ class OWNHTTPServer(socketserver.TCPServer):
             return
         self.web.log(message)
 
-    def process_request(self, request, client_address):
-        """Call finish_request.
-        TODO: Override to catch errno 32 in finish request
-        """
+    def process_request_thread(self, request, client_address):
+        self.log(self)
         self.finish_request(request, client_address)
         self.shutdown_request(request)
+
+    def process_request(self, request, client_address):
+        """
+        """
+        t = Thread(target=self.process_request_thread,
+                   args=(request, client_address))
+        # should add thread to main loop at this point...
+        t.start()
 
     def server_bind(self):
         """Override server_bind to store the server name."""
