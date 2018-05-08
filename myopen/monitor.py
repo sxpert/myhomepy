@@ -50,16 +50,15 @@ class OWNMonitor(OWNSocket):
 
         from .commands import CmdScanDeviceIds
 
-        def callback():
+        def cb(self):
             self.log('.----- CALLBACK !!! -----.')
             self.log('|                        |')
             self.log('|    callback success    |')
             self.log('|                        |')
             self.log('`------------------------\'')
-        
-        self.push_task(CmdScanDeviceIds, callback=callback)
-        self.push_task(CmdScanDeviceIds)
-        # self.push_command(CmdScanDeviceIds, False, callback)
+                
+        self.push_task(CmdScanDeviceIds, callback=cb)
+        self.push_task(CmdScanDeviceIds, callback=cb)
     
     # ----------------------------------------------------------------------------------------------
     # this is called for each open web net packet received
@@ -69,8 +68,6 @@ class OWNMonitor(OWNSocket):
         message.dispatch()
 
     def send_command(self, command=CommandDialog, wait=True, callback=None):
-        # todo: implement a queue, one command at a time
-
         socket = command(self)
         event = threading.Event()
         socket.event = event

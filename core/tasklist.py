@@ -2,6 +2,7 @@
 
 import inspect
 import threading
+import types
 
 
 class TaskList(object):
@@ -37,32 +38,48 @@ class TaskList(object):
 
         class closure(object):
             __tasklist = self
+            __func = None
             
             def __init__(self):
                 tl = self.__tasklist
                 tl.log('closure.__init__: task = %s' % (str(task)))
                 if inspect.isclass(task):
                     if issubclass(task, threading.Thread):
-                        
-                        class temp_subclass(task):
-                            def run(self):
-                                super().run()
-                                _tl = self.system.monitor._tasks
-                                if callback is not None:
-                                    callback()
-                                if wait:
-                                    _tl._list_lock.acquire()
-                                    _tl._stopped = False
-                                    _tl._list_lock.release()
-                                
+
                         if wait:
                             tl._list_lock.acquire()
                             tl._stopped = True
                             tl._list_lock.release()
-                        func = temp_subclass(tl._parent)
-                        tl._parent.system.main_loop.add_task(func)
-                        func.start()
+
+                        self.__func = task(tl._parent)
+
+                        old_run = getattr(self.__func, 'run')
+                        
+                        cb = None
+                        if callback is not None:
+                            cb = types.MethodType(callback, self.__func)
+                        
+                        def run(*args, **kwargs):
+                            # the run function only takes one parameter
+                            if len(args) != 1:
+                                # should never happen
+                                raise TypeError('run(self) missing 1 required positional argument: \'self\'')
+                            _self = args[0]
+                            old_run()
+                            # run callback if available
+                            if cb is not None:
+                                cb()
+                            if wait:
+                                tl._list_lock.acquire()
+                                tl._stopped = False
+                                tl._list_lock.release()
+
+                        setattr(self.__func, 'run', types.MethodType(run, self.__func))
+
+                        tl._parent.system.main_loop.add_task(self.__func)
+                        self.__func.start()
                         return
+                        
                     else:
                         tl.log('not a thread')
                         return
@@ -81,6 +98,7 @@ class TaskList(object):
                         tl._stopped = False
                         tl._list_lock.release()
         self._tasks.append(closure)
+        return closure
 
     def pop(self):
         if len(self._tasks) == 0:

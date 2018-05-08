@@ -44,6 +44,7 @@ class OWNSocket(Thread):
 
     _main_loop = None
     _tasks = None
+    _callback = None
 
     address = '192.168.1.35'
     auto_reconnect = True
@@ -180,6 +181,19 @@ class OWNSocket(Thread):
                     self.log("Keyboard Interrupt in %s thread"
                              % (self.__class__.__name__))
                     self.stopping = True
+
+        self.log('do we have a callback function ?')
+        if callable(self._callback):
+            self._callback() # pylint: disable=E1102
+        else:
+            self.log('callback was not callable')
+            try:
+                r = getattr(self._callback, 'run')
+            except AttributeError as e:
+                self.log(str(e))
+            else:
+                r()
+
         self.log("quitting task %s" % (str(self)))
 
     @property
@@ -329,4 +343,4 @@ class OWNSocket(Thread):
         self.log('<-RX '+str(msg))
 
     def push_task(self, task, wait=True, callback=None):
-        self._tasks.push(task, wait, callback)
+        return self._tasks.push(task, wait, callback)
