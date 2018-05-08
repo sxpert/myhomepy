@@ -58,7 +58,6 @@ class OWNMonitor(OWNSocket):
             self.log('`------------------------\'')
                 
         self.push_task(CmdScanDeviceIds, callback=cb)
-        self.push_task(CmdScanDeviceIds, callback=cb)
     
     # ----------------------------------------------------------------------------------------------
     # this is called for each open web net packet received
