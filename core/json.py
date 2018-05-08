@@ -8,5 +8,7 @@ class CoreJsonEncoder(system_json.JSONEncoder):
             return system_json.JSONEncoder.default(self, obj)
 
 
-def dumps(obj):
-    return system_json.dumps(obj, cls=CoreJsonEncoder)
+def dumps(obj, indent=None):
+    return system_json.dumps(obj, 
+                             cls=CoreJsonEncoder, 
+                             indent=indent)

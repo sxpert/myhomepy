@@ -97,9 +97,11 @@ class Action(object):
     def __to_json__(self):
         ac = {}
         if self._action_mode == self.AC_PLUGIN:
-            ac['module'] = self._module
-            ac['method'] = self._method
-            ac['params'] = self._params
+            pl = {}
+            pl['module'] = self._module
+            pl['method'] = self._method
+            ac['plugin'] = pl
+        ac['params'] = self._params
         return ac
 
     def execute(self, system, order, device, data):
@@ -180,6 +182,9 @@ class Callback(object):
             data['condition'] = self.condition
         if self.action:
             data['action'] = self.action
+        else:
+            self.log('action is None...')
+        self.log(data)
         return data
 
     def map_callback(self):

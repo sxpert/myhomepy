@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+import json as system_json
+import threading
 
-import json
-
+import core.json as json
 from core.logger import SYSTEM_LOGGER
 
 from . import gateway, system, systems, tls
@@ -9,8 +10,9 @@ from . import gateway, system, systems, tls
 CONFIG_FILE_NAME = 'config.json'
 
 
-class Config():
+class Config(object):
     app = None
+    _file_lock = None
 
     def __init__(self, app, config_file=None):
         self.app = app
@@ -18,6 +20,7 @@ class Config():
             self.config_file = CONFIG_FILE_NAME
         self.tls = tls.Tls(self)
         self.systems = systems.Systems(self)
+        self._file_lock = threading.RLock()
         self.load_file(self.config_file)
 
     def log(self, msg):
@@ -45,7 +48,7 @@ class Config():
 
     def load(self, data):
             if len(data) > 0:
-                data = json.loads(data)
+                data = system_json.loads(data)
                 if type(data) is dict:
                     k = data.keys()
                     if 'tls' in k:
@@ -64,9 +67,13 @@ class Config():
         return data
 
     def save(self):
+        # should save to a temp file, then move
+        self._file_lock.acquire()
         f = open(self.config_file, 'w')
-        # f.write(self.json())
+        json_data = json.dumps(self, indent=4)
+        f.write(json_data)
         f.close()
+        self._file_lock.release()
 
     def add_system(self, ip, port, password):
         # search if we already have this system

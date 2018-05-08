@@ -56,6 +56,9 @@ class OWNMonitor(OWNSocket):
             self.log('|    callback success    |')
             self.log('|                        |')
             self.log('`------------------------\'')
+            self.log('=> saving configuration')
+            self.system.systems.config.save()
+            self.log('<= configuration saved')
                 
         self.push_task(CmdScanDeviceIds, callback=cb)
     
