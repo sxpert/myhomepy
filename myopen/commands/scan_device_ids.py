@@ -29,6 +29,7 @@ class CmdScanDeviceIds(CommandDialog):
         return subs.replace_in_command(subs.TX_CMD_SCAN_SYSTEM, _vars)
 
     def run(self):
+        self.log('CmdScanDeviceIds.run: %s' % (str(self._tasks._tasks)))
         self.log(self._system.devices)
         self._scannable = subs.find_scannable()
         ok = True

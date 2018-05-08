@@ -17,6 +17,7 @@ from threading import Thread
 
 from core.logger import SYSTEM_LOGGER
 from core.poller import GenericPoller
+from core.tasklist import TaskList
 
 from . import openpass
 
@@ -42,6 +43,7 @@ class OWNSocket(Thread):
     ACK = '*#*1##'
 
     _main_loop = None
+    _tasks = None
 
     address = '192.168.1.35'
     auto_reconnect = True
@@ -66,6 +68,8 @@ class OWNSocket(Thread):
             self.mode = mode
         self.auto_reconnect = auto_reconnect
         self.timeout = timeout
+        self._tasks = TaskList(self)
+        self.log('OWNSocket.__init__: %s' % (str(self._tasks._tasks)))
         super().__init__()
 
     def create_clone(self, mode):
@@ -153,7 +157,8 @@ class OWNSocket(Thread):
 
                                     self.stopping = True
                         # look for things to do in the queue
-                        # 
+                        self._tasks.execute_next()
+
                         # no event, check timers
                         # handle timers
                         # while len(self.timers) > 0:
@@ -322,3 +327,6 @@ class OWNSocket(Thread):
 
     def data_callback(self, msg):
         self.log('<-RX '+str(msg))
+
+    def push_task(self, task, wait=True, callback=None):
+        self._tasks.push(task, wait, callback)

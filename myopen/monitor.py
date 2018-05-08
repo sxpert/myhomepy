@@ -48,10 +48,19 @@ class OWNMonitor(OWNSocket):
     def ready_callback(self):
         self.log("MONITOR is ready")
 
-        # do a scan of system devices
         from .commands import CmdScanDeviceIds
-        self.send_command(CmdScanDeviceIds, False)
 
+        def callback():
+            self.log('.----- CALLBACK !!! -----.')
+            self.log('|                        |')
+            self.log('|    callback success    |')
+            self.log('|                        |')
+            self.log('`------------------------\'')
+        
+        self.push_task(CmdScanDeviceIds, callback=callback)
+        self.push_task(CmdScanDeviceIds)
+        # self.push_command(CmdScanDeviceIds, False, callback)
+    
     # ----------------------------------------------------------------------------------------------
     # this is called for each open web net packet received
     #
@@ -59,7 +68,7 @@ class OWNMonitor(OWNSocket):
         message = Message(msg, self)
         message.dispatch()
 
-    def send_command(self, command=CommandDialog, wait=True):
+    def send_command(self, command=CommandDialog, wait=True, callback=None):
         # todo: implement a queue, one command at a time
 
         socket = command(self)
