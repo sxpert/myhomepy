@@ -59,6 +59,8 @@ class CmdScanDeviceIds(CommandDialog):
             # next system
             _cmd = self.get_next_scan_command()
             if _cmd is None:
+                # we went to the end...
+                self._success = True
                 return self._stop_task()
             self.send(_cmd)
             return
