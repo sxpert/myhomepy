@@ -43,43 +43,31 @@ class TaskList(object):
                 tl.log('closure.__init__: task = %s' % (str(task)))
                 if inspect.isclass(task):
                     if issubclass(task, threading.Thread):
-                        tl.log('we have a subclass of thread')
-
+                        
                         class temp_subclass(task):
                             def run(self):
-                                self.log('ts.run : must wait ? %s' % (str(wait)))
                                 super().run()
-                                self.log('ts.run : function has run it\'s course')
                                 _tl = self.system.monitor._tasks
-                                self.log('ts.run : %s' % (str(_tl)))
-                                self.log('ts.run : %s' % (len(_tl)))
-                                self.log('ts.run : callback ?')
                                 if callback is not None:
-                                    self.log('ts.run : callback ! %s' % (str(callback)))
                                     callback()
                                 if wait:
-                                    self.log('ts.run : locking the tasklist')
                                     _tl._list_lock.acquire()
-                                    self.log('ts.run : setting stopped to false')
                                     _tl._stopped = False
-                                    self.log('ts.run : unlocking the tasklist')
                                     _tl._list_lock.release()
-                                self.log('ts.run : done')
-
-                        tl.log('closure.__init__: wait ? %s' % (str(wait)))
+                                
                         if wait:
                             tl._list_lock.acquire()
                             tl._stopped = True
                             tl._list_lock.release()
                         func = temp_subclass(tl._parent)
                         tl._parent.system.main_loop.add_task(func)
-                        tl.log('starting task %s' % (str(func)))
                         func.start()
                         return
                     else:
                         tl.log('not a thread')
                         return
                 if inspect.isfunction(task):
+                    # TODO: this needs to be tested some more
                     tl.log('we have a bone headed function')
                     if wait:
                         tl._list_lock.acquire()
@@ -113,9 +101,6 @@ class TaskList(object):
         if not self.has_task:
             self._list_lock.release()
             return
-        self.log('TaskList.execute_next: current list %s' % (str(self._tasks)))
         task = self.pop()
-        self.log('TaskList: %s' % (str(self)))
-        self.log('TaskList.execute_next: starting task %s' % (str(task)))
         task()
         self._list_lock.release()
