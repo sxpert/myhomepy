@@ -174,7 +174,6 @@ class Callback(object):
         if action_data is not None:
             self.action = Action(self._log)
             self.action.load(action_data)
-        self.log(str(self))
 
     def __to_json__(self):
         data = {}
@@ -182,9 +181,6 @@ class Callback(object):
             data['condition'] = self.condition
         if self.action:
             data['action'] = self.action
-        else:
-            self.log('action is None...')
-        self.log(data)
         return data
 
     def map_callback(self):
