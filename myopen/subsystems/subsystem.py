@@ -42,33 +42,27 @@ class OWNSubSystem(object):
         # say something only if we coudn't do anything with it
         self.log("COMMAND %s -> %s" % (self.__class__.__name__, msg))
         return None
-        
+
     def parse_regexp(self, msg):
-        # system regexps
+        return self._parse_regexp(msg, self.get_regexps(msg, 'SYSTEM_REGEXPS'))
 
-        system_regexps = getattr(self, 'SYSTEM_REGEXPS', {})
-        system_regexps = system_regexps.get(msg.type_name, [])
-
-        scan_regexps = getattr(self, 'SCAN_REGEXPS',{})
-        scan_regexps = scan_regexps.get(msg.type_name, [])
-
-        mode_regexps = system_regexps + scan_regexps
-
-        self.log(mode_regexps)
-
-        if len(mode_regexps) > 0:
-            for r, fname in mode_regexps:
+    def get_regexps(self, msg, name):
+        regexps = getattr(self, name, {})
+        return regexps.get(msg.type_name, [])
+        
+    def _parse_regexp(self, msg, regexps):
+        if len(regexps) > 0:
+            for r, fname in regexps:
                 m = re.match(r, msg.msg)
                 if m is not None:
                     matches = m.groupdict()
-                    try:
-                        f = getattr(self, fname)
-                    except AttributeError:
+                    f = getattr(self, fname, None)
+                    if callable(f):
+                        return f(matches)
+                    else:
                         self.log("Unable to find method %s.%s" % (
                             self.__class__.__name__, fname))
-                        return None
-                    else:
-                        return f(matches)
+                        return None    
         # nothing was found
         return None        
 
