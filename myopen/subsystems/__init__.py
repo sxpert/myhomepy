@@ -2,6 +2,7 @@ from .subsystem import OWNSubSystem
 from .lighting import Lighting
 from .temp_control import TempControl
 from .gateway import Gateway
+from .diag_scannable import DiagScannable
 from .diag_lighting import DiagLighting
 from .diag_temp_control import DiagTempControl
 from .diag_gateway import DiagGateway
@@ -20,17 +21,17 @@ TX_CMD_SCAN_SYSTEM = "*#[who]*0*13##"
 def find_subsystem(who):
     for s in SubSystems:
         if isinstance(who, int):
-            if s.SYSTEM_WHO == who:
+            if getattr(s, 'SYSTEM_WHO', None) == who:
                 return s
         if isinstance(who, str):
-            if s.SYSTEM_NAME == who:
+            if getattr(s, 'SYSTEM_NAME', 'UNKNOWN') == who:
                 return s
     return None
 
 def find_scannable():
     _scan = []
     for s in SubSystems:
-        if s.SYSTEM_IS_SCANNABLE:
+        if getattr(s, 'SYSTEM_IS_SCANNABLE', False):
             _scan.append(s)
     return _scan
 

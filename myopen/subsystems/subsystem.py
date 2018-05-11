@@ -5,12 +5,6 @@ import re
 
 
 class OWNSubSystem(object):
-    SYSTEM_NAME = "UNKNOWN"
-    SYSTEM_WHO = None
-    SYSTEM_IS_SCANNABLE = False
-    SYSTEM_CALLBACKS = None
-    SYSTEM_REGEXPS = None
-    system = None
 
     def __init__(self, system=None):
         self.system = system
@@ -50,13 +44,19 @@ class OWNSubSystem(object):
         return None
         
     def parse_regexp(self, msg):
-        if self.SYSTEM_REGEXPS is None:
-            return None
-        if not isinstance(self.SYSTEM_REGEXPS, dict):
-            self.log("SYSTEM_REGEXPS is not dict")
-            return None
-        mode_regexps = self.SYSTEM_REGEXPS.get(msg.type_name, None)
-        if mode_regexps is not None:
+        # system regexps
+
+        system_regexps = getattr(self, 'SYSTEM_REGEXPS', {})
+        system_regexps = system_regexps.get(msg.type_name, [])
+
+        scan_regexps = getattr(self, 'SCAN_REGEXPS',{})
+        scan_regexps = scan_regexps.get(msg.type_name, [])
+
+        mode_regexps = system_regexps + scan_regexps
+
+        self.log(mode_regexps)
+
+        if len(mode_regexps) > 0:
             for r, fname in mode_regexps:
                 m = re.match(r, msg.msg)
                 if m is not None:
@@ -90,7 +90,7 @@ class OWNSubSystem(object):
         return None
 
     def map_callback(self, order, device):
-        who = self.SYSTEM_WHO
+        who = getattr(self, 'SYSTEM_WHO', None)
         if who is not None:
             dev = self.map_device(device)
             if dev is None:
@@ -102,11 +102,12 @@ class OWNSubSystem(object):
 
     @classmethod
     def map_callback_name(cls, name):
-        if cls.SYSTEM_CALLBACKS is None:
+        sys_callbacks = getattr(cls, 'SYSTEM_CALLBACKS', None)
+        if sys_callbacks is None:
             return None
-        if not isinstance(cls.SYSTEM_CALLBACKS, dict):
+        if not isinstance(sys_callbacks, dict):
             return None
-        _cb_id = cls.SYSTEM_CALLBACKS.get(name, None)
+        _cb_id = sys_callbacks.get(name, None)
         return _cb_id   
 
     def callback(self, order, device, data=None):
