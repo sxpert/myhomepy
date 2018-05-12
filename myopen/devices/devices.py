@@ -45,19 +45,27 @@ class Devices(object):
     
     @staticmethod
     def format_hw_addr(hw_addr):
+        if not isinstance(hw_addr, int):
+            hw_addr = int(hw_addr)
         return '%08X' % (hw_addr)
 
     def register(self, subsystem, data):
-        # build proxy device
-        d = BaseDevice(subsystem, data)
-        if not d.valid:
+        hw_addr = data.get('hw_addr', None)
+        if hw_addr is None:
             self.log('ERROR: malformed device register request, missing \'hw_addr\' value %s %s' %
                 (str(subsystem), str(data)))        
             return None
-        k = Devices.format_hw_addr(d.hw_addr)
+        # generate key
+        k = Devices.format_hw_addr(hw_addr)
         # if device already registered, return that
         if k in self.keys():
             return self[k]
+        # build proxy device
+        d = BaseDevice(subsystem, data)
+        # should not happen
+        if not d.valid:
+            self.log('ERROR: proxy device is not valid')
+            return None
         # insert proxy device
         self[k] = d
         # push command to get device info
