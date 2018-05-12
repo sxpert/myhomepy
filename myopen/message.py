@@ -27,9 +27,9 @@ class Message(object):
             print(msg)
 
     def _identify_type(self):
-        # skip useless *1001*3*0## frame
-        if self._str == '*1001*3*0##':
-            return
+        # # skip useless *1001*3*0## frame
+        # if self._str == '*1001*3*0##':
+        #     return
         # analyze the content of messages passed from the layer 1
         m = re.match(r'^\*(?P<who>\d+)(?P<msg>\*.*)', self._str)
         if m is not None:
@@ -84,7 +84,7 @@ class Message(object):
             if ok is not None and ok:
                 return
         if not ok:
-            msg = "UNHANDLED %s message \'%d\' data \'%s\'" % \
-                  (self.type_name, self._who, self._msg)
+            msg = "UNHANDLED %s message \'%s\' data \'%s\'" % \
+                  (self.type_name, str(self._who), self._msg)
             self.log(msg)
         

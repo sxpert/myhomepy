@@ -34,7 +34,7 @@ class TaskList(object):
     def __len__(self):
         return len(self._tasks)
 
-    def push(self, task, wait=True, callback=None):
+    def push(self, task, wait=True, callback=None, params=None):
 
         class closure(object):
             __tasklist = self
@@ -65,7 +65,10 @@ class TaskList(object):
                                 # should never happen
                                 raise TypeError('run(self) missing 1 required positional argument: \'self\'')
                             _self = args[0]
-                            old_run()
+                            if params is not None:
+                                old_run(params)
+                            else:
+                                old_run()
                             # run callback if available
                             if cb is not None:
                                 cb()

@@ -23,7 +23,8 @@ class BaseDevice(json.JSONEncoder):
     def __str__(self):
         _class = '<%s ' % (self.__class__.__name__)
         if self.valid:
-            return '%sid: %s>' % (_class, self.hw_addr_hex_str)
+            from . import Devices
+            return '%sid: %s>' % (_class, Devices.format_hw_addr(self._hw_addr))
         return '%sINVALID>' % (_class)
 
     def __to_json__(self):
@@ -38,9 +39,7 @@ class BaseDevice(json.JSONEncoder):
                self._virt_id is not None and \
                self._hw_addr is not None
 
-    # return the hw_addr as an 8 char hex string
     @property
-    def hw_addr_hex_str(self):
-        if self._hw_addr is None:
-            return None
-        return '%08X' % (self._hw_addr)
+    def hw_addr(self):
+        return self._hw_addr
+        

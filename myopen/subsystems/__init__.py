@@ -16,6 +16,11 @@ SubSystems = [Lighting,
               DiagGateway, ]
 
 TX_CMD_SCAN_SYSTEM = "*#[who]*0*13##"
+TX_CMD_DIAG_ABORT = "*[who]*6*0##"
+TX_CMD_DIAG_ID = "*[who]*10#[id]*0##"
+TX_CMD_SCAN_CHECK = "*[who]*11#[id]*0##"
+TX_CMD_RESET = "*[who]*12*0##"
+TX_CMD_PARAM_ALL_KO = "*#[who]*0*38#0##"
 
 # returns the appropriate class object
 def find_subsystem(who):

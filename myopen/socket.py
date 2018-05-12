@@ -342,5 +342,5 @@ class OWNSocket(Thread):
     def data_callback(self, msg):
         self.log('<-RX '+str(msg))
 
-    def push_task(self, task, wait=True, callback=None):
-        return self._tasks.push(task, wait, callback)
+    def push_task(self, task, wait=True, callback=None, params=None):
+        return self._tasks.push(task, wait, callback, params)
