@@ -50,17 +50,17 @@ class OWNMonitor(OWNSocket):
 
         from .commands import CmdScanDeviceIds
 
-        def cb(self):
-            self.log('.----- CALLBACK !!! -----.')
-            self.log('|                        |')
-            self.log('|    callback success    |')
-            self.log('|                        |')
-            self.log('`------------------------\'')
-            self.log('=> saving configuration')
-            self.system.systems.config.save()
-            self.log('<= configuration saved')
+        # def cb(self):
+        #     self.log('.----- CALLBACK !!! -----.')
+        #     self.log('|                        |')
+        #     self.log('|    callback success    |')
+        #     self.log('|                        |')
+        #     self.log('`------------------------\'')
+        #     self.log('=> saving configuration')
+        #     self.system.systems.config.save()
+        #     self.log('<= configuration saved')
                 
-        self.push_task(CmdScanDeviceIds, callback=cb)
+        self.push_task(CmdScanDeviceIds)
     
     # ----------------------------------------------------------------------------------------------
     # this is called for each open web net packet received

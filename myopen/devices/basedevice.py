@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import json
+import json, threading
 
 class BaseDevice(json.JSONEncoder):
     BRAND_UNDEFINED = 0
@@ -42,20 +42,57 @@ class BaseDevice(json.JSONEncoder):
 
     PARAMS_KEY = '_PARAMS'
 
+    _VIRT_ID_CHECK_LENIENT = False
+    _VIRT_ID_CHECK_STRICT = True
+
     def __init__(self, devices, subsystem, params):
         self._devices = devices
         self._subsystem = subsystem
+        self._discovery_lock = threading.RLock()
+        self._discovery = False
+        self.update_base_data(params)
+
+    def log(self, msg):
+        if self._devices is not None:
+            self._devices.log(msg)
+        else:
+            print(msg)
+
+    def queue_for_discovery(self):
+        """
+        Pushes the device to be discovered.
+        Makes sure we only push it once
+        """
+        self._discovery_lock.acquire()
+        if self._devices is None:
+            self._discovery_lock.release()
+            return False
+        
+        if self._discovery:
+            self._discovery_lock.release()
+            return False
+
+        self._discovery = True
+
+        params = {
+            'devices': self._devices,
+            'device': self
+        }
+
+        from ..commands import CmdDiagDeviceByAid
+        self._devices._system \
+            .monitor.push_task(CmdDiagDeviceByAid, params=params)
+        self._discovery_lock.release()
+
+    def update_base_data(self, params):
         self._virt_id = params.get('virt_id', None)
         self._hw_addr = params.get('hw_addr', None)
         if isinstance(self._hw_addr, str):
             # TODO: check if we get an exception
             self._hw_addr = int(self._hw_addr)
 
-    def __repr__(self):
-        return self.__str__()
-
     def __str__(self):
-        _class = '<%s ' % (self.__class__.__name__)
+        _class = '<%s [%s] ' % (self.__class__.__name__, hex(id(self)))
         if self.valid:
             from . import Devices
             return '%sid: %s>' % (_class, Devices.format_hw_addr(self._hw_addr))
@@ -105,7 +142,7 @@ class BaseDevice(json.JSONEncoder):
     def __to_json__(self):
         data = {}
         data['virt_id'] = self._virt_id
-        data['hw_addr'] = self._hw_addr
+        data['hw_addr'] = self._devices.format_hw_addr(self._hw_addr)
 
         # MODEL_ID handling
         # the proper model_id
@@ -143,19 +180,29 @@ class BaseDevice(json.JSONEncoder):
     @property
     def valid(self):
         return self._subsystem is not None and \
-               self._virt_id is not None and \
                self._hw_addr is not None
 
     @property
     def hw_addr(self):
         return self._hw_addr
 
+    def _virt_id_check(self, virt_id, strict=True):
+        _virt_id = getattr(self, '_virt_id', None)
+        if not strict:
+            if _virt_id is None:
+                # probably not configured yet, ok
+                return True
+        if _virt_id != virt_id:
+            error_msg = 'this device\'s virt_id is %s, doesn\'t match with %s' \
+                        % (self._virt_id, virt_id)
+            self.log(error_msg)
+            return False
+        return True
+
     def res_object_model(self, virt_id, model_id, nb_conf, brand_id, prod_line):
-        if virt_id != self._virt_id:
-            self._devices.log('this device\'s virt_id is %s, doesn\'t match with %s' % (self._virt_id, virt_id))
+        if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_LENIENT):
             return False
         if self.__class__.__name__ == BaseDevice.__name__:
-            # self._devices.log('we are an instance of BaseDevice, time to setup the proper type')
             from . import DeviceTypes
             for d in DeviceTypes:
                 mid = getattr(d, 'MODEL_ID', None) 
@@ -167,18 +214,16 @@ class BaseDevice(json.JSONEncoder):
             # couldn't find a proper model id
             self._model_id = model_id
             return False
-        # self._devices.log('we are an instance of %s' % (self.__class__.__name__))
         self._configurators = [0] * nb_conf
         self._brand_id = brand_id
         self._product_line = prod_line
         return True
 
     def res_fw_version(self, virt_id, fw_version):
-        if virt_id != self._virt_id:
-            self._devices.log('this device\'s virt_id is %s, doesn\'t match with %s' % (self._virt_id, virt_id))
+        if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_LENIENT):
             return False
         if self.__class__.__name__ == BaseDevice.__name__:
-            self._devices.log('can\'t set the firmware version on a BaseDevice instance')
+            self.log('can\'t set the firmware version on a BaseDevice instance')
             return False
         self._fw_version = fw_version
         return True
@@ -192,27 +237,26 @@ class BaseDevice(json.JSONEncoder):
         return True
 
     def res_conf_1_6(self, virt_id, conf_1_6):
-        if virt_id != self._virt_id:
-            self._devices.log('this device\'s virt_id is %s, doesn\'t match with %s' % (self._virt_id, virt_id))
+        if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_LENIENT):
             return False
         if self.__class__.__name__ == BaseDevice.__name__:
-            self._devices.log('can\'t set configurators 1 through 6 on a BaseDevice instance')
+            self.log('can\'t set configurators 1 through 6 on a BaseDevice instance')
             return False
         # limit the range to the actual number of configurators
         range_max = min(len(self._configurators), 6)
         for i in range(0, range_max):
             v = conf_1_6[i]
             if not self.set_configurator(i, v):
-                self._devices.log('Unable to set configurator %d to value %d' % (i, v))
+                self.log('Unable to set configurator %d to value %d' % (i, v))
         return True
 
     def _slots_check(self, slot_id):
         slots = getattr(self, '_slots', [])
         # slot ids start at 1
         if slot_id < 1:
-            self._devices.log('slot_set_value : slot_id %d invalid' % (slot_id))
+            self.log('slot_set_value : slot_id %d invalid' % (slot_id))
         if slot_id > 32:
-            self._devices.log('slot_set_value : slot_id %d appears too large' % (slot_id))
+            self.log('slot_set_value : slot_id %d appears too large' % (slot_id))
         if len(slots) < slot_id:
             # enlarge (hihi) the slots
             slots += [None]*(slot_id-len(slots))
@@ -249,36 +293,34 @@ class BaseDevice(json.JSONEncoder):
         self.slot_set_value(slot_id, self.PARAMS_KEY, params)
 
     def res_ko_value(self, virt_id, slot, keyo, state):
-        if virt_id != self._virt_id:
-            self._devices.log('this device\'s virt_id is %s, doesn\'t match with %s' % (self._virt_id, virt_id))
+        if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_STRICT):
             return False
         if self.__class__.__name__ == BaseDevice.__name__:
-            self._devices.log('can\'t set keyo and state on a BaseDevice instance')
+            self.log('can\'t set keyo and state on a BaseDevice instance')
             return False
         self.slot_set_value(slot, 'keyo', keyo)
         self.slot_set_value(slot, 'state', state)
         return True
 
     def res_ko_sys(self, virt_id, slot, sys, addr):
-        if virt_id != self._virt_id:
-            self._devices.log('this device\'s virt_id is %s, doesn\'t match with %s' % (self._virt_id, virt_id))
+        if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_STRICT):
             return False
         if self.__class__.__name__ == BaseDevice.__name__:
-            self._devices.log('can\'t set sys and addr on a BaseDevice instance')
+            self.log('can\'t set sys and addr on a BaseDevice instance')
             return False
         self.slot_set_value(slot, 'sys', sys)
         self.slot_set_value(slot, 'addr', addr)
         return True
 
     def res_param_ko(self, virt_id, slot, index, val_par):
-        if virt_id != self._virt_id:
-            self._devices.log('this device\'s virt_id is %s, doesn\'t match with %s' % (self._virt_id, virt_id))
+        if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_STRICT):
             return False
         if self.__class__.__name__ == BaseDevice.__name__:
-            self._devices.log('can\'t set parameter on a BaseDevice instance')
+            self.log('can\'t set parameter on a BaseDevice instance')
             return False
         self.slot_set_param(slot, index, val_par)
         return True
 
     def end_config_read(self):
+        self._discovery = False
         return

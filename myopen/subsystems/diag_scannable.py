@@ -93,14 +93,16 @@ class DiagScannable(OWNSubSystem):
         return res
 
     def _diag_cmd_diag_abort(self, matches):
-        self.log('cmd_diag_abort %s' % (str(matches)))
+        # self.log('cmd_diag_abort %s' % (str(matches)))
+        self.system.devices.end_config_read()
+        self.system.devices.reset_active_device()
         return True
 
     def _diag_cmd_diag_id(self, matches):
         _hw_addr = int(matches.get('hw_addr', None))
         res = self.system.devices.set_active_device(self, _hw_addr)
         if not res:
-            self.log('cmd_diat_id : %s' % (str(matches)))
+            self.log('cmd_diad_id : %s' % (str(matches)))
         return res
 
     def _cmd_scan_check(self, matches):

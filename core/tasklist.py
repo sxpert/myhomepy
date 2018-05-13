@@ -42,7 +42,7 @@ class TaskList(object):
             
             def __init__(self):
                 tl = self.__tasklist
-                tl.log('closure.__init__: task = %s' % (str(task)))
+                # tl.log('closure.__init__: task = %s' % (str(task)))
                 if inspect.isclass(task):
                     if issubclass(task, threading.Thread):
 

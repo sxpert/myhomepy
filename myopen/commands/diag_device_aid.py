@@ -111,8 +111,6 @@ class CmdDiagDeviceByAid(CommandDialog):
             return
         if data == self.ACK:
             # end of keyo list
-            self.system.devices.end_config_read()
-            self.system.devices.reset_active_device()
             return self.end_diag()
         
         message = Message(data, self)

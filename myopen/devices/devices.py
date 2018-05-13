@@ -21,7 +21,7 @@ class Devices(object):
             return None
         # make a list of devices
         data = []
-        for k in self._devs.keys():
+        for k in sorted(self._devs.keys()):
             data.append(self._devs[k])
         return data
 
@@ -49,7 +49,11 @@ class Devices(object):
             hw_addr = int(hw_addr)
         return '%08X' % (hw_addr)
 
-    def register(self, subsystem, data):
+    def _register(self, subsystem, data):
+        """
+        Registers a device without launching a scan
+        """
+
         hw_addr = data.get('hw_addr', None)
         if hw_addr is None:
             self.log('ERROR: malformed device register request, missing \'hw_addr\' value %s %s' %
@@ -59,7 +63,9 @@ class Devices(object):
         k = Devices.format_hw_addr(hw_addr)
         # if device already registered, return that
         if k in self.keys():
-            return self[k]
+            dev = self[k]
+            dev.update_base_data(data)
+            return dev
         # build proxy device
         d = BaseDevice(self, subsystem, data)
         # should not happen
@@ -68,33 +74,32 @@ class Devices(object):
             return None
         # insert proxy device
         self[k] = d
-        
-
-        # TODO: DEBUG
-        # skip all except the F411/4 we're interested in
-        # if int(hw_addr) != 8130287:
-        #     return d
-        
-        # push command to get device info
-        self.log('Device %s is not yet known, queuing for discovery' % (k))
-        from ..commands import CmdDiagDeviceByAid
-        self._system.monitor.push_task(CmdDiagDeviceByAid, 
-                                    params={'devices': self,
-                                            'device': d })    
         return d
 
+    def register(self, subsystem, data):
+        """
+        Registers a device, launches a scan if the device is unknown
+        """
+        dev = self._register(subsystem, data)        
+
+        if dev.__class__.__name__ != BaseDevice.__name__:
+            return dev
+        # push command to get device info
+        dev.queue_for_discovery()
+        return dev
+
     def set_active_device(self, caller, hw_addr):
-        self.log('set_active_device %s %s' % (str(caller), str(hw_addr)))
         if self._active_device is not None:
-            self.log('active device already set to %s' % (self._active_device))
+            # self.log('active device already set to %s' % (self._active_device))
             return True
         k = self.format_hw_addr(hw_addr)
-        if k in self.keys():
-            self._active_device = self[k]
-            self._active_device_caller = caller
-            return True
-        self.log('unable to find device with hw_addr %s' % (k))
-        return False
+        if k not in self.keys():
+            # registers the device
+            self._register(caller, { 'hw_addr': hw_addr})
+
+        self._active_device = self[k]
+        self._active_device_caller = caller
+        return True
 
     def replace_active_device(self, new_device):
         if self._active_device is None:
@@ -153,19 +158,21 @@ class Devices(object):
         return False
 
     def eot_event(self, command, matches):
-        self.log('Devices.eot_event')
         from ..dialog import CommandDialog
-        self.log('%s' % (self._active_device_caller))
+        # self.log('%s' % (self._active_device_caller))
         if issubclass(self._active_device_caller.__class__, CommandDialog):
-            self.log('we have a CommandDialog subclass object')
             if self._active_device is not None:
-                self.log('notifying diag sync')
                 return self._active_device_caller.notify_diag_sync()
+        # if we have an active device, just reply true
+        if self._active_device is not None:
+            return True
+        # no active device, reply false
         return False
 
     def res_param_ko(self, virt_id, slot, index, val_par):
         if self._active_device is not None:
             return self._active_device.res_param_ko(virt_id, slot, index, val_par)
+        self.log('no active device')
         return False
 
     def end_config_read(self):
@@ -176,7 +183,7 @@ class Devices(object):
 
     def reset_active_device(self):
         if self._active_device is not None:
-            self.log('resetting active device')
+            # self.log('resetting active device')
             self._active_device = None
             self._active_device_caller = None
             return
