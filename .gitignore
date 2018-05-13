@@ -11,3 +11,4 @@ devices.txt
 *.swp
 *.pem
 .vscode/*
+test.py

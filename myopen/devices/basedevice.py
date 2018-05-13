@@ -3,34 +3,102 @@
 import json, threading
 
 class BaseDevice(json.JSONEncoder):
+    # this comes from the MHCatalogue.db file
+
     BRAND_UNDEFINED = 0
     BRAND_BTICINO = 1
     BRAND_LEGRAND = 2
     BRAND_TEGUI = 3
-    BRAND_KONTAKTOR = 4
-    BRAND_SHIDEAN = 5
-    BRAND_OBSOLETE_1 = 6
-    BRAND_LEGRAND_GROUP = 7
-    BRAND_LEGRAND_BTICINO = 8
-    BRAND_ARNOULD = 9
-
-    BRANDS_SHORT_NAME = 0
-    BRANDS_LONG_NAME = 1
-    BRANDS = (
-        ('_', 'UNDEFINED', ),
-        ('BT', 'BTicino', ),
-        ('LG', 'Legrand', ),
-        ('TG', 'Tegui', ),
-        ('KT', 'Kontaktor', ),
-        ('SH', 'Shidean', ),
-        ('_0', 'OBSOLETE', ),
-        ('LGG', 'LegrandGroup', ),
-        ('LGG', 'LegrandBticino', ),
-        ('AR', 'Arnould', ),
-    )
+    BRAND_SHIDEAN = 4
+    BRAND_LEGRAND_BTICINO = 5
+    BRAND_ARNOULD = 6
 
     PROD_LINE_UNDEFINED = 0
+    PROD_LINE_L_N_NT = 1
+    PROD_LINE_VELA = 1
+    PROD_LINE_ARTEOR = 2
+    PROD_LINE_MATIX = 2
+    PROD_LINE_AXOLUTE = 3
+    PROD_LINE_MOSAIC = 3
     PROD_LINE_CELIANE = 4
+    PROD_LINE_POLYX = 4
+    PROD_LINE_GALEA = 5
+    PROD_LINE_PIVOT = 6
+    PROD_LINE_SFERA = 7
+    PROD_LINE_ESPACE_EVOLUTON = 8
+    PROD_LINE_ETERIS = 9
+    PROD_LINE_AIR = 10
+
+    BRANDS = [
+        {   
+            'id': 'BRAND_UNDEFINED',
+            'names': {
+                'short': '_', 
+                'long': 'Undefined'
+            },
+            'lines': {
+                PROD_LINE_UNDEFINED: 'Undefined'
+            }
+        },
+        {   
+            'id': 'BRAND_BTICINO',
+            'names': {
+                'short': 'BT',
+                'long': 'BTicino'
+            },
+            'lines': {
+                PROD_LINE_L_N_NT: 'L/N/NT',
+                PROD_LINE_MATIX: 'Matix',
+                PROD_LINE_AXOLUTE: 'Axolute',
+                PROD_LINE_POLYX: 'Polyx',
+                PROD_LINE_SFERA: 'Sfera',
+                PROD_LINE_ETERIS: 'Èteris',
+                PROD_LINE_AIR: 'Air'
+            }
+        },
+        { 
+            'id': 'BRAND_LEGRAND',
+            'names': {
+                'short': 'LG', 
+                'long': 'Legrand'
+            },
+            'lines': {
+                PROD_LINE_MOSAIC: 'Mosaic',
+                PROD_LINE_CELIANE: 'Céliane',
+            }
+        },
+        {   'id': 'BRAND_TEGUI',
+            'names': {
+                'short': 'TG', 
+                'long': 'Tegui', 
+            }
+        },
+        {
+            'id': 'BRAND_SHIDEAN',
+            'names': {
+                'short': 'SH',
+                'long': 'Shidean'
+            }
+        },
+        {   
+            'id': 'BRAND_LEGRAND_BTICINO',
+            'names': {
+                'short': 'LGG', 
+                'long': 'LegrandBticino' 
+            },
+        },
+        {  
+            'id': 'BRAND_ARNOULD',
+            'names':{
+                'short': 'AR', 
+                'long': 'Arnould'
+            },
+            'lines': {
+                PROD_LINE_ESPACE_EVOLUTON: 'Espace Évolution'
+            }
+        }
+    ]
+    
 
     PROD_LINES = (
         'UNDEFINED', 
@@ -44,6 +112,16 @@ class BaseDevice(json.JSONEncoder):
 
     _VIRT_ID_CHECK_LENIENT = False
     _VIRT_ID_CHECK_STRICT = True
+
+    def __new__(cls, devices, subsystem, params):
+        dev_sys = getattr(cls, 'DEVICE_SYSTEM', None)
+        sys_who = getattr(subsystem, 'SYSTEM_DIAG_WHO', None)
+        if sys_who is None:
+            print('PANIC : subsystem %s has no SYSTEM_DIAG_WHO' % (str(subsystem)))
+        if dev_sys is not None and dev_sys != sys_who:
+            print('PANIC : subsystem %s, device %d' % (str(subsystem), dev_sys))
+            return None
+        return json.JSONEncoder.__new__(cls)
 
     def __init__(self, devices, subsystem, params):
         self._devices = devices
@@ -120,17 +198,23 @@ class BaseDevice(json.JSONEncoder):
             return bid
         if bid < 0 or bid >= len(self.BRANDS):
             return bid
-        return self.BRANDS[bid][self.BRANDS_LONG_NAME]
+        brand_info = self.BRANDS[bid]
+        names = brand_info.get('names', {})
+        long_name = names.get('long', None)
+        return long_name
 
     def dump_product_line(self):
+        bid = getattr(self, '_brand_id', None)
         pln = getattr(self, '_product_line', None)
-        if pln is None:
+        if bid is None or pln is None:
             return pln
-        if not isinstance(pln, int):
+        if not isinstance(bid, int) or not isinstance(pln, int):
             return pln
-        if pln <0 or pln >= len(self.PROD_LINES):
+        brand_info = self.BRANDS[bid]
+        lines = brand_info.get('lines')
+        if pln not in lines.keys():
             return pln
-        pln_s = self.PROD_LINES[pln]
+        pln_s = lines[pln]
         if pln_s is None:
             return pln
         return pln_s
@@ -154,6 +238,8 @@ class BaseDevice(json.JSONEncoder):
             model_id = getattr(self, '_model_id', None)
             if model_id is not None:
                 data['_model_id'] = model_id
+
+        data['subsystem'] = str(self._subsystem)
 
         confs = self.dump_configurators()
         if confs is not None:
@@ -208,9 +294,12 @@ class BaseDevice(json.JSONEncoder):
                 mid = getattr(d, 'MODEL_ID', None) 
                 if mid is not None and mid == model_id:
                     nd = d(self._devices, self._subsystem, {'virt_id': self._virt_id, 'hw_addr': self._hw_addr})
-                    nd.res_object_model(virt_id, model_id, nb_conf, brand_id, prod_line)
-                    self._devices.replace_active_device(nd)
-                    return True
+                    # object creation may fail if we're in the wrong subsystem,
+                    # continue looking for other devices that may fit better
+                    if nd is not None:
+                        nd.res_object_model(virt_id, model_id, nb_conf, brand_id, prod_line)
+                        self._devices.replace_active_device(nd)
+                        return True
             # couldn't find a proper model id
             self._model_id = model_id
             return False

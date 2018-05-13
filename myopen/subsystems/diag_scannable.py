@@ -44,7 +44,7 @@ class DiagScannable(OWNSubSystem):
             # res_conf_1_6
             # device answers with hardware configurators 1 through 6
             # *#[who]*[where]*4*[c1]*[c2]*[c3]*[c4]*[c5]*[c6]##
-            (r'^\*(?P<virt_id>\d{1,4})\*4\*(?P<c1>\d{1,2})\*(?P<c2>\d{1,2})\*(?P<c3>\d{1,2})\*(?P<c4>\d{1,2})\*(?P<c5>\d{1,2})\*(?P<c6>\d{1,2})##$', '_diag_res_conf_1_6', ),
+            (r'^\*(?P<virt_id>\d{1,4})\*4\*(?P<c1>\d{1,3})\*(?P<c2>\d{1,3})\*(?P<c3>\d{1,3})\*(?P<c4>\d{1,3})\*(?P<c5>\d{1,3})\*(?P<c6>\d{1,3})##$', '_diag_res_conf_1_6', ),
             
             # res_diag_a
             # device answers with diagnostic bit set A
@@ -63,17 +63,17 @@ class DiagScannable(OWNSubSystem):
             # res_ko_value
             # device answers with it's key/object, value and state
             # *#[who]*[where]*30*[slot]*[keyo]*[state]##
-            (r'^\*(?P<virt_id>\d{1,4})\*30\*(?P<slot>\d{1,3})\*(?P<keyo>\d{1,3})\*(?P<state>\d{1,3})##$', '_diag_res_ko_value', ),
+            (r'^\*(?P<virt_id>\d{1,4})\*30\*(?P<slot>\d{1,3})\*(?P<keyo>\d{1,5})\*(?P<state>[01])##$', '_diag_res_ko_value', ),
             
             # res_ko_sys
             # device answers with it's key/object, system and address",
             # *#[who]*[where]*32#[slot]*[sys]*[addr]##
-            (r'^\*(?P<virt_id>\d{1,4})\*32#(?P<slot>\d{1,3})\*(?P<sys>\d{1,3})\*(?P<addr>\d{1,4})##$', '_diag_res_ko_sys', ),
+            (r'^\*(?P<virt_id>\d{1,4})\*32#(?P<slot>\d{1,3})\*(?P<sys>\d{1,3})\*(?P<addr>\d{1,5})##$', '_diag_res_ko_sys', ),
 
             # res_param_ko
             # device answers with the key/value of key/object
             # *#[who]*[where]*35#[index]#[slot]*[val_par]##
-            (r'\*(?P<virt_id>\d{1,4})\*35#(?P<index>\d{1,3})#(?P<slot>\d{1,3})\*(?P<val_par>\d{1,10})##', '_diag_res_param_ko', ),
+            (r'\*(?P<virt_id>\d{1,4})\*35#(?P<index>\d{1,3})#(?P<slot>\d{1,3})\*(?P<val_par>\d{1,5})##', '_diag_res_param_ko', ),
         ]
     }
 
@@ -127,7 +127,7 @@ class DiagScannable(OWNSubSystem):
     def parse_version(self, version):
         if version[-1] != '*':
             version += '*'
-        names = ('major', 'minor', 'revision')
+        names = ('major', 'minor', 'build')
         ver = {}
         var = ''
         cur = 0
