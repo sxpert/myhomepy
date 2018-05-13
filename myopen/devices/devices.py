@@ -61,13 +61,20 @@ class Devices(object):
         if k in self.keys():
             return self[k]
         # build proxy device
-        d = BaseDevice(subsystem, data)
+        d = BaseDevice(self, subsystem, data)
         # should not happen
         if not d.valid:
             self.log('ERROR: proxy device is not valid')
             return None
         # insert proxy device
         self[k] = d
+        
+
+        # TODO: DEBUG
+        # skip all except the F411/4 we're interested in
+        # if int(hw_addr) != 8130287:
+        #     return d
+        
         # push command to get device info
         self.log('Device %s is not yet known, queuing for discovery' % (k))
         from ..commands import CmdDiagDeviceByAid
@@ -89,10 +96,61 @@ class Devices(object):
         self.log('unable to find device with hw_addr %s' % (k))
         return False
 
-    def reset_active_device(self):
-        self.log('resetting active device')
-        self._active_device = None
-        self._active_device_caller = None
+    def replace_active_device(self, new_device):
+        if self._active_device is None:
+            self.log('Devices.replace_active_device: no device activated')
+            return False
+        
+        bd_name = BaseDevice.__name__
+        ad_name = self._active_device.__class__.__name__
+        nd_name = new_device.__class__.__name__
+
+        if ad_name != bd_name:
+            self.log('Devices.replace_active_device: active device not an instance of BaseDevice')
+            return False
+        
+        if nd_name == bd_name:
+            self.log('Devices.replace_active_device: new device should not be an instance of BaseDevice')
+            return False
+
+        old_hw_addr = self._active_device.hw_addr
+        new_hw_addr = new_device.hw_addr
+        old_x = self.format_hw_addr(old_hw_addr)
+        new_x = self.format_hw_addr(new_hw_addr)
+        if old_hw_addr != new_hw_addr:
+            self.log('Devices.replace_active_device: hardware addresses must match %s => %s' % (old_x, new_x))
+            return False
+        
+        # we are reasonably certain of having the right things here
+        self[new_x] = new_device
+        self._active_device = new_device
+
+        return True
+
+    def res_object_model(self, virt_id, model_id, nb_conf, brand_id, prod_line):
+        if self._active_device is not None:
+            return self._active_device.res_object_model(virt_id, model_id, nb_conf, brand_id, prod_line)
+        return False
+
+    def res_fw_version(self, virt_id, fw_version):
+        if self._active_device is not None:
+            return self._active_device.res_fw_version(virt_id, fw_version)
+        return False
+
+    def res_conf_1_6(self, virt_id, conf_1_6):
+        if self._active_device is not None:
+            return self._active_device.res_conf_1_6(virt_id, conf_1_6)
+        return False
+
+    def res_ko_value(self, virt_id, slot, keyo, state):
+        if self._active_device is not None:
+            return self._active_device.res_ko_value(virt_id, slot, keyo, state)
+        return False
+
+    def res_ko_sys(self, virt_id, slot, sys, addr):
+        if self._active_device is not None:
+            return self._active_device.res_ko_sys(virt_id, slot, sys, addr)
+        return False
 
     def eot_event(self, command, matches):
         self.log('Devices.eot_event')
@@ -105,4 +163,22 @@ class Devices(object):
                 return self._active_device_caller.notify_diag_sync()
         return False
 
+    def res_param_ko(self, virt_id, slot, index, val_par):
+        if self._active_device is not None:
+            return self._active_device.res_param_ko(virt_id, slot, index, val_par)
+        return False
+
+    def end_config_read(self):
+        if self._active_device is not None:
+            self._active_device.end_config_read()
+        # save configuration
+        self._system.systems.config.save()
+
+    def reset_active_device(self):
+        if self._active_device is not None:
+            self.log('resetting active device')
+            self._active_device = None
+            self._active_device_caller = None
+            return
+        self.log('there was no active device')
 

@@ -102,7 +102,7 @@ models:
 129: F411/2 type
 130: F411/4 type
 
-brand: (from the enums at : Bticino.Core.v3.dll{BTicino.Core.Utils/Brand|BrandCode) 
+brand: (from the enums at : Bticino.Core.v3.dll{BTicino.Core.Utils/Brand|BrandCode} 
   0: (Undefined)    (Undefined)
   1: BTicino        BT
   2: Legrand        LG

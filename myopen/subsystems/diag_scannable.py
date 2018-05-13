@@ -87,8 +87,10 @@ class DiagScannable(OWNSubSystem):
         return True
 
     def _diag_res_trans_end(self, matches):
-        self.log('res_trans_end %s' % (str(matches)))
-        return self.system.devices.eot_event(self, matches)
+        res = self.system.devices.eot_event(self, matches)
+        if not res: 
+            self.log('res_trans_end %s' % (str(matches)))
+        return res
 
     def _diag_cmd_diag_abort(self, matches):
         self.log('cmd_diag_abort %s' % (str(matches)))
@@ -96,7 +98,10 @@ class DiagScannable(OWNSubSystem):
 
     def _diag_cmd_diag_id(self, matches):
         _hw_addr = int(matches.get('hw_addr', None))
-        return self.system.devices.set_active_device(self, _hw_addr)
+        res = self.system.devices.set_active_device(self, _hw_addr)
+        if not res:
+            self.log('cmd_diat_id : %s' % (str(matches)))
+        return res
 
     def _cmd_scan_check(self, matches):
         return True
@@ -106,16 +111,58 @@ class DiagScannable(OWNSubSystem):
         return True
 
     def _diag_res_object_model(self, matches):
-        self.log('res_object_model %s' % (str(matches)))
-        return True
+        _virt_id = matches['virt_id']
+        _model_id = int(matches['model_id'])
+        _nb_conf = int(matches['nb_conf'])
+        _brand_id = int(matches['brand_id'])
+        _prod_line = int(matches['prod_line'])
+        res = self.system.devices.res_object_model(_virt_id, _model_id, _nb_conf, _brand_id, _prod_line)
+        if not res:
+            self.log('res_object_model %s' % (str(matches)))
+        return res
+            
+
+    def parse_version(self, version):
+        if version[-1] != '*':
+            version += '*'
+        names = ('major', 'minor', 'revision')
+        ver = {}
+        var = ''
+        cur = 0
+        for c in version:
+            if c.isdecimal():
+                var += c
+            elif c == '*':
+                if cur < len(names):
+                    k = names[cur]
+                else:
+                    k = cur
+                ver[k] = int(var)
+                var = ''
+                cur += 1
+        return ver
 
     def _diag_res_fw_version(self, matches):
-        self.log('res_fw_version %s' % (str(matches)))
-        return True
-
+        _virt_id = matches['virt_id']
+        _fw_ver = self.parse_version(matches['fw_version'])
+        res = self.system.devices.res_fw_version(_virt_id, _fw_ver)
+        if not res:
+            self.log('res_fw_version %s' % (str(matches)))
+        return res
+       
     def _diag_res_conf_1_6(self, matches):
-        self.log('res_conf_1_6 %s' % (str(matches)))
-        return True
+        _virt_id = matches['virt_id']
+        _c1 = int(matches['c1'])
+        _c2 = int(matches['c2'])
+        _c3 = int(matches['c3'])
+        _c4 = int(matches['c4'])
+        _c5 = int(matches['c5'])
+        _c6 = int(matches['c6'])
+        _c_1_6 = (_c1, _c2, _c3, _c4, _c5, _c6, )
+        res = self.system.devices.res_conf_1_6(_virt_id, _c_1_6)
+        if not res:
+            self.log('res_conf_1_6 %s' % (str(matches)))
+        return res
 
     def _diag_res_diag_a(self, matches):
         self.log('res_diag_a %s' % (str(matches)))
@@ -126,18 +173,43 @@ class DiagScannable(OWNSubSystem):
         return True
 
     def _diag_res_id(self, matches):
-        self.log('res_id %s' % str(matches))
-        self.system.devices.register(self, matches)
+        # self.log('res_id %s' % str(matches))
+        _virt_id = matches['virt_id']
+        _hw_addr = matches['hw_addr']        
+        hw_addr_x = self.system.devices.format_hw_addr(_hw_addr)
+        dev = self.system.devices.register(self, matches)
+        if dev is None:
+            self.log('Unable to register device with virt_id %s and hw_addr %s' % (_virt_id, hw_addr_x))
+            return False
         return True
     
     def _diag_res_ko_value(self, matches):
-        self.log('res_ko_value %s' % (str(matches)))
-        return True
+        _virt_id = matches['virt_id']
+        _slot = int(matches['slot'])
+        _keyo = int(matches['keyo'])
+        _state = int(matches['state'])
+        res = self.system.devices.res_ko_value(_virt_id, _slot, _keyo, _state)
+        if not res:
+            self.log('res_ko_value %s' % (str(matches)))
+        return res
+            
 
     def _diag_res_ko_sys(self, matches):
-        self.log('res_ko_sys %s' % (str(matches)))
-        return True
+        _virt_id = matches['virt_id']
+        _slot = int(matches['slot'])
+        _sys = int(matches['sys'])
+        _addr = int(matches['addr'])
+        res = self.system.devices.res_ko_sys(_virt_id, _slot, _sys, _addr)
+        if not res:
+            self.log('res_ko_sys %s' % (str(matches)))
+        return res
 
     def _diag_res_param_ko(self, matches):
-        self.log('res_param_ko %s' % (str(matches)))
-        return True
+        _virt_id = matches['virt_id']
+        _slot = int(matches['slot'])
+        _index = int(matches['index'])
+        _val_par = int(matches['val_par'])
+        res = self.system.devices.res_param_ko(_virt_id, _slot, _index, _val_par)
+        if not res:
+            self.log('res_param_ko %s' % (str(matches)))
+        return res

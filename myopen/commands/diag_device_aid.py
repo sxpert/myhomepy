@@ -21,22 +21,6 @@ class CmdDiagDeviceByAid(CommandDialog):
         'state_end_diag'
     ]
 
-    SCENARIO = {
-        'states': [
-            {
-                'name': 'STATE_START',
-                'callback': '_res_scan_check',
-                'nack': None, # ABORT ?
-                'ack': {
-                    'tx': '',
-                    'next': 'STATE_'
-                },
-                'other': None,
-            }
-        ]
-
-    }
-
     def run(self, params):
         self._diag_event = threading.Event()
         self.log(params)
@@ -127,6 +111,7 @@ class CmdDiagDeviceByAid(CommandDialog):
             return
         if data == self.ACK:
             # end of keyo list
+            self.system.devices.end_config_read()
             self.system.devices.reset_active_device()
             return self.end_diag()
         
