@@ -11,4 +11,8 @@ devices.txt
 *.swp
 *.pem
 .vscode/*
+<<<<<<< HEAD
 lgg-databases*
+=======
+test.py
+>>>>>>> f39a734f10c76601484383a5a201b420e0ab6714
