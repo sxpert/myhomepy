@@ -12,4 +12,5 @@ devices.txt
 *.pem
 .vscode/*
 lgg-databases*
+lgg-software*
 test.py
