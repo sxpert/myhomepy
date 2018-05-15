@@ -11,4 +11,5 @@ devices.txt
 *.swp
 *.pem
 .vscode/*
+lgg-databases*
 test.py

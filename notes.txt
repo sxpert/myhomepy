@@ -138,6 +138,13 @@ skin:
 8182713 007CDBB9 130-6-0-0 BT_F411/4                faux plafond, séjour
 9828102 0095F706   2-6-2-4 LG_067552                droite de l'entree du séjour
 
+Scannable Systems:
+‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+1001 Automation
+1004 Temperature control
+1018 Energy management
+1023 Access control (is that the alarm system ??)
+
 
 Scanning Session:
 ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
@@ -182,6 +189,9 @@ Note:
 
 Programming Session:
 ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+example 1:
+‾‾‾‾‾‾‾‾‾‾
+
 Monitor session                           Command session             Notes
 
                                           [login process]
@@ -234,4 +244,88 @@ Monitor session                           Command session             Notes
                                           -> *1001*2*0##              cmd_conf_end        programmer send end of configuration
 <- *1001*2*0##
                                           <- *#*1##
+
+
+examples:
+‾‾‾‾‾‾‾‾‾
+2 buttons basic command,
+3 buttons is probably very similar, with 1 more slot ;-)
+
+KO: 
+400 Light control
+401 Automation control
+404 CEN
+406 CEN+
+500 Not Configured
+
+- address:
+  - A/PL  3/7                      55   0x37  
+  - A/PL  4/2                      66   0x42
+  - A/PL  5/2                      82   0x52
+  - A/PL  8/2                     130   0x82
+  - A/PL  9/15                    159   0x9F
+  - A/PL 10/15                    175   0xAF
+
+when module disabled, the slot is left empty
+
+- Automation type (param 0) :
+  - Light control (ko 400)
+    - Toggle                          0
+    - Timed-on                        1 needs time as param 17
+    - Toggle dimmer                   2
+    - On/off and dimming              3
+    - On/Off and only p2p dimming     9
+    - Off                            10
+    - On                             11 
+    - PUL                            15
+  - Automation control (ko 401)
+    - Bistable control               12
+    - Monostable control             13
+    - Bistable and blades control    14
+
+*#1001*0*#30*1*[ko]##
+*#1001*0*#35#0#1*[control]##
+
+- add_type (param 1):
+
+*#1001*0*#35#1#1*[add_type]##
+
+  - Point to point                    0 uses address as param 2
+  - Area                              1 uses area as param 2
+  - Group                             2 uses group as param 2
+  - General                           3 no param 2
+
+- area: (param 2)              [0 - 10] needs referent address as param 5
+- group:(param 2)              [1 -255] needs referent address as param 5
+
+- time (param 17):
+  -  1   min                          1
+  -  2   min                          2
+  -  3   min                          3
+  -  4   min                          4
+  -  5   min                          5
+  - 15   min                          6
+  - 30   sec                          7 
+  -  0.5 sec                          8
+  -  2   sec                          9
+  - 10   min                         10
+
+looks like that was added later...
+
+CEN commands
+
+*#1001*0*#30*1*404##      Keyo cen
+*#1001*0*#32#1*1*0915##   A/PL
+*#1001*0*#35#1#1*1##      Button Up
+*#1001*0*#35#2#1*2##      Button Down
+
+CEN+ commands
+
+CEN+ command [0 - 2047]
+
+*#1001*0*#30*1*406##      Keyo CEN+
+*#1001*0*#35#0#1*42##     CEN+ command number low byte
+*#1001*0*#35#1#1*0##      CEN+ command number high byte
+*#1001*0*#35#2#1*13##     Button Up
+*#1001*0*#35#3#1*17##     Button Down
 
