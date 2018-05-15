@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from . import system
-from . import callback
-from myopen.subsystems import find_subsystem
 from core.logger import SYSTEM_LOGGER
+from myopen.subsystems import find_subsystem
+
+from . import callback, system
 
 
 class Callbacks(object):
@@ -79,6 +79,6 @@ class Callbacks(object):
             else:
                 self.log('Callbacks.execute ERROR : key %s '
                          'not in callbacks => return None' % (key))
-        elif SYSTEM_LOGGER.debug:
+        elif SYSTEM_LOGGER.info:
             self.log("Callbacks.execute WARNING : key is None => return None")
         return None

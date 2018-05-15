@@ -1,7 +1,8 @@
 import json as system_json
 
+
 class CoreJsonEncoder(system_json.JSONEncoder):
-    def default(self, obj): # pylint: disable=E0202
+    def default(self, obj):     # pylint: disable=E0202
         if '__to_json__' in dir(obj):
             return obj.__to_json__()
         else:
@@ -9,6 +10,6 @@ class CoreJsonEncoder(system_json.JSONEncoder):
 
 
 def dumps(obj, indent=None):
-    return system_json.dumps(obj, 
-                             cls=CoreJsonEncoder, 
+    return system_json.dumps(obj,
+                             cls=CoreJsonEncoder,
                              indent=indent)

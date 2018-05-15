@@ -28,7 +28,7 @@ def log_to_database(system, params, device, data):
     _sensor = "{:d}{:02d}".format(_zone, _sensor)
     _temp = "{:.1f}".format(_temp)
     # not a warning
-    if SYSTEM_LOGGER.debug:
+    if SYSTEM_LOGGER.info:
         system.log(
             "plugins.temperature.log_to_database (%s, %s, %s)" %
             (str(_timestamp), str(_sensor), str(_temp)))

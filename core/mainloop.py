@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import time
 import sys
+import time
 
 # --------------------------------------------------------------------------------------------------
 #
@@ -31,7 +31,7 @@ class MainLoop(object):
         if hasattr(task, 'mainloop'):
             task.mainloop = self
         self.tasks.append(task)
-    
+
     def get_index(self, thread):
         return self.tasks.index(thread)
 

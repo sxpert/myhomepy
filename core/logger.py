@@ -11,10 +11,11 @@ import inspect
 
 class Logger(object):
     _logfile = None
+    _info = False
     _debug = False
 
     COLOR_RED = '\033[91m'
-    COLOR_DEFAULT = '\033[0m'  
+    COLOR_DEFAULT = '\033[0m'
 
     def __init__(self, logfile=None):
         self._logfile = logfile
@@ -23,6 +24,10 @@ class Logger(object):
     def debug(self):
         return self._debug
 
+    @property
+    def info(self):
+        return self._info
+
     @debug.setter
     def debug(self, _debug):
         self._debug = _debug
@@ -30,7 +35,7 @@ class Logger(object):
     @property
     def logfile(self):
         return self._logfile
-    
+
     @logfile.setter
     def logfile(self, _logfile):
         self._logfile = _logfile
@@ -54,9 +59,9 @@ class Logger(object):
             for _caller in inspect.stack():
                 _func_name = _caller.function
                 if _func_name != 'log':
-                    #print(_caller)
+                    # print(_caller)
                     break
-            #_caller = inspect.stack()[2]
+            # _caller = inspect.stack()[2]
             _func_name = _caller.function
             _frame = _caller.frame
             _locals = _frame.f_locals
@@ -67,7 +72,7 @@ class Logger(object):
                     _self = _self[0]
                 else:
                     print(self.COLOR_RED, _self, self.COLOR_DEFAULT)
-            if not isinstance(_self, list): 
+            if not isinstance(_self, list):
                 _class_name = _self.__class__.__name__
             else:
                 # print("looking for class name")
@@ -81,7 +86,7 @@ class Logger(object):
                     _class_name = _class.__name__
             if not _class_name:
                 _class_name = "<unknown>"
-            
+
             _caller_name = "%s.%s" % (_class_name, _func_name)
             msg = "%s : %s" % (_caller_name, str(msg))
 

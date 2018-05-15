@@ -108,7 +108,7 @@ class Database(object):
             return self._sql_log_error(
                 "wrong rowcount after insert, expected 1, got %d" % (_rc),
                 (_request, values,))
-        if SYSTEM_LOGGER.debug:
+        if SYSTEM_LOGGER.info:
             self.log("request successful %s rows: %d" %
                      (str((_request, values,)), _rc))
         # commit

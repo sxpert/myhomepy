@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
 
-
 from .subsystem import OWNSubSystem
 
 

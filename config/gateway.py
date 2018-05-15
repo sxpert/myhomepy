@@ -2,6 +2,7 @@
 
 from datetime import datetime, timedelta
 
+from core.logger import SYSTEM_LOGGER
 from myopen.socket import OWNSocket
 
 from . import system
@@ -105,7 +106,6 @@ class Gateway(object):
             return None
         sock = OWNSocket(self.address, self.port, self.passwd, mode)
         # find the original system level logger
-        # sock.set_logger(self.system.main_loop.logger.log)
         return sock
 
     @property
@@ -119,9 +119,13 @@ class Gateway(object):
             _g_dt = datetime.combine(self._cur_date, self._cur_time)
             _sys_dt = datetime.now().astimezone()
             _offset = _sys_dt - _g_dt
-            #self.log('system %s gateway %s offset %s' % (str(_sys_dt), str(_g_dt), str(_offset)))
+            if SYSTEM_LOGGER.info:
+                self.log('system %s gateway %s offset %s' %
+                         (str(_sys_dt), str(_g_dt), str(_offset)))
             if abs(_offset) > timedelta(minutes=5):
-                #self.log('offset too large, queue a gateway datetime update to current value')
+                if SYSTEM_LOGGER.info:
+                    self.log('offset too large, queue a gateway datetime '
+                             'update to current value')
                 from myopen.commands import CmdGatewayUpdateDateTime
                 params = {
                     'gateway': self,
@@ -131,11 +135,13 @@ class Gateway(object):
 
     def date_info(self, _date):
         self._cur_date = _date
-        #self.log(self._cur_date)
+        if SYSTEM_LOGGER.info:
+            self.log(self._cur_date)
         return True
 
     def time_info(self, _time):
         self._cur_time = _time
-        #self.log(self._cur_time)
+        if SYSTEM_LOGGER.info:
+            self.log(self._cur_time)
         self._check_and_update_date_time()
         return True

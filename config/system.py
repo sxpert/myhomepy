@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import database
+from core.logger import SYSTEM_LOGGER
 from myopen.monitor import OWNMonitor
 from myopen.socket import OWNSocket
 
-from core.logger import SYSTEM_LOGGER
 from . import callbacks, gateway
 
 
@@ -68,7 +68,7 @@ class System(object):
                 self.log('config.System.database WARNING : '
                          'No database specified anywhere')
             else:
-                if SYSTEM_LOGGER.debug:
+                if SYSTEM_LOGGER.info:
                     self.log('config.System.database : '
                              'Opening database %s' % (self._database))
                 self._db = database.Database(self._database, self.log)
@@ -104,7 +104,7 @@ class System(object):
 
     def callback(self, *args, **kwargs):
         if self._callbacks is None:
-            if SYSTEM_LOGGER.debug:
+            if SYSTEM_LOGGER.info:
                 self.log('System.callback WARNING : '
                          'no callbacks found %s %s' % (str(args), str(kwargs)))
             return None

@@ -93,7 +93,7 @@ class OWNSubSystem(object):
             dev = self.map_device(device)
             if dev is None:
                 # can't map it, no problem
-                if SYSTEM_LOGGER.debug:
+                if SYSTEM_LOGGER.info:
                     self.log('Subsystem.map_callback %d-%d-%s' %
                              (who, order, str(dev)))
                 return None
@@ -117,7 +117,7 @@ class OWNSubSystem(object):
         return cls._map_callback_name(name, sys_callbacks)
 
     def callback(self, order, device, data=None):
-        if SYSTEM_LOGGER.debug:
+        if SYSTEM_LOGGER.info:
             self.log("OWNSubSystem.callback %d %s %s" %
                      (order, str(device), str(data)))
         callback_ok = self.system.callback(self, order, device, data)
@@ -129,7 +129,7 @@ class OWNSubSystem(object):
                          'unable to execute callback')
                 return False
         # we had None here
-        if SYSTEM_LOGGER.debug:
+        if SYSTEM_LOGGER.info:
             self.log('OWNSubSystem.callback WARNING : no callback found')
         # lets say things were fine
         return True

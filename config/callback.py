@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from myopen.subsystems import find_subsystem
 import os
 import sys
+
+from myopen.subsystems import find_subsystem
+
 from . import callbacks
 
 PLUGINS_DIRS = "plugins/"
