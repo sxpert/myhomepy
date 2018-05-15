@@ -107,7 +107,10 @@ class OWNSubSystem(object):
                     self.log('Subsystem.map_callback %d-%d-%s' %
                              (who, order, str(dev)))
                 return None
-            return "%d-%d-%s" % (who, order, dev)
+            ck = "%d-%d-%s" % (who, order, dev)
+            if SYSTEM_LOGGER.info:
+                self.log('OWNSubSystem.map_callback %s' % (ck))
+            return ck
         self.log("ERROR: Can't call %s.map_callback" % (
             self.__class__.__name__))
 
@@ -130,7 +133,7 @@ class OWNSubSystem(object):
             self.log("OWNSubSystem.callback %d %s %s" %
                      (order, str(device), str(data)))
         callback_ok = self.system.callback(self, order, device, data)
-        if callback_ok is bool:
+        if isinstance(callback_ok, bool):
             if callback_ok:
                 return True
             else:

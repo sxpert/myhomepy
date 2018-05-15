@@ -396,7 +396,7 @@ class OWNHTTPServer(socketserver.TCPServer):
         self.web.log(message)
 
     def process_request_thread(self, request, client_address):
-        self.log(self)
+        # self.log(self)
         self.finish_request(request, client_address)
         self.shutdown_request(request)
 

@@ -12,7 +12,7 @@ class DiagScannable(OWNSubSystem):
     # config ops
 
     SCAN_CALLBACKS = {
-        'CMD_DIAG_ID': OP_SCAN_CMD_DIAG_ID,
+        'SCAN_CMD_DIAG_ID': OP_SCAN_CMD_DIAG_ID,
     }
 
     SCAN_REGEXPS = {
@@ -130,7 +130,8 @@ class DiagScannable(OWNSubSystem):
         return _cb_name
 
     def map_device(self, device):
-        SYSTEM_LOGGER.log('DiagScannable.map_device : %s' % (str(device)))
+        if SYSTEM_LOGGER.info:
+            SYSTEM_LOGGER.log('DiagScannable.map_device : %s' % (str(device)))
         if device is None:
             return '*'
         return str(device)

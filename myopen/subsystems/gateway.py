@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import datetime
 
+from core.logger import SYSTEM_LOGGER
+
 from .subsystem import OWNSubSystem
 
 

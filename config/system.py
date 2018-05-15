@@ -108,6 +108,9 @@ class System(object):
                 self.log('System.callback WARNING : '
                          'no callbacks found %s %s' % (str(args), str(kwargs)))
             return None
+        if SYSTEM_LOGGER.info:
+            self.log('System.callback : executing callback %s %s' %
+                     (str(args), str(kwargs)))
         return self._callbacks.execute(*args, **kwargs)
 
     def socket(self, mode):

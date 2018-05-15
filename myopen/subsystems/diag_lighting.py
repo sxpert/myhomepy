@@ -3,6 +3,7 @@ from .diag_scannable import DiagScannable
 
 
 class DiagLighting(DiagScannable):
+    SYSTEM_NAME = 'DIAG_LIGHTING'
     SYSTEM_WHO = 1001
     SYSTEM_DIAG_WHO = 1
 

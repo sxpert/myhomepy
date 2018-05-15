@@ -66,6 +66,8 @@ class Callbacks(object):
     def execute(self, subsystem, order, device, data):
         # subsystem is a subsystem instance
         key = subsystem.map_callback(order, device)
+        if SYSTEM_LOGGER.info:
+            self.log('config.Callbacks.execute : key %s' % (str(key)))
         if key is not None:
             if key in self.keys():
                 cb = self[key]
@@ -75,6 +77,9 @@ class Callbacks(object):
                     self.log('Callbacks.execute : .2 %s' % (str(cb)))
                     return False
                 else:
+                    if SYSTEM_LOGGER.info:
+                        self.log('config.Callbacks.execute : found callback %s'
+                                 % (str(cb)))
                     return cb.execute(self.system, order, device, data)
             else:
                 self.log('Callbacks.execute ERROR : key %s '
