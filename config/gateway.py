@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from datetime import datetime, timedelta
+
 from myopen.socket import OWNSocket
 
 from . import system
@@ -109,3 +111,31 @@ class Gateway(object):
     @property
     def socket_info(self):
         return (self.address, self.port, self.passwd, )
+
+    # gateway sends date then time every 10 minutes...
+
+    def _check_and_update_date_time(self):
+        if self._cur_date is not None and self._cur_time is not None:
+            _g_dt = datetime.combine(self._cur_date, self._cur_time)
+            _sys_dt = datetime.now().astimezone()
+            _offset = _sys_dt - _g_dt
+            #self.log('system %s gateway %s offset %s' % (str(_sys_dt), str(_g_dt), str(_offset)))
+            if abs(_offset) > timedelta(minutes=5):
+                #self.log('offset too large, queue a gateway datetime update to current value')
+                from myopen.commands import CmdGatewayUpdateDateTime
+                params = {
+                    'gateway': self,
+                    'datetime': _sys_dt
+                }
+                self.system.push_task(CmdGatewayUpdateDateTime, params=params)
+
+    def date_info(self, _date):
+        self._cur_date = _date
+        #self.log(self._cur_date)
+        return True
+
+    def time_info(self, _time):
+        self._cur_time = _time
+        #self.log(self._cur_time)
+        self._check_and_update_date_time()
+        return True

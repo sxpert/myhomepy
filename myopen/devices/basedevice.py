@@ -63,6 +63,8 @@ class BaseDevice(json.JSONEncoder):
                 'long': 'Legrand'
             },
             'lines': {
+                PROD_LINE_VELA: 'Vela',
+                PROD_LINE_ARTEOR: 'Arteor',
                 PROD_LINE_MOSAIC: 'Mosaic',
                 PROD_LINE_CELIANE: 'Céliane',
             }
@@ -118,6 +120,7 @@ class BaseDevice(json.JSONEncoder):
         sys_who = getattr(subsystem, 'SYSTEM_DIAG_WHO', None)
         if sys_who is None:
             print('PANIC : subsystem %s has no SYSTEM_DIAG_WHO' % (str(subsystem)))
+            return None
         if dev_sys is not None and dev_sys != sys_who:
             print('PANIC : subsystem %s, device %d' % (str(subsystem), dev_sys))
             return None
@@ -158,8 +161,7 @@ class BaseDevice(json.JSONEncoder):
         }
 
         from ..commands import CmdDiagDeviceByAid
-        self._devices._system \
-            .monitor.push_task(CmdDiagDeviceByAid, params=params)
+        self._devices._system.push_task(CmdDiagDeviceByAid, params=params)
         self._discovery_lock.release()
 
     def update_base_data(self, params):
