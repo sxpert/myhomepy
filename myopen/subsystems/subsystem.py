@@ -17,6 +17,11 @@ class OWNSubSystem(object):
         else:
             print(msg)
 
+    # ---------------------------------------------------------------------
+    #
+    # Message parsing stuff
+    #
+
     def parse(self, msg):
         if msg.is_status:
             return self.parse_status(msg)
@@ -68,6 +73,11 @@ class OWNSubSystem(object):
         # nothing was found
         return None
 
+    # ---------------------------------------------------------------------
+    #
+    # Callback stuff
+    #
+
     def gen_callback_dict(self, order, device, data):
         return {
             'order': order,
@@ -102,19 +112,18 @@ class OWNSubSystem(object):
             self.__class__.__name__))
 
     @classmethod
-    def _map_callback_name(cls, name, callbacks):
+    def _map_callback_name(self, name, callbacks):
         if not isinstance(callbacks, dict):
             return None
         _cb_id = callbacks.get(name, None)
         return _cb_id
 
-    @classmethod
-    def map_callback_name(cls, name):
-        print('OWNSubSystem.map_callback_name')
-        sys_callbacks = getattr(cls, 'SYSTEM_CALLBACKS', None)
+    def map_callback_name(self, name):
+        self.log('OWNSubSystem.map_callback_name')
+        sys_callbacks = getattr(self, 'SYSTEM_CALLBACKS', None)
         if sys_callbacks is None:
             return None
-        return cls._map_callback_name(name, sys_callbacks)
+        return self.__class__._map_callback_name(name, sys_callbacks)
 
     def callback(self, order, device, data=None):
         if SYSTEM_LOGGER.info:

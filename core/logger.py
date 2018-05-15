@@ -24,13 +24,17 @@ class Logger(object):
     def debug(self):
         return self._debug
 
+    @debug.setter
+    def debug(self, _debug):
+        self._debug = _debug
+
     @property
     def info(self):
         return self._info
 
-    @debug.setter
-    def debug(self, _debug):
-        self._debug = _debug
+    @info.setter
+    def info(self, _info):
+        self._info = _info
 
     @property
     def logfile(self):

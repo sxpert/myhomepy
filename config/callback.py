@@ -38,7 +38,7 @@ class Condition(object):
 
         ssc = find_subsystem(self._system_str)
         self._subsystem_class = ssc
-        self._callback_id = ssc.map_callback_name(self._order_str)
+        self._callback_id = ssc().map_callback_name(self._order_str)
         if self._callback_id is None:
             self._log("Unable to find callback \'%s\'" % (self._order_str))
             return

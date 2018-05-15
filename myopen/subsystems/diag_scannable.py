@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from core.logger import SYSTEM_LOGGER
+
 from .subsystem import OWNSubSystem
 
 
@@ -99,11 +101,44 @@ class DiagScannable(OWNSubSystem):
         ]
     }
 
+    # ---------------------------------------------------------------------
+    #
+    # Message parsing stuff
+    #
+
     def parse_regexp(self, msg):
         sys_regexps = self.get_regexps(msg, 'SYSTEM_REGEXPS')
         scan_regexps = self.get_regexps(msg, 'SCAN_REGEXPS')
         regexps = sys_regexps + scan_regexps
         return self._parse_regexp(msg, regexps)
+
+    # ---------------------------------------------------------------------
+    #
+    # Callback stuff
+    #
+
+    def map_callback_name(self, name):
+        SYSTEM_LOGGER.log('DiagScannable.map_callback_name')
+        scan_callbacks = getattr(self, 'SCAN_CALLBACKS', None)
+        sys_callbacks = getattr(self, 'SYSTEM_CALLBACKS', None)
+        _cb = scan_callbacks.copy()
+        SYSTEM_LOGGER.log(_cb)
+        if sys_callbacks is not None:
+            _cb.update(sys_callbacks)
+        _cb_name = self.__class__._map_callback_name(name, _cb)
+        SYSTEM_LOGGER.log(_cb_name)
+        return _cb_name
+
+    def map_device(self, device):
+        SYSTEM_LOGGER.log('DiagScannable.map_device : %s' % (str(device)))
+        if device is None:
+            return '*'
+        return str(device)
+
+    # ---------------------------------------------------------------------
+    #
+    # SubSystem-specific functions
+    #
 
     def _diag_busy(self, matches):
         return True
@@ -129,8 +164,8 @@ class DiagScannable(OWNSubSystem):
                      (str(matches)))
         # callback
         _order = self.OP_SCAN_CMD_DIAG_ID
-        _device = {'hw_addr': _hw_addr}
-        _data = None
+        _device = None
+        _data = {'hw_addr': _hw_addr}
         return self.gen_callback_dict(_order, _device, _data)
 
     def _cmd_scan_check(self, matches):

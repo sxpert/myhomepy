@@ -26,6 +26,22 @@ class Gateway(OWNSubSystem):
         ]
     }
 
+    # ---------------------------------------------------------------------
+    #
+    # Callback stuff
+    #
+
+    def map_device(self, device):
+        SYSTEM_LOGGER.log('DiagScannable.map_device : %s' % (str(device)))
+        if device is None:
+            return '*'
+        return str(device)
+
+    # ---------------------------------------------------------------------
+    #
+    # SubSystem-specific functions
+    #
+
     def _time_info(self, matches):
         _hour = int(matches['hour'])
         _minute = int(matches['minute'])
