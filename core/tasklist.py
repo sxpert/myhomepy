@@ -3,6 +3,7 @@
 import inspect
 import threading
 import types
+from .logger import SYSTEM_LOGGER
 
 
 class TaskList(object):
@@ -101,6 +102,8 @@ class TaskList(object):
                         tl._stopped = False
                         tl._list_lock.release()
         self._tasks.append(closure)
+        SYSTEM_LOGGER.log('added task (%s %s) in tasklist %s' 
+                          % (str(task), str(params), str(self)))
         return closure
 
     def pop(self):
