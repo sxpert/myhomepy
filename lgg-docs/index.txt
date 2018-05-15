@@ -1,0 +1,21 @@
+All mirrored on 2018-05-15
+
+HMAC for OpenWebNet Gateway                     1.1
+Introduction
+Scenes                          WHO: 0
+Lighting                        WHO: 1
+Automation                      WHO: 2
+Load control                    WHO: 3          DEPRECATED
+Thermoregulation                WHO: 4
+Burglar alarm                   WHO: 5
+Video door entry                WHO: 7
+Gateway                         WHO: 13
+CEN function                    WHO: 15,25
+Sound diffusion                 WHO: 16         DEPRECATED
+Scenes                          WHO: 17
+Energy management               WHO: 18
+Sound diffusion                 WHO: 22
+Lighting management             WHO: 24
+Dry contact and IR functions    WHO: 25
+ZigBee OpenWebNet Frames        WHO: 0,1,13
+    
