@@ -64,9 +64,9 @@ class System(object):
     def database(self):
         if self._db is None:
             if self._database is None:
-                self.log("No database specified anywhere")
+                self.log("config.System.database WARNING : No database specified anywhere")
             else:
-                self.log("Opening database %s" % (self._database))
+                # self.log("config.System.database : Opening database %s" % (self._database))
                 self._db = database.Database(self._database, self.log)
         return self._db
         
@@ -99,6 +99,9 @@ class System(object):
         self.monitor = OWNMonitor(self)
 
     def callback(self, *args, **kwargs):
+        if self._callbacks is None:
+            # self.log('System.callback WARNING : no callbacks found %s %s' % (str(args), str(kwargs)))
+            return None
         return self._callbacks.execute(*args, **kwargs)
 
     def socket(self, mode):

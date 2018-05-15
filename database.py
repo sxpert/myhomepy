@@ -107,8 +107,7 @@ class Database(object):
             return self._sql_log_error(
                 "wrong rowcount after insert, expected 1, got %d" % (_rc),
                 (_request, values,))
-        self.log("request successful %s rows: %d" 
-                 % (str((_request, values,)), _rc))
+        # self.log("request successful %s rows: %d" % (str((_request, values,)), _rc))
         # commit
         conn.commit()
         # close connection

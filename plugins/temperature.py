@@ -26,8 +26,13 @@ def log_to_database(system, params, device, data):
     _timestamp = "{:d}".format(_ts_int)
     _sensor = "{:d}{:02d}".format(_zone, _sensor)
     _temp = "{:.1f}".format(_temp)
-    system.log(
-        "plugin: temperature/log_to_database (%s, %s, %s)" % 
-        (str(_timestamp), str(_sensor), str(_temp)))
-    return system.database.log_temperature(_timestamp, _sensor, _temp)
+    # not a warning
+    # system.log(
+    #     "plugins.temperature.log_to_database (%s, %s, %s)" % 
+    #     (str(_timestamp), str(_sensor), str(_temp)))
+    _db = system.database
+    if _db is not None:
+        return _db.log_temperature(_timestamp, _sensor, _temp)
+    system.log('plugins.temperature.log_to_database WARNING : no database')
+    return None
     

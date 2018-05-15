@@ -69,14 +69,15 @@ class Callbacks(object):
             if key in self.keys():
                 cb = self[key]
                 if isinstance(cb, list):
-                    self.log(".1 handling of lists of callbacks not implemented yet")
-                    self.log(".2 %s" % (str(cb)))
+                    self.log("Callbacks.execute : .1 handling of lists of callbacks not implemented yet")
+                    self.log("Callbacks.execute : .2 %s" % (str(cb)))
                     return False
                 else:
                     return cb.execute(self.system, order, device, data)
             else:
-                self.log("key %s not in callbacks => return None" % (key))
-        else:
-            self.log("key is None => return None")
+                self.log("Callbacks.execute ERROR : key %s not in callbacks => return None" % (key))
+        # else:
+        #     # default warning, only in debug mode
+        #     self.log("Callbacks.execute WARNING : key is None => return None")
         return None
     

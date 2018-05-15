@@ -5,6 +5,14 @@ from .subsystem import OWNSubSystem
 class DiagScannable(OWNSubSystem):
     SYSTEM_IS_SCANNABLE = True
 
+    # scan ops
+    OP_SCAN_CMD_DIAG_ID = 0
+    # config ops
+
+    SCAN_CALLBACKS = {
+        'CMD_DIAG_ID': OP_SCAN_CMD_DIAG_ID,
+    }
+
     SCAN_REGEXPS = {
         'COMMAND': [
             # system is busy
@@ -100,10 +108,15 @@ class DiagScannable(OWNSubSystem):
 
     def _diag_cmd_diag_id(self, matches):
         _hw_addr = int(matches.get('hw_addr', None))
+        # do the system thing
         res = self.system.devices.set_active_device(self, _hw_addr)
         if not res:
-            self.log('cmd_diad_id : %s' % (str(matches)))
-        return res
+            self.log('DiagScannable._diag_cmd_diad_id ERROR : %s' % (str(matches)))
+        # callback
+        _order = self.OP_SCAN_CMD_DIAG_ID
+        _device = {'hw_addr': _hw_addr}
+        _data = None
+        return self.gen_callback_dict(_order, _device, _data)
 
     def _cmd_scan_check(self, matches):
         return True
@@ -120,7 +133,7 @@ class DiagScannable(OWNSubSystem):
         _prod_line = int(matches['prod_line'])
         res = self.system.devices.res_object_model(_virt_id, _model_id, _nb_conf, _brand_id, _prod_line)
         if not res:
-            self.log('res_object_model %s' % (str(matches)))
+            self.log('DiagScannable._diag_res_object_model ERROR : %s' % (str(matches)))
         return res
             
 
