@@ -161,8 +161,7 @@ class BaseDevice(json.JSONEncoder):
         }
 
         from ..commands import CmdDiagDeviceByAid
-        self._devices._system \
-            .monitor.push_task(CmdDiagDeviceByAid, params=params)
+        self._devices._system.push_task(CmdDiagDeviceByAid, params=params)
         self._discovery_lock.release()
 
     def update_base_data(self, params):

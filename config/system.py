@@ -103,3 +103,6 @@ class System(object):
 
     def socket(self, mode):
         return self.gateway.socket(mode)
+
+    def push_task(self, task, wait=True, callback=None, params=None):
+        return self.monitor.push_task(task, wait, callback, params)
