@@ -4,13 +4,14 @@ import database
 from myopen.monitor import OWNMonitor
 from myopen.socket import OWNSocket
 
+from core.logger import SYSTEM_LOGGER
 from . import callbacks, gateway
 
 
 class System(object):
     #
     # NOTE: this should go, as OWNMonitor should
-    # inherit from OWNSocket 
+    # inherit from OWNSocket
     #
     COMMAND = OWNSocket.COMMAND
     MONITOR = OWNSocket.MONITOR
@@ -64,12 +65,15 @@ class System(object):
     def database(self):
         if self._db is None:
             if self._database is None:
-                self.log("config.System.database WARNING : No database specified anywhere")
+                self.log('config.System.database WARNING : '
+                         'No database specified anywhere')
             else:
-                # self.log("config.System.database : Opening database %s" % (self._database))
+                if SYSTEM_LOGGER.debug:
+                    self.log('config.System.database : '
+                             'Opening database %s' % (self._database))
                 self._db = database.Database(self._database, self.log)
         return self._db
-        
+
     @property
     def id(self):
         if not self.systems:
@@ -100,7 +104,9 @@ class System(object):
 
     def callback(self, *args, **kwargs):
         if self._callbacks is None:
-            # self.log('System.callback WARNING : no callbacks found %s %s' % (str(args), str(kwargs)))
+            if SYSTEM_LOGGER.debug:
+                self.log('System.callback WARNING : '
+                         'no callbacks found %s %s' % (str(args), str(kwargs)))
             return None
         return self._callbacks.execute(*args, **kwargs)
 

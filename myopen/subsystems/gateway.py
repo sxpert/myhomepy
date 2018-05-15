@@ -18,8 +18,12 @@ class Gateway(OWNSubSystem):
 
     SYSTEM_REGEXPS = {
         'STATUS': [
-            (r'^\*\*#0\*(?P<hour>[0-2][0-9])\*(?P<minute>[0-5][0-9])\*(?P<second>[0-5][0-9])\*(?P<timezone>\d{1,3})##$', '_time_info', ),
-            (r'^\*\*#1\*(?P<weekday>0[0-6])\*(?P<day>[0-3][0-9])\*(?P<month>[01][0-9])\*(?P<year>\d{4})##$', '_date_info', ),
+            (r'^\*\*#0\*(?P<hour>[0-2][0-9])\*(?P<minute>[0-5][0-9])'
+             r'\*(?P<second>[0-5][0-9])\*(?P<timezone>\d{1,3})##$',
+             '_time_info', ),
+            (r'^\*\*#1\*(?P<weekday>0[0-6])\*(?P<day>[0-3][0-9])'
+             r'\*(?P<month>[01][0-9])\*(?P<year>\d{4})##$',
+             '_date_info', ),
         ]
     }
 
@@ -35,12 +39,13 @@ class Gateway(OWNSubSystem):
         _time = datetime.time(_hour, _minute, _second, 0, _tz)
         res = self.system.gateway.time_info(_time)
         if not res:
-            self.log('myopen.subsystems.Gateway._time_info WARNING : time info not handled')
+            self.log('myopen.subsystems.Gateway._time_info WARNING : '
+                     'time info not handled')
         _order = self.OP_RES_TIME_INFO
         _device = None
         _data = {'time': _time}
         return self.gen_callback_dict(_order, _device, _data)
-    
+
     def _date_info(self, matches):
         _day = int(matches['day'])
         _month = int(matches['month'])
@@ -53,10 +58,12 @@ class Gateway(OWNSubSystem):
         # _dow should be == to _wd
         if _dow != _wd:
             # just log it, doesn't really matter, we don't use that info
-            self.log('myopen.subsystems.Gateway._date_info WARNING : weekday differs : got %d expected %d' % (_dow, _wd))
+            self.log('myopen.subsystems.Gateway._date_info WARNING : '
+                     'weekday differs : got %d expected %d' % (_dow, _wd))
         res = self.system.gateway.date_info(_date)
         if not res:
-            self.log('myopen.subsystems.Gateway._date_info WARNING : date info not handled')
+            self.log('myopen.subsystems.Gateway._date_info WARNING : '
+                     'date info not handled')
         _order = self.OP_RES_DATE_INFO
         _device = None
         _data = {'date': _date}
@@ -64,7 +71,8 @@ class Gateway(OWNSubSystem):
 
     @staticmethod
     def gen_set_date_time(_dt):
-        cmd = '*#13**#22*[hour]*[minute]*[second]*[tz]*[dow]*[day]*[month]*[year]##'
+        cmd = '*#13**#22*[hour]*[minute]*[second]*[tz]' \
+              '*[dow]*[day]*[month]*[year]##'
         _tz = _dt.strftime('%z')
         _dow = _dt.isoweekday()
         params = {

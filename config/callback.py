@@ -34,8 +34,9 @@ class Condition(object):
         self._order_str = data.get("order", None)
         self._device = data.get("device", None)
 
-        self._subsystem_class = find_subsystem(self._system_str)
-        self._callback_id = self._subsystem_class.map_callback_name(self._order_str)
+        ssc = find_subsystem(self._system_str)
+        self._subsystem_class = ssc
+        self._callback_id = ssc.map_callback_name(self._order_str)
         if self._callback_id is None:
             self._log("Unable to find callback \'%s\'" % (self._order_str))
             return
@@ -52,13 +53,14 @@ class Condition(object):
         return self._device
 
     def map_condition(self):
-        return self._subsystem_class().map_callback(self._callback_id, self._device)
+        subsys = self._subsystem_class()
+        return subsys.map_callback(self._callback_id, self._device)
 
 
 class Action(object):
     _log = None
 
-    AC_BUILT_IN = 1 
+    AC_BUILT_IN = 1
     AC_PLUGIN = 2
 
     _action_mode = None
@@ -108,7 +110,7 @@ class Action(object):
         if self._action_mode == self.AC_PLUGIN:
             return self._exec_plugin(system, order, device, data)
         return None
-            
+
     def _exec_plugin(self, subsystem, order, device, data):
         if self._module is None:
             self._log("Module not specified, cancelling callback")

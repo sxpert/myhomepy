@@ -3,6 +3,8 @@
 import json
 import re
 
+from core.logger import SYSTEM_LOGGER
+
 
 class OWNSubSystem(object):
 
@@ -26,13 +28,13 @@ class OWNSubSystem(object):
     def parse_status(self, msg):
         cb_data = self.parse_regexp(msg)
         if cb_data is not None:
-            if isinstance(cb_data,bool):
+            if isinstance(cb_data, bool):
                 return cb_data
             return self._do_callback(cb_data)
         # say something only if we coudn't do anything with it
         self.log("STATUS %s -> %s" % (self.__class__.__name__, msg))
         return None
-        
+
     def parse_command(self, msg):
         cb_data = self.parse_regexp(msg)
         if cb_data is not None:
@@ -49,7 +51,7 @@ class OWNSubSystem(object):
     def get_regexps(self, msg, name):
         regexps = getattr(self, name, {})
         return regexps.get(msg.type_name, [])
-        
+
     def _parse_regexp(self, msg, regexps):
         if len(regexps) > 0:
             for r, fname in regexps:
@@ -62,9 +64,9 @@ class OWNSubSystem(object):
                     else:
                         self.log("Unable to find method %s.%s" % (
                             self.__class__.__name__, fname))
-                        return None    
+                        return None
         # nothing was found
-        return None        
+        return None
 
     def gen_callback_dict(self, order, device, data):
         return {
@@ -91,7 +93,9 @@ class OWNSubSystem(object):
             dev = self.map_device(device)
             if dev is None:
                 # can't map it, no problem
-                # self.log('Subsystem.map_callback %d-%d-%s' % (who, order, str(dev)))
+                if SYSTEM_LOGGER.debug:
+                    self.log('Subsystem.map_callback %d-%d-%s' %
+                             (who, order, str(dev)))
                 return None
             return "%d-%d-%s" % (who, order, dev)
         self.log("ERROR: Can't call %s.map_callback" % (
@@ -102,7 +106,7 @@ class OWNSubSystem(object):
         if not isinstance(callbacks, dict):
             return None
         _cb_id = callbacks.get(name, None)
-        return _cb_id   
+        return _cb_id
 
     @classmethod
     def map_callback_name(cls, name):
@@ -113,15 +117,19 @@ class OWNSubSystem(object):
         return cls._map_callback_name(name, sys_callbacks)
 
     def callback(self, order, device, data=None):
-        # self.log("OWNSubSystem.callback %d %s %s" % (order, str(device), str(data)))
+        if SYSTEM_LOGGER.debug:
+            self.log("OWNSubSystem.callback %d %s %s" %
+                     (order, str(device), str(data)))
         callback_ok = self.system.callback(self, order, device, data)
         if callback_ok is bool:
             if callback_ok:
                 return True
             else:
-                self.log("OWNSubsystem.callback WARNING: unable to execute callback")
+                self.log('OWNSubsystem.callback WARNING: '
+                         'unable to execute callback')
                 return False
         # we had None here
-        # self.log('OWNSubSystem.callback WARNING : no callback found')
+        if SYSTEM_LOGGER.debug:
+            self.log('OWNSubSystem.callback WARNING : no callback found')
         # lets say things were fine
         return True

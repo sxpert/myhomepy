@@ -17,7 +17,8 @@ class TempControl(OWNSubSystem):
 
     SYSTEM_REGEXPS = {
         'STATUS': [
-            (r'^\*(?P<probe>\d{3})\*0\*(?P<temperature>\d{4})##$', '_report_temperature')
+            (r'^\*(?P<probe>\d{3})\*0\*(?P<temperature>\d{4})##$',
+             '_report_temperature')
         ]
     }
 
@@ -25,7 +26,7 @@ class TempControl(OWNSubSystem):
         _zone = int(matches['probe'][0])
         _sensor = int(matches['probe'][1:])
         _temp = float(matches['temperature'])/10.0
-        
+
         _order = self.OP_REPORT_TEMP
         _device = {'zone': _zone, 'sensor': _sensor}
         _data = {'temp': _temp, 'unit': '°C'}

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sqlite3
+from core.logger import SYSTEM_LOGGER
 
 
 class Database(object):
@@ -32,7 +33,7 @@ class Database(object):
                 version = 0
             else:
                 version = version_row[0]
-            
+
         if version == 0:
             # remove all tables
             self.log("[database/init] info: remove all existing tables")
@@ -87,7 +88,7 @@ class Database(object):
                      (fields, values))
             return False
         _fields = '(%s)' % (', '.join(fields))
-        _placeholders = '(%s)'% (', '.join(['?'] * len(values)))
+        _placeholders = '(%s)' % (', '.join(['?'] * len(values)))
         _request = "insert into %s %s values %s;" % (
             table, _fields, _placeholders
         )
@@ -107,7 +108,9 @@ class Database(object):
             return self._sql_log_error(
                 "wrong rowcount after insert, expected 1, got %d" % (_rc),
                 (_request, values,))
-        # self.log("request successful %s rows: %d" % (str((_request, values,)), _rc))
+        if SYSTEM_LOGGER.debug:
+            self.log("request successful %s rows: %d" %
+                     (str((_request, values,)), _rc))
         # commit
         conn.commit()
         # close connection
@@ -122,8 +125,8 @@ class Database(object):
     # sensor is sensor id
     # temp is in celcius
     def log_temperature(self, time, sensor, temp):
-        return self._do_insert('temperatures', 
-                               ['time', 'sensor', 'temp'], 
+        return self._do_insert('temperatures',
+                               ['time', 'sensor', 'temp'],
                                [time, sensor, temp])
 
     # lists all temperature sensors that logged something so far

@@ -3,6 +3,8 @@
 from . import system
 from . import callback
 from myopen.subsystems import find_subsystem
+from core.logger import SYSTEM_LOGGER
+
 
 class Callbacks(object):
     _callbacks = {}
@@ -61,7 +63,6 @@ class Callbacks(object):
     def __setitem__(self, key, item):
         self._callbacks[key] = item
 
-
     def execute(self, subsystem, order, device, data):
         # subsystem is a subsystem instance
         key = subsystem.map_callback(order, device)
@@ -69,15 +70,15 @@ class Callbacks(object):
             if key in self.keys():
                 cb = self[key]
                 if isinstance(cb, list):
-                    self.log("Callbacks.execute : .1 handling of lists of callbacks not implemented yet")
-                    self.log("Callbacks.execute : .2 %s" % (str(cb)))
+                    self.log('Callbacks.execute : .1 handling of lists '
+                             'of callbacks not implemented yet')
+                    self.log('Callbacks.execute : .2 %s' % (str(cb)))
                     return False
                 else:
                     return cb.execute(self.system, order, device, data)
             else:
-                self.log("Callbacks.execute ERROR : key %s not in callbacks => return None" % (key))
-        # else:
-        #     # default warning, only in debug mode
-        #     self.log("Callbacks.execute WARNING : key is None => return None")
+                self.log('Callbacks.execute ERROR : key %s '
+                         'not in callbacks => return None' % (key))
+        elif SYSTEM_LOGGER.debug:
+            self.log("Callbacks.execute WARNING : key is None => return None")
         return None
-    

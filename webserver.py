@@ -20,6 +20,7 @@ from threading import Thread
 
 from core.logger import SYSTEM_LOGGER
 
+
 # --------------------------------------------------------------------------------------------------
 #
 #
@@ -345,6 +346,7 @@ class OpenWebHandler(http.server.BaseHTTPRequestHandler, object):
             else:
                 v += c
         return v
+
 
 #
 #
