@@ -25,8 +25,7 @@ class Gateway(OWNSubSystem):
         _td = datetime.timedelta(hours=_timezone)
         _tz = datetime.timezone(_td)
         _time = datetime.time(_hour, _minute, _second, 0, _tz)
-        self.system.gateway.time_info(_time)
-        return True
+        return self.system.gateway.time_info(_time)
     
     def _date_info(self, matches):
         _day = int(matches['day'])
@@ -41,8 +40,7 @@ class Gateway(OWNSubSystem):
         if _dow != _wd:
             # just log it, doesn't really matter, we don't use that info
             self.log('weekday differs : got %d expected %d' % (_dow, _wd))
-        self.system.gateway.date_info(_date)
-        return True
+        return self.system.gateway.date_info(_date)
 
     @staticmethod
     def gen_set_date_time(_dt):
