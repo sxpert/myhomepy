@@ -23,55 +23,40 @@ class OWNSubSystem(object):
     #
 
     def parse(self, msg):
-        if msg.is_status:
-            return self.parse_status(msg)
-        if msg.is_command:
-            return self.parse_command(msg)
-        self.log("Unknown message type %s" % (str(msg)))
-        return None
-
-    def parse_status(self, msg):
-        cb_data = self.parse_regexp(msg)
-        if cb_data is not None:
-            if isinstance(cb_data, bool):
-                return cb_data
-            return self._do_callback(cb_data)
-        # say something only if we coudn't do anything with it
-        self.log("STATUS %s -> %s" % (self.__class__.__name__, msg))
-        return None
-
-    def parse_command(self, msg):
-        cb_data = self.parse_regexp(msg)
-        if cb_data is not None:
-            if isinstance(cb_data, bool):
-                return cb_data
-            return self._do_callback(cb_data)
-        # say something only if we coudn't do anything with it
-        self.log("COMMAND %s -> %s" % (self.__class__.__name__, msg))
-        return None
+        return self.parse_regexp(msg)
 
     def parse_regexp(self, msg):
         return self._parse_regexp(msg, self.get_regexps(msg, 'SYSTEM_REGEXPS'))
 
     def get_regexps(self, msg, name):
+        """
+        returns a list of regexps according to the message type
+        """
         regexps = getattr(self, name, {})
         return regexps.get(msg.type_name, [])
 
     def _parse_regexp(self, msg, regexps):
+        """
+        search for the function corresponding to the message
+        in :
+        Message object
+        regexps list
+
+        out, either:
+        * a tuple (function, matches)
+        * None
+        """
+        # step 1: find a regexp that matches
+        func_info = None
         if len(regexps) > 0:
-            for r, fname in regexps:
+            for r, f in regexps:
                 m = re.match(r, msg.msg)
                 if m is not None:
+                    # package the info on the func
                     matches = m.groupdict()
-                    f = getattr(self, fname, None)
-                    if callable(f):
-                        return f(matches)
-                    else:
-                        self.log("Unable to find method %s.%s" % (
-                            self.__class__.__name__, fname))
-                        return None
-        # nothing was found
-        return None
+                    func_info = (f, matches, )
+        # either a tuple or none
+        return func_info
 
     # ---------------------------------------------------------------------
     #

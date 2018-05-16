@@ -94,10 +94,12 @@ class Action(object):
             self._action_mode = self.AC_PLUGIN
             self._module = _plugin.get("module", None)
             if self._module is None:
-                self.log("config.Action.load : no module specified for plugin...")
+                self.log('config.Action.load : '
+                         'no module specified for plugin...')
             self._method = _plugin.get("method", None)
             if self._method is None:
-                self.log("config.Action.load: no method specified for plugin...")
+                self.log('config.Action.load: '
+                         'no method specified for plugin...')
         self._params = data.get("params", None)
 
     def __to_json__(self):
@@ -129,7 +131,7 @@ class Action(object):
                      "Method not specified, cancelling callback")
             return None
         if SYSTEM_LOGGER.info:
-            self.log('config.Action._exec_plugin: plugin appears valid %s %s' 
+            self.log('config.Action._exec_plugin: plugin appears valid %s %s'
                      % (str(self._module), str(self._method)))
         plugins_paths = PLUGINS_DIRS.split(os.pathsep)
         sys.path.extend(plugins_paths)
@@ -162,7 +164,6 @@ class Action(object):
                     if SYSTEM_LOGGER.info:
                         self.log('config.Action._exec_plugin : '
                                  'module imported %s' % (str(m)))
-                    
         if m is None:
             return None
         # find method
@@ -170,13 +171,14 @@ class Action(object):
         if func:
             if SYSTEM_LOGGER.info:
                 self.log('config.Action._exec_plugin : '
-                         'calling %s %s %s %s %s' % 
+                         'calling %s %s %s %s %s' %
                          (str(func), str(subsystem),
-                         str(self._params),
-                         str(device), str(data)))
+                          str(self._params),
+                          str(device), str(data)))
             res = func(subsystem, self._params, device, data)
             if SYSTEM_LOGGER.info:
-                self.log('config.Action._exec_plugin : callback plugin returned %s' % (str(res)))
+                self.log('config.Action._exec_plugin : '
+                         'callback plugin returned %s' % (str(res)))
             return res
         if SYSTEM_LOGGER.info:
             self.log('config.Action._exec_plugin : '
@@ -240,7 +242,9 @@ class Callback(object):
     def execute(self, subsystem, order, device, data):
         if self.action is not None:
             if SYSTEM_LOGGER.info:
-                self.log('config.Callback.execute : action is not None, launching')
+                self.log('config.Callback.execute : '
+                         'action is not None, launching')
             return self.action.execute(subsystem, order, device, data)
-        self.log("config.Callback.execute : self.action is None => return None")
+        self.log('config.Callback.execute : '
+                 'self.action is None => return None')
         return None

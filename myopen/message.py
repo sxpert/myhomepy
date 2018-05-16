@@ -15,7 +15,7 @@ class Message(object):
     _who = None
     _msg = None
 
-    def __init__(self, msg = None, source=None):
+    def __init__(self, msg=None, source=None):
         self._str = msg
         self._src = source
         self._identify_type()
@@ -27,9 +27,6 @@ class Message(object):
             print(msg)
 
     def _identify_type(self):
-        # # skip useless *1001*3*0## frame
-        # if self._str == '*1001*3*0##':
-        #     return
         # analyze the content of messages passed from the layer 1
         m = re.match(r'^\*(?P<who>\d+)(?P<msg>\*.*)', self._str)
         if m is not None:
@@ -50,7 +47,7 @@ class Message(object):
         import inspect
         func = inspect.currentframe().f_code.co_name
         self.log("%s %s" % (func, msg))
-        
+
     def __str__(self):
         return "<%s \'%s\'>" % (self.__class__.__name__, self._str)
 
@@ -76,15 +73,55 @@ class Message(object):
         return self._msg
 
     def dispatch(self):
-        ok = False
+        func_info = None
         sub_class = find_subsystem(self._who)
         if sub_class is not None:
             subsystem = sub_class(self._src.system)
-            ok = subsystem.parse(self)
-            if ok is not None and ok:
-                return
-        if not ok:
-            msg = "UNHANDLED %s message \'%s\' data \'%s\'" % \
-                  (self.type_name, str(self._who), self._msg)
+            func_info = subsystem.parse(self)
+        if func_info is None:
+            msg = "UNHANDLED %s message \'%s\' %s \'%s\'" % \
+                  (self.type_name,
+                   str(self._who),
+                   sub_class.__name__,
+                   self._msg)
             self.log(msg)
-        
+            return None
+        # do something with func_info
+        # finfo is either a str or a tuple
+        finfo, matches = func_info
+        if isinstance(finfo, str):
+            fname = finfo
+            ver = 1
+            finfo = (fname, ver)
+        if isinstance(finfo, tuple) and len(finfo) == 2:
+            fname, ver = finfo
+            # check types and complain ?
+        else:
+            self.log('Message.dispatch: '
+                     'expected a tuple of length 2 with (str, int)')
+        # find the corresponding function object
+        f = getattr(subsystem, fname, None)
+        if f is None:
+            # better logging ?
+            self.log('Message.dispatch: '
+                     'Unable to find method %s.%s' %
+                     (sub_class.__name__, fname))
+            return None
+        if not callable(f):
+            self.log('Message.dispatch: '
+                     'not a callable method %s.%s' %
+                     (sub_class.__name__, fname))
+            return None
+        if ver == 1:
+            cb_data = f(matches)
+        elif ver == 2:
+            cb_data = f(self, matches)
+        else:
+            # ver is unknown
+            self.log('Message.dispatch : expected an int for ver, got %s'
+                     (str(ver)))
+            return False
+        if cb_data is not None:
+            if isinstance(cb_data, bool):
+                return cb_data
+            return subsystem._do_callback(cb_data)
