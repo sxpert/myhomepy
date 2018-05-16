@@ -82,8 +82,10 @@ class Callbacks(object):
                                  % (str(cb)))
                     return cb.execute(self.system, order, device, data)
             else:
-                self.log('Callbacks.execute ERROR : key %s '
-                         'not in callbacks => return None' % (key))
+                # there is no callback by this key, ignore
+                # self.log('Callbacks.execute INFO : key %s '
+                #          'not in callbacks => return None' % (key))
+                pass
         elif SYSTEM_LOGGER.info:
             self.log("Callbacks.execute WARNING : key is None => return None")
         return None
