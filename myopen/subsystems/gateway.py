@@ -34,7 +34,7 @@ class Gateway(OWNSubSystem):
     #
 
     def map_device(self, device):
-        SYSTEM_LOGGER.log('DiagScannable.map_device : %s' % (str(device)))
+        SYSTEM_LOGGER.log('Gateway.map_device : %s' % (str(device)))
         if device is None:
             return '*'
         return str(device)
