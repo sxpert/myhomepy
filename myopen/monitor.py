@@ -58,8 +58,8 @@ class OWNMonitor(OWNSocket):
         #     self.system.systems.config.save()
         #     self.log('<= configuration saved')
 
-        from .commands import CmdScanDeviceIds
-        self.push_task(CmdScanDeviceIds)
+        # from .commands import CmdScanDeviceIds
+        # self.push_task(CmdScanDeviceIds)
 
     # ----------------------------------------------------------------------------------------------
     # this is called for each open web net packet received
