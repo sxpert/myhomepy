@@ -78,9 +78,11 @@ class DiagScannable(OWNSubSystem):
             # res_id
             # device answers with it's ID
             # *#[who]*[where]*13*[id]##
-            (r'^\*(?P<virt_id>\d{1,4})\*13\*(?P<hw_addr>\d{1,10})##$',
-             '_diag_res_id', ),
-
+            {
+                'name': 'DIAG_RES_ID',
+                're': r'^\*(?P<virt_id>\d{1,4})\*13\*(?P<hw_addr>\d{1,10})##$',
+                'func': '_diag_res_id'
+            },
             # res_ko_value
             # device answers with it's key/object, value and state
             # *#[who]*[where]*30*[slot]*[keyo]*[state]##
@@ -130,8 +132,7 @@ class DiagScannable(OWNSubSystem):
         return _cb_name
 
     def map_device(self, device):
-        if SYSTEM_LOGGER.info:
-            SYSTEM_LOGGER.log('DiagScannable.map_device : %s' % (str(device)))
+        self.log('DiagScannable.map_device : %s' % (str(device)))
         if device is None:
             return '*'
         return str(device)
@@ -245,12 +246,16 @@ class DiagScannable(OWNSubSystem):
         _virt_id = matches['virt_id']
         _hw_addr = matches['hw_addr']
         hw_addr_x = self.system.devices.format_hw_addr(_hw_addr)
-        dev = self.system.devices.register(self, matches)
-        if dev is None:
-            self.log('Unable to register device with virt_id %s '
-                     'and hw_addr %s' % (_virt_id, hw_addr_x))
-            return False
-        return True
+
+        def register():
+            dev = self.system.devices.register(self, matches)
+            if dev is None:
+                self.log('Unable to register device with virt_id %s '
+                         'and hw_addr %s' % (_virt_id, hw_addr_x))
+                return False
+            return True
+
+        return register
 
     def _diag_res_ko_value(self, matches):
         _virt_id = matches['virt_id']

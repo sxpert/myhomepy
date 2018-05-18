@@ -1,20 +1,16 @@
 #!/usr/bin/python
 
 import sqlite3
-from core.logger import SYSTEM_LOGGER
+from core.logger import *
 
 
 class Database(object):
-
-    def log(self, message):
-        if self._log is not None:
-            self._log(message)
-        else:
-            print(message)
-
-    def __init__(self, dbname, log=None):
-        self._log = log
+    def __init__(self, dbname, system=None):
+        self.system = system
         self.dbname = dbname
+        self.log = get_logger(LOG_INFO,
+                              '[DB %s]' % (self.dbname),
+                              COLOR_CYAN)
         conn = sqlite3.connect(self.dbname)
         c = conn.cursor()
         # check for presence of version table
@@ -108,9 +104,8 @@ class Database(object):
             return self._sql_log_error(
                 "wrong rowcount after insert, expected 1, got %d" % (_rc),
                 (_request, values,))
-        if SYSTEM_LOGGER.info:
-            self.log("request successful %s rows: %d" %
-                     (str((_request, values,)), _rc))
+        self.log("request successful %s rows: %d" %
+                 (str((_request, values,)), _rc), LOG_INFO)
         # commit
         conn.commit()
         # close connection

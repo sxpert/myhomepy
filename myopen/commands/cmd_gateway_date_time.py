@@ -4,12 +4,13 @@ from ..dialog import CommandDialog
 from ..subsystems import Gateway
 from .. import subsystems as subs
 
+
 class CmdGatewayUpdateDateTime(CommandDialog):
     def run(self, params):
         self._gateway = params.get('gateway', None)
         self._datetime = params.get('datetime', None)
         super().run()
-        
+
     def ready_callback(self):
         self.log("Sending Set DateTime commnand")
         command = Gateway.gen_set_date_time(self._datetime)
@@ -27,4 +28,3 @@ class CmdGatewayUpdateDateTime(CommandDialog):
             self.log("Unexpected response '%s'" % (msg))
         self.stopping = True
         self.notify()
- 

@@ -1,27 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from . import config, system
+from . import config as conf
+from . import system
 
 
 class Systems(list):
     _log = None
 
-    def __init__(self, obj=None):
+    def __init__(self, config=None):
         super().__init__(self)
-        if obj is not None:
-            if isinstance(obj, config.Config):
-                self.config = obj
-                self._log = self.config.log
-            else:
-                self.log("WARNING: wrong object passed "
-                         "to Systems.__init__ %s" % (str(obj)))
-        self.log("initializing systems")
-
-    def log(self, msg):
-        if self._log is not None:
-            self._log(msg)
-        else:
-            print(msg)
+        if config is not None:
+            if isinstance(config, conf.Config):
+                self.config = config
+                self.log = self.config.log
 
     def load(self, data):
         if type(data) is not list:
@@ -44,7 +35,16 @@ class Systems(list):
     @property
     def main_loop(self):
         if self.config is not None:
-            return self.config.main_loop
+            ml = getattr(self.config, 'main_loop', None)
+            return ml
+        else:
+            return None
+
+    @property
+    def async_loop(self):
+        if self.config is not None:
+            al = getattr(self.config, 'async_loop', None)
+            return al
         else:
             return None
 

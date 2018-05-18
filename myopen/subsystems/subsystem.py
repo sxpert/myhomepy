@@ -3,19 +3,20 @@
 import json
 import re
 
-from core.logger import SYSTEM_LOGGER
+from core.logger import *
 
 
 class OWNSubSystem(object):
 
     def __init__(self, system=None):
-        self.system = system
-
-    def log(self, msg):
-        if self.system:
-            self.system.log(msg)
+        if system is None:
+            self.log = get_logger(LOG_INFO, COLOR_LT_RED)
+            self.log.debug = True
+            self.log('had to create logger')
+            raise SystemError
         else:
-            print(msg)
+            self.system = system
+            self.log = system.log
 
     # ---------------------------------------------------------------------
     #
@@ -49,12 +50,19 @@ class OWNSubSystem(object):
         # step 1: find a regexp that matches
         func_info = None
         if len(regexps) > 0:
-            for r, f in regexps:
+            for rec in regexps:
+                if isinstance(rec, tuple):
+                    r, f = rec
+                    name = None
+                if isinstance(rec, dict):
+                    name = rec.get('name')
+                    r = rec.get('re')
+                    f = rec.get('func')
                 m = re.match(r, msg.msg)
                 if m is not None:
                     # package the info on the func
                     matches = m.groupdict()
-                    func_info = (f, matches, )
+                    func_info = (f, matches, name, )
         # either a tuple or none
         return func_info
 
@@ -88,13 +96,13 @@ class OWNSubSystem(object):
             dev = self.map_device(device)
             if dev is None:
                 # can't map it, no problem
-                if SYSTEM_LOGGER.info:
-                    self.log('Subsystem.map_callback %d-%d-%s' %
-                             (who, order, str(dev)))
+                self.log('Subsystem.map_callback %d-%d-%s' %
+                         (who, order, str(dev)),
+                         LOG_INFO)
                 return None
             ck = "%d-%d-%s" % (who, order, dev)
-            if SYSTEM_LOGGER.info:
-                self.log('OWNSubSystem.map_callback %s' % (ck))
+            self.log('OWNSubSystem.map_callback %s' % (ck),
+                     LOG_INFO)
             return ck
         self.log("ERROR: Can't call %s.map_callback" % (
             self.__class__.__name__))
@@ -107,16 +115,16 @@ class OWNSubSystem(object):
         return _cb_id
 
     def map_callback_name(self, name):
-        self.log('OWNSubSystem.map_callback_name')
+        self.log('OWNSubSystem.map_callback_name', LOG_INFO)
         sys_callbacks = getattr(self, 'SYSTEM_CALLBACKS', None)
         if sys_callbacks is None:
             return None
         return self.__class__._map_callback_name(name, sys_callbacks)
 
     def callback(self, order, device, data=None):
-        if SYSTEM_LOGGER.info:
-            self.log("OWNSubSystem.callback %d %s %s" %
-                     (order, str(device), str(data)))
+        logmsg = 'OWNSubSystem.callback %d %s %s' % \
+                 (order, str(device), str(data))
+        self.log(logmsg, LOG_INFO)
         callback_ok = self.system.callback(self, order, device, data)
         if isinstance(callback_ok, bool):
             if callback_ok:
@@ -126,7 +134,6 @@ class OWNSubSystem(object):
                          'unable to execute callback')
                 return False
         # we had None here
-        if SYSTEM_LOGGER.info:
-            self.log('OWNSubSystem.callback WARNING : no callback found')
+        self.log('OWNSubSystem.callback WARNING : no callback found', LOG_INFO)
         # lets say things were fine
         return True

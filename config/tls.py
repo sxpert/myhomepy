@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 
 from . import config
 
@@ -12,17 +12,11 @@ class Tls(object):
         if obj is not None:
             if isinstance(obj, config.Config):
                 self.config = obj
-                self._log = self.config.log
+                self.log = self.config.log
             else:
-                self.log("WARNING: wrong object passed "
-                         "to Systems.__init__ %s" % (str(obj)))
+                print("WARNING: wrong object passed "
+                      "to Systems.__init__ %s" % (str(obj)))
         self.log("TLS initialized")
-
-    def log(self, msg):
-        if self._log is not None:
-            self._log(msg)
-        else:
-            print(msg)
 
     def load(self, data):
         if data is None:
@@ -78,4 +72,3 @@ class Tls(object):
         avail_s = str(self.available)
         return "<%s cert: %s key: %s available: %s>" % (
             self.__class__.__name__, cert_s, key_s, avail_s)
-

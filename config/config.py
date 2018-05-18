@@ -3,7 +3,7 @@ import json as system_json
 import threading
 
 import core.json as json
-from core.logger import SYSTEM_LOGGER
+from core.logger import *
 
 from . import gateway, system, systems, tls
 
@@ -15,6 +15,8 @@ class Config(object):
     _file_lock = None
 
     def __init__(self, app, config_file=None):
+        self.log = get_logger(LOG_INFO, '[CONF]', COLOR_LT_YELLOW)
+        self.log('Initializing configuration')
         self.app = app
         if config_file is None:
             self.config_file = CONFIG_FILE_NAME
@@ -23,14 +25,14 @@ class Config(object):
         self._file_lock = threading.RLock()
         self.load_file(self.config_file)
 
-    def log(self, msg):
-        msg_s = '[CONF] '+str(msg)
-        SYSTEM_LOGGER.log(msg_s)
-
     # sets the main loop
     # starts up all loaded systems
     def set_main_loop(self, ml):
         self.main_loop = ml
+        self.systems.run()
+
+    def set_async_loop(self, al):
+        self.async_loop = al
         self.systems.run()
 
     def load_file(self, file):

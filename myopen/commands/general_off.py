@@ -23,4 +23,3 @@ class CmdGeneralOff(CommandDialog):
             self.log("Unexpected response '%s'" % (msg))
         self.stopping = True
         self.notify()
- 

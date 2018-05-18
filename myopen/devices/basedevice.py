@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import json, threading
+import json
+import threading
+
 
 class BaseDevice(json.JSONEncoder):
     # this comes from the MHCatalogue.db file
@@ -30,17 +32,17 @@ class BaseDevice(json.JSONEncoder):
     PROD_LINE_AIR = 10
 
     BRANDS = [
-        {   
+        {
             'id': 'BRAND_UNDEFINED',
             'names': {
-                'short': '_', 
+                'short': '_',
                 'long': 'Undefined'
             },
             'lines': {
                 PROD_LINE_UNDEFINED: 'Undefined'
             }
         },
-        {   
+        {
             'id': 'BRAND_BTICINO',
             'names': {
                 'short': 'BT',
@@ -56,10 +58,10 @@ class BaseDevice(json.JSONEncoder):
                 PROD_LINE_AIR: 'Air'
             }
         },
-        { 
+        {
             'id': 'BRAND_LEGRAND',
             'names': {
-                'short': 'LG', 
+                'short': 'LG',
                 'long': 'Legrand'
             },
             'lines': {
@@ -69,10 +71,11 @@ class BaseDevice(json.JSONEncoder):
                 PROD_LINE_CELIANE: 'Céliane',
             }
         },
-        {   'id': 'BRAND_TEGUI',
+        {
+            'id': 'BRAND_TEGUI',
             'names': {
-                'short': 'TG', 
-                'long': 'Tegui', 
+                'short': 'TG',
+                'long': 'Tegui',
             }
         },
         {
@@ -82,17 +85,17 @@ class BaseDevice(json.JSONEncoder):
                 'long': 'Shidean'
             }
         },
-        {   
+        {
             'id': 'BRAND_LEGRAND_BTICINO',
             'names': {
-                'short': 'LGG', 
-                'long': 'LegrandBticino' 
+                'short': 'LGG',
+                'long': 'LegrandBticino'
             },
         },
-        {  
+        {
             'id': 'BRAND_ARNOULD',
-            'names':{
-                'short': 'AR', 
+            'names': {
+                'short': 'AR',
                 'long': 'Arnould'
             },
             'lines': {
@@ -100,15 +103,6 @@ class BaseDevice(json.JSONEncoder):
             }
         }
     ]
-    
-
-    PROD_LINES = (
-        'UNDEFINED', 
-        None,
-        None,
-        None,
-        'Céliane', 
-    )
 
     PARAMS_KEY = '_PARAMS'
 
@@ -119,25 +113,22 @@ class BaseDevice(json.JSONEncoder):
         dev_sys = getattr(cls, 'DEVICE_SYSTEM', None)
         sys_who = getattr(subsystem, 'SYSTEM_DIAG_WHO', None)
         if sys_who is None:
-            print('PANIC : subsystem %s has no SYSTEM_DIAG_WHO' % (str(subsystem)))
+            print('PANIC : subsystem %s has no SYSTEM_DIAG_WHO'
+                  % (str(subsystem)))
             return None
         if dev_sys is not None and dev_sys != sys_who:
-            print('PANIC : subsystem %s, device %d' % (str(subsystem), dev_sys))
+            print('PANIC : subsystem %s, device %d'
+                  % (str(subsystem), dev_sys))
             return None
         return json.JSONEncoder.__new__(cls)
 
     def __init__(self, devices, subsystem, params):
-        self._devices = devices
-        self._subsystem = subsystem
+        self.devices = devices
+        self.log = devices.log
+        self.subsystem = subsystem
         self._discovery_lock = threading.RLock()
         self._discovery = False
         self.update_base_data(params)
-
-    def log(self, msg):
-        if self._devices is not None:
-            self._devices.log(msg)
-        else:
-            print(msg)
 
     def queue_for_discovery(self):
         """
@@ -145,10 +136,10 @@ class BaseDevice(json.JSONEncoder):
         Makes sure we only push it once
         """
         self._discovery_lock.acquire()
-        if self._devices is None:
+        if self.devices is None:
             self._discovery_lock.release()
             return False
-        
+
         if self._discovery:
             self._discovery_lock.release()
             return False
@@ -156,12 +147,20 @@ class BaseDevice(json.JSONEncoder):
         self._discovery = True
 
         params = {
-            'devices': self._devices,
+            'devices': self.devices,
             'device': self
         }
 
-        from ..commands import CmdDiagDeviceByAid
-        self._devices._system.push_task(CmdDiagDeviceByAid, params=params)
+        # only for thread based stuff
+        if self.devices.system.main_loop:
+            from ..commands import CmdDiagDeviceByAid
+            self.devices.system.push_task(CmdDiagDeviceByAid, params=params)
+        elif self.devices.system.async_loop:
+            from ..commands.asyncio_cmd_diag_aid import CmdDiagAid
+            self.devices.system.push_task(CmdDiagAid, params=params)
+        else:
+            self.log('BaseDevice.queue_for_discovery : '
+                     'no main loop, not doing anything')
         self._discovery_lock.release()
 
     def update_base_data(self, params):
@@ -175,7 +174,8 @@ class BaseDevice(json.JSONEncoder):
         _class = '<%s [%s] ' % (self.__class__.__name__, hex(id(self)))
         if self.valid:
             from . import Devices
-            return '%sid: %s>' % (_class, Devices.format_hw_addr(self._hw_addr))
+            return '%sid: %s>' % \
+                   (_class, Devices.format_hw_addr(self._hw_addr))
         return '%sINVALID>' % (_class)
 
     def dump_configurators(self):
@@ -184,7 +184,7 @@ class BaseDevice(json.JSONEncoder):
         suitable for use in the configuration save, for instance
 
         returns None if no configurators are present
-        can return either an array, or a dictionnary, depending on 
+        can return either an array, or a dictionnary, depending on
         the device
         """
         confs = getattr(self, '_configurators', None)
@@ -228,7 +228,7 @@ class BaseDevice(json.JSONEncoder):
     def __to_json__(self):
         data = {}
         data['virt_id'] = self._virt_id
-        data['hw_addr'] = self._devices.format_hw_addr(self._hw_addr)
+        data['hw_addr'] = self.devices.format_hw_addr(self._hw_addr)
 
         # MODEL_ID handling
         # the proper model_id
@@ -241,7 +241,7 @@ class BaseDevice(json.JSONEncoder):
             if model_id is not None:
                 data['_model_id'] = model_id
 
-        data['subsystem'] = str(self._subsystem)
+        data['subsystem'] = str(self.subsystem)
 
         confs = self.dump_configurators()
         if confs is not None:
@@ -267,7 +267,7 @@ class BaseDevice(json.JSONEncoder):
 
     @property
     def valid(self):
-        return self._subsystem is not None and \
+        return self.subsystem is not None and \
                self._hw_addr is not None
 
     @property
@@ -281,26 +281,31 @@ class BaseDevice(json.JSONEncoder):
                 # probably not configured yet, ok
                 return True
         if _virt_id != virt_id:
-            error_msg = 'this device\'s virt_id is %s, doesn\'t match with %s' \
+            error_msg = 'this device\'s virt_id is %s, ' \
+                        'doesn\'t match with %s' \
                         % (self._virt_id, virt_id)
             self.log(error_msg)
             return False
         return True
 
-    def res_object_model(self, virt_id, model_id, nb_conf, brand_id, prod_line):
+    def res_object_model(self, virt_id, model_id,
+                         nb_conf, brand_id, prod_line):
         if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_LENIENT):
             return False
         if self.__class__.__name__ == BaseDevice.__name__:
             from . import DeviceTypes
             for d in DeviceTypes:
-                mid = getattr(d, 'MODEL_ID', None) 
+                mid = getattr(d, 'MODEL_ID', None)
                 if mid is not None and mid == model_id:
-                    nd = d(self._devices, self._subsystem, {'virt_id': self._virt_id, 'hw_addr': self._hw_addr})
+                    nd = d(self.devices, self.subsystem,
+                           {'virt_id': self._virt_id,
+                            'hw_addr': self._hw_addr})
                     # object creation may fail if we're in the wrong subsystem,
                     # continue looking for other devices that may fit better
                     if nd is not None:
-                        nd.res_object_model(virt_id, model_id, nb_conf, brand_id, prod_line)
-                        self._devices.replace_active_device(nd)
+                        nd.res_object_model(virt_id, model_id,
+                                            nb_conf, brand_id, prod_line)
+                        self.devices.replace_active_device(nd)
                         return True
             # couldn't find a proper model id
             self._model_id = model_id
@@ -314,7 +319,8 @@ class BaseDevice(json.JSONEncoder):
         if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_LENIENT):
             return False
         if self.__class__.__name__ == BaseDevice.__name__:
-            self.log('can\'t set the firmware version on a BaseDevice instance')
+            self.log('can\'t set the firmware version '
+                     'on a BaseDevice instance')
             return False
         self._fw_version = fw_version
         return True
@@ -331,7 +337,8 @@ class BaseDevice(json.JSONEncoder):
         if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_LENIENT):
             return False
         if self.__class__.__name__ == BaseDevice.__name__:
-            self.log('can\'t set configurators 1 through 6 on a BaseDevice instance')
+            self.log('can\'t set configurators 1 through '
+                     '6 on a BaseDevice instance')
             return False
         # limit the range to the actual number of configurators
         range_max = min(len(self._configurators), 6)
@@ -347,7 +354,8 @@ class BaseDevice(json.JSONEncoder):
         if slot_id < 1:
             self.log('slot_set_value : slot_id %d invalid' % (slot_id))
         if slot_id > 32:
-            self.log('slot_set_value : slot_id %d appears too large' % (slot_id))
+            self.log('slot_set_value : slot_id %d appears too large'
+                     % (slot_id))
         if len(slots) < slot_id:
             # enlarge (hihi) the slots
             slots += [None]*(slot_id-len(slots))

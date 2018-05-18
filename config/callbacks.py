@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from core.logger import SYSTEM_LOGGER
+from core.logger import *
 from myopen.subsystems import find_subsystem
 
 from . import callback, system
@@ -8,24 +8,18 @@ from . import callback, system
 
 class Callbacks(object):
     _callbacks = {}
-    _log = None
 
     def __init__(self, obj=None):
         if obj is not None:
             if isinstance(obj, system.System):
                 self.system = obj
-                self._log = self.system.log
+                self.log = self.system.log
             else:
                 self.log("WARNING: wrong object passed "
                          "to Callbacks.__init__ %s" % (str(obj)))
 
-    def log(self, msg):
-        if self._log is not None:
-            self._log(msg)
-        else:
-            print(msg)
-
     def load(self, data):
+        self.log('loading callbacks')
         if not isinstance(data, list):
             self.log("expecting a list of callback elements")
             return
@@ -38,6 +32,7 @@ class Callbacks(object):
                 self.log("a callback for key %s is already present" % (key))
             else:
                 self[key] = cb
+        self.log("callbacks loaded")
 
     def __to_json__(self):
         if len(self._callbacks) == 0:
@@ -66,8 +61,7 @@ class Callbacks(object):
     def execute(self, subsystem, order, device, data):
         # subsystem is a subsystem instance
         key = subsystem.map_callback(order, device)
-        if SYSTEM_LOGGER.info:
-            self.log('config.Callbacks.execute : key %s' % (str(key)))
+        self.log('config.Callbacks.execute : key %s' % (str(key)), LOG_INFO)
         if key is not None:
             if key in self.keys():
                 cb = self[key]
@@ -77,15 +71,15 @@ class Callbacks(object):
                     self.log('Callbacks.execute : .2 %s' % (str(cb)))
                     return False
                 else:
-                    if SYSTEM_LOGGER.info:
-                        self.log('config.Callbacks.execute : found callback %s'
-                                 % (str(cb)))
+                    self.log('config.Callbacks.execute : found callback %s'
+                             % (str(cb)), LOG_INFO)
                     return cb.execute(self.system, order, device, data)
             else:
                 # there is no callback by this key, ignore
                 # self.log('Callbacks.execute INFO : key %s '
                 #          'not in callbacks => return None' % (key))
                 pass
-        elif SYSTEM_LOGGER.info:
-            self.log("Callbacks.execute WARNING : key is None => return None")
+        else:
+            self.log("Callbacks.execute WARNING : key is None => return None",
+                     LOG_INFO)
         return None

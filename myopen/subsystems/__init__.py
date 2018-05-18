@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from .subsystem import OWNSubSystem
 from .lighting import Lighting
 from .temp_control import TempControl
@@ -7,6 +9,13 @@ from .diag_lighting import DiagLighting
 from .diag_temp_control import DiagTempControl
 from .diag_gateway import DiagGateway
 
+
+__all__ = [
+    'TX_CMD_SCAN_SYSTEM', 'TX_CMD_DIAG_ABORT',
+    'TX_CMD_DIAG_ID', 'TX_CMD_SCAN_CHECK',
+    'TX_CMD_RESET', 'TX_CMD_PARAM_ALL_KO',
+    'find_subsystem', 'find_scannable', 'replace_in_command'
+]
 
 SubSystems = [Lighting,
               TempControl,
@@ -22,6 +31,7 @@ TX_CMD_SCAN_CHECK = "*[who]*11#[id]*0##"
 TX_CMD_RESET = "*[who]*12*0##"
 TX_CMD_PARAM_ALL_KO = "*#[who]*0*38#0##"
 
+
 # returns the appropriate class object
 def find_subsystem(who):
     for s in SubSystems:
@@ -33,12 +43,14 @@ def find_subsystem(who):
                 return s
     return None
 
+
 def find_scannable():
     _scan = []
     for s in SubSystems:
         if getattr(s, 'SYSTEM_IS_SCANNABLE', False):
             _scan.append(s)
     return _scan
+
 
 def replace_in_command(command, params):
     _cmd = ''

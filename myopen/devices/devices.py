@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
 from .basedevice import BaseDevice
+from core.logger import *
+
 
 class Devices(object):
     _devs = {}
 
     def __init__(self, system):
-        self._system = system
+        self.system = system
+        self.log = system.log
         self._discovery_busy = False
         self._active_device = None
 
-    def log(self, msg):
-        self._system.log(msg)
-    
     def load(self, data):
         pass
 
@@ -42,7 +42,7 @@ class Devices(object):
     # def __str__(self):
     #     _s = '<%s>' % (self.__class__.__name__)
     #     return _s
-    
+
     @staticmethod
     def format_hw_addr(hw_addr):
         if not isinstance(hw_addr, int):
@@ -56,8 +56,9 @@ class Devices(object):
 
         hw_addr = data.get('hw_addr', None)
         if hw_addr is None:
-            self.log('ERROR: malformed device register request, missing \'hw_addr\' value %s %s' %
-                (str(subsystem), str(data)))        
+            self.log('ERROR: malformed device register request, '
+                     'missing \'hw_addr\' value %s %s' %
+                     (str(subsystem), str(data)))
             return None
         # generate key
         k = Devices.format_hw_addr(hw_addr)
@@ -80,8 +81,8 @@ class Devices(object):
         """
         Registers a device, launches a scan if the device is unknown
         """
-        dev = self._register(subsystem, data)        
-
+        dev = self._register(subsystem, data)
+        self.log('Devices.register : %s' % (str(dev)), LOG_INFO)
         if dev.__class__.__name__ != BaseDevice.__name__:
             return dev
         # push command to get device info
@@ -90,12 +91,13 @@ class Devices(object):
 
     def set_active_device(self, caller, hw_addr):
         if self._active_device is not None:
-            # self.log('active device already set to %s' % (self._active_device))
+            self.log('active device already set to %s' %
+                     (self._active_device), LOG_INFO)
             return True
         k = self.format_hw_addr(hw_addr)
         if k not in self.keys():
             # registers the device
-            self._register(caller, { 'hw_addr': hw_addr})
+            self._register(caller, {'hw_addr': hw_addr})
 
         self._active_device = self[k]
         self._active_device_caller = caller
@@ -105,17 +107,21 @@ class Devices(object):
         if self._active_device is None:
             self.log('Devices.replace_active_device: no device activated')
             return False
-        
+
         bd_name = BaseDevice.__name__
         ad_name = self._active_device.__class__.__name__
         nd_name = new_device.__class__.__name__
 
         if ad_name != bd_name:
-            self.log('Devices.replace_active_device: active device not an instance of BaseDevice')
+            self.log('Devices.replace_active_device: '
+                     'active device not an instance of BaseDevice',
+                     LOG_INFO)
             return False
-        
+
         if nd_name == bd_name:
-            self.log('Devices.replace_active_device: new device should not be an instance of BaseDevice')
+            self.log('Devices.replace_active_device: '
+                     'new device should not be an instance of BaseDevice',
+                     LOG_INFO)
             return False
 
         old_hw_addr = self._active_device.hw_addr
@@ -123,18 +129,23 @@ class Devices(object):
         old_x = self.format_hw_addr(old_hw_addr)
         new_x = self.format_hw_addr(new_hw_addr)
         if old_hw_addr != new_hw_addr:
-            self.log('Devices.replace_active_device: hardware addresses must match %s => %s' % (old_x, new_x))
+            self.log('Devices.replace_active_device: '
+                     'hardware addresses must match %s => %s' % (old_x, new_x),
+                     LOG_INFO)
             return False
-        
+
         # we are reasonably certain of having the right things here
         self[new_x] = new_device
         self._active_device = new_device
 
         return True
 
-    def res_object_model(self, virt_id, model_id, nb_conf, brand_id, prod_line):
+    def res_object_model(self, virt_id, model_id,
+                         nb_conf, brand_id, prod_line):
         if self._active_device is not None:
-            return self._active_device.res_object_model(virt_id, model_id, nb_conf, brand_id, prod_line)
+            return self._active_device\
+                .res_object_model(virt_id, model_id,
+                                  nb_conf, brand_id, prod_line)
         return False
 
     def res_fw_version(self, virt_id, fw_version):
@@ -171,7 +182,8 @@ class Devices(object):
 
     def res_param_ko(self, virt_id, slot, index, val_par):
         if self._active_device is not None:
-            return self._active_device.res_param_ko(virt_id, slot, index, val_par)
+            return self._active_device.res_param_ko(virt_id, slot,
+                                                    index, val_par)
         self.log('no active device')
         return False
 
@@ -179,7 +191,7 @@ class Devices(object):
         if self._active_device is not None:
             self._active_device.end_config_read()
         # save configuration
-        self._system.systems.config.save()
+        self.system.systems.config.save()
 
     def reset_active_device(self):
         if self._active_device is not None:
@@ -188,4 +200,3 @@ class Devices(object):
             self._active_device_caller = None
             return
         self.log('there was no active device')
-

@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 import database
-from core.logger import SYSTEM_LOGGER
+from core.logger import *
 
 
 def log_to_database(system, params, device, data):
@@ -28,10 +28,8 @@ def log_to_database(system, params, device, data):
     _sensor = "{:d}{:02d}".format(_zone, _sensor)
     _temp = "{:.1f}".format(_temp)
     # not a warning
-    if SYSTEM_LOGGER.info:
-        system.log(
-            "plugins.temperature.log_to_database (%s, %s, %s)" %
-            (str(_timestamp), str(_sensor), str(_temp)))
+    system.log("plugins.temperature.log_to_database (%s, %s, %s)" %
+               (str(_timestamp), str(_sensor), str(_temp)), LOG_INFO)
     _db = system.database
     if _db is not None:
         return _db.log_temperature(_timestamp, _sensor, _temp)

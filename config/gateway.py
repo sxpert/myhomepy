@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-
+import asyncio
 from datetime import datetime, timedelta
 
-from core.logger import SYSTEM_LOGGER
+from core.logger import *
+from myopen.asyncio_connection import *
+from myopen.message import Message
 from myopen.socket import OWNSocket
 
 from . import system
@@ -13,19 +15,18 @@ class Gateway(object):
     port = None
     passwd = None
     available = False
-    _log = None
     system = None
 
     _cur_date = None
     _cur_time = None
 
     def __init__(self, *args, **kwargs):
+        self.log = None
         if len(args) == 1:
             obj = args[0]
             if isinstance(obj, system.System):
                 self.system = obj
-                self._log = obj.log
-                return
+                self.log = obj.log
         elif len(args) == 3:
             if isinstance(args[0], str) and \
                isinstance(args[1], int) and \
@@ -34,20 +35,15 @@ class Gateway(object):
                 self.port = args[1]
                 self.passwd = args[2]
                 self.available = True
-                return
+        if self.log is None:
+            self.log = get_logger(LOG_INFO, color=COLOR_LT_RED)
         self.log("Invalid parameters on creating Gateway")
         self.log(args)
         self.log(kwargs)
 
     def set_system(self, system):
         self.system = system
-        self._log = system.log
-
-    def log(self, msg):
-        if self._log is not None:
-            self._log(str(msg))
-        else:
-            print(msg)
+        self.log = system.log
 
     def load(self, data):
         if type(data) is not dict:
@@ -99,6 +95,11 @@ class Gateway(object):
         return '<%s address: %s port: %s passwd: \'%s\'>' % (
             self.__class__.__name__, address_s, port_s, passwd_s)
 
+    # ------------------------------------------------------------------------
+    #
+    # socket related stuff
+    #
+
     def socket(self, mode):
         if not self.available:
             self.log("ERROR attempting to create a socket for "
@@ -112,6 +113,77 @@ class Gateway(object):
     def socket_info(self):
         return (self.address, self.port, self.passwd, )
 
+    async def is_ready(self):
+        await self.mon_conn.is_ready.wait()
+
+    def send(self, msg):
+        self.send_queue.put_nowait(msg)
+
+    async def handle_send_queue(self):
+        while self.loop.is_running():
+            pkt = await self.send_queue.get()
+            if self.cmd_conn is None:
+                self.log('Gateway.handle_send_queue : '
+                         'starting the command connection')
+                self.cmd_conn = \
+                    AsyncIOOWNConnection(self.address,
+                                         self.port,
+                                         self.passwd,
+                                         self.msg_queue,
+                                         MODE_COMMAND,
+                                         loop=self.loop)
+                asyncio.ensure_future(self.cmd_conn.run(),
+                                      loop=self.loop)
+                await self.cmd_conn.is_ready.wait()
+                self.log('Gateway.handle_send_queue : CMD conn is ready')
+            self.log('Gateway.handle_send_queue : sending \'%s\'' % (str(pkt)))
+            await self.cmd_conn.send_packet(pkt)
+
+    def stop_cmd_conn(self):
+        if self.cmd_conn is not None:
+            self.cmd_conn.stop()
+
+    def setup_async(self):
+        self.loop = self.system.async_loop
+        self.loop = asyncio.get_event_loop()
+        self.send_queue = asyncio.Queue(loop=self.loop)
+        self.msg_queue = asyncio.Queue(loop=self.loop)
+        asyncio.ensure_future(self.run(), loop=self.loop)
+        asyncio.ensure_future(self.handle_send_queue(), loop=self.loop)
+        self.mon_conn = \
+            AsyncIOOWNConnection(self.address,
+                                 self.port,
+                                 self.passwd,
+                                 self.msg_queue,
+                                 MODE_MONITOR,
+                                 loop=self.loop)
+        self.cmd_conn = None
+        self.cmd_conn_task = None
+        asyncio.ensure_future(self.mon_conn.run(), loop=self.loop)
+
+    async def run(self):
+        while True:
+            try:
+                data = await asyncio.wait_for(self.msg_queue.get(), .2)
+            except asyncio.TimeoutError:
+                data = None
+
+            handled = False
+            if self.system.is_cmd_busy:
+                if data is not None:
+                    self.log('msg_queue cmd %s' % str(data))
+                handled = self.system.dispatch_message(data)
+            if (data is not None) and (handled is not None) and (not handled):
+                self.log('msg_queue default %s' % str(data))
+                msg, src = data
+                m = Message(msg, self)
+                m.dispatch()
+
+    # ------------------------------------------------------------------------
+    #
+    # gateway specific functions
+    #
+
     # gateway sends date then time every 10 minutes...
 
     def _check_and_update_date_time(self):
@@ -119,13 +191,13 @@ class Gateway(object):
             _g_dt = datetime.combine(self._cur_date, self._cur_time)
             _sys_dt = datetime.now().astimezone()
             _offset = _sys_dt - _g_dt
-            if SYSTEM_LOGGER.info:
-                self.log('system %s gateway %s offset %s' %
-                         (str(_sys_dt), str(_g_dt), str(_offset)))
+            self.log('system %s gateway %s offset %s' %
+                     (str(_sys_dt), str(_g_dt), str(_offset)),
+                     LOG_INFO)
             if abs(_offset) > timedelta(minutes=5):
-                if SYSTEM_LOGGER.info:
-                    self.log('offset too large, queue a gateway datetime '
-                             'update to current value')
+                self.log('offset too large, queue a gateway datetime '
+                         'update to current value',
+                         LOG_INFO)
                 from myopen.commands import CmdGatewayUpdateDateTime
                 params = {
                     'gateway': self,
@@ -135,13 +207,11 @@ class Gateway(object):
 
     def date_info(self, _date):
         self._cur_date = _date
-        if SYSTEM_LOGGER.info:
-            self.log(self._cur_date)
+        self.log(self._cur_date, LOG_INFO)
         return True
 
     def time_info(self, _time):
         self._cur_time = _time
-        if SYSTEM_LOGGER.info:
-            self.log(self._cur_time)
+        self.log(self._cur_time, LOG_INFO)
         self._check_and_update_date_time()
         return True

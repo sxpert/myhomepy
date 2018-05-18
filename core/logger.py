@@ -3,38 +3,47 @@
 import datetime
 import inspect
 
+__all__ = (
+    'LOG_EMERG', 'LOG_ALERT', 'LOG_CRITICAL', 'LOG_ERROR',
+    'LOG_WARNING', 'LOG_NOTICE', 'LOG_INFO', 'LOG_DEBUG',
+    'COLOR_CYAN',
+    'COLOR_LT_RED', 'COLOR_LT_GREEN', 'COLOR_LT_YELLOW',
+    'COLOR_LT_BLUE', 'COLOR_LT_MAGENTA', 'COLOR_LT_CYAN',
+    'COLOR_DEFAULT',
+    'Logger', 'SYSTEM_LOGGER', 'get_logger',
+)
+
 # --------------------------------------------------------------------------------------------------
 #
 # System Logger
 #
 
+LOG_EMERG = 0
+LOG_ALERT = 1
+LOG_CRITICAL = 2
+LOG_ERROR = 3
+LOG_WARNING = 4
+LOG_NOTICE = 5
+LOG_INFO = 6
+LOG_DEBUG = 7
+
+COLOR_CYAN = '\33[36m'
+COLOR_LT_RED = '\033[91m'
+COLOR_LT_GREEN = '\033[92m'
+COLOR_LT_YELLOW = '\033[93m'
+COLOR_LT_BLUE = '\033[94m'
+COLOR_LT_MAGENTA = '\033[95m'
+COLOR_LT_CYAN = '\033[96m'
+COLOR_DEFAULT = '\033[0m'
+
 
 class Logger(object):
     _logfile = None
-    _info = False
+    _level = LOG_ERROR
     _debug = False
-
-    COLOR_RED = '\033[91m'
-    COLOR_DEFAULT = '\033[0m'
 
     def __init__(self, logfile=None):
         self._logfile = logfile
-
-    @property
-    def debug(self):
-        return self._debug
-
-    @debug.setter
-    def debug(self, _debug):
-        self._debug = _debug
-
-    @property
-    def info(self):
-        return self._info
-
-    @info.setter
-    def info(self, _info):
-        self._info = _info
 
     @property
     def logfile(self):
@@ -44,7 +53,32 @@ class Logger(object):
     def logfile(self, _logfile):
         self._logfile = _logfile
 
-    def log(self, msg):
+    @property
+    def level(self):
+        return self._level
+
+    @level.setter
+    def level(self, value):
+        self._level = value
+
+    @property
+    def debug(self):
+        return self._debug
+
+    @debug.setter
+    def debug(self, value):
+        self._debug = value
+
+    def log(self, msg, level=LOG_ERROR, header='',
+            color=COLOR_DEFAULT):
+        if self._debug:
+            print('%s \'%s\' %d \'%s\'' %
+                  (str(self), msg, level, header))
+            return
+
+        if level > self._level:
+            return
+
         # generate datetime string
         current_date = datetime.datetime.today()
         date_string = "%04d-%02d-%02d %02d:%02d:%02d" % (
@@ -59,7 +93,7 @@ class Logger(object):
 
         # find name of caller
 
-        if self._debug:
+        if self._level == LOG_DEBUG:
             for _caller in inspect.stack():
                 _func_name = _caller.function
                 if _func_name != 'log':
@@ -94,8 +128,15 @@ class Logger(object):
             _caller_name = "%s.%s" % (_class_name, _func_name)
             msg = "%s : %s" % (_caller_name, str(msg))
 
-        logmsg = '%s %s' % (date_string, msg)
-        print(logmsg)
+        hdr = ''
+        if header != '':
+            hdr = header+' '
+        logmsg = '%s %s%s' % (date_string, hdr, msg)
+        prtmsg = logmsg
+        if color != COLOR_DEFAULT:
+            prtmsg = '%s %s%s%s%s' % \
+                (date_string, color, hdr, msg, COLOR_DEFAULT)
+        print(prtmsg)
 
         # log to file
         if self._logfile:
@@ -108,3 +149,24 @@ class Logger(object):
                 pass
 
 SYSTEM_LOGGER = Logger()
+
+
+def get_logger(level=LOG_ERROR, header='', color=COLOR_DEFAULT):
+    _l = SYSTEM_LOGGER
+    # if level != SYSTEM_LOGGER.level:
+    #     _l = Logger(SYSTEM_LOGGER.logfile)
+    #     _l.level = level
+
+    class logger(object):
+        def __init__(self, _msg, _level=level, _header=header, _color=color):
+            _l.log(_msg, _level, _header, _color)
+
+        @property
+        def debug(self):
+            return _l.debug
+
+        @debug.setter
+        def debug(self, value):
+            _l.debug = True
+
+    return logger
