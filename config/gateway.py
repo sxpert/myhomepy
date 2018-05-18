@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 from core.logger import *
 from myopen.asyncio_connection import *
 from myopen.message import Message
-from myopen.socket import OWNSocket
 
 from . import system
 

@@ -4,19 +4,11 @@ import asyncio
 
 import database
 from core.logger import *
-from myopen.socket import OWNSocket
 
 from . import callbacks, gateway
 
 
 class System(object):
-    #
-    # NOTE: this should go, as OWNMonitor should
-    # inherit from OWNSocket
-    #
-    COMMAND = OWNSocket.COMMAND
-    MONITOR = OWNSocket.MONITOR
-
     _db = None
     _database = None
     gateway = None
