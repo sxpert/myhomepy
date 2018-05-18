@@ -154,7 +154,8 @@ class BaseDevice(json.JSONEncoder):
         # only for thread based stuff
         if self.devices.system.async_loop:
             from ..commands.asyncio_cmd_diag_aid import CmdDiagAid
-            self.devices.system.push_task(CmdDiagAid, params=params)
+            if self.devices.format_hw_addr(self.hw_addr) == '0095F706':
+                self.devices.system.push_task(CmdDiagAid, params=params)
         else:
             self.log('BaseDevice.queue_for_discovery : '
                      'no main loop, not doing anything')

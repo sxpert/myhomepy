@@ -11,6 +11,9 @@ from .diag_gateway import DiagGateway
 
 
 __all__ = [
+    'Lighting', 'TempControl', 'Gateway',
+    'DiagLighting', 'DiagTempControl', 'DiagGateway',
+    'DiagScannable',
     'TX_CMD_SCAN_SYSTEM', 'TX_CMD_DIAG_ABORT',
     'TX_CMD_DIAG_ID', 'TX_CMD_SCAN_CHECK',
     'TX_CMD_RESET', 'TX_CMD_PARAM_ALL_KO',

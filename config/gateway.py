@@ -132,6 +132,7 @@ class Gateway(object):
     def stop_cmd_conn(self):
         if self.cmd_conn is not None:
             self.cmd_conn.stop()
+            self.cmd_conn = None
 
     def setup_async(self):
         self.loop = self.system.async_loop

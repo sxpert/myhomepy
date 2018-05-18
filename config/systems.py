@@ -32,7 +32,7 @@ class Systems(list):
         obj.systems = self
         return obj
 
-   @property
+    @property
     def async_loop(self):
         if self.config is not None:
             al = getattr(self.config, 'async_loop', None)

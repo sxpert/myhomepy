@@ -169,11 +169,6 @@ class Devices(object):
         return False
 
     def eot_event(self, command, matches):
-        from ..dialog import CommandDialog
-        # self.log('%s' % (self._active_device_caller))
-        if issubclass(self._active_device_caller.__class__, CommandDialog):
-            if self._active_device is not None:
-                return self._active_device_caller.notify_diag_sync()
         # if we have an active device, just reply true
         if self._active_device is not None:
             return True

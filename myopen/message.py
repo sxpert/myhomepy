@@ -131,10 +131,13 @@ class Message(object):
                 self._fi = self.subsystem.parse(self)
 
             if self._fi is None:
-                msg = "UNHANDLED %s message \'%s\' %s \'%s\'" % \
+                _sc_name = ''
+                if self._sc is not None:
+                    _sc_name = '%s ' % self._sc.__name__
+                msg = "UNHANDLED %s message \'%s\' %s\'%s\'" % \
                       (self.type_name,
                        str(self._who),
-                       self._sc.__name__,
+                       _sc_name,
                        self._msg)
                 self.log(msg)
 

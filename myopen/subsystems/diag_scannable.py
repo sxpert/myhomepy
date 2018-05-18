@@ -23,7 +23,11 @@ class DiagScannable(OWNSubSystem):
             # res_trans_end
             # end of transmission from device
             # *[who]*4*[_junk]##
-            (r'^\*4\*(?P<_junk>.*)##$', '_diag_res_trans_end', ),
+            {
+                'name': 'RES_TRANS_END',
+                're': r'^\*4\*(?P<_junk>.*)##$',
+                'func': '_diag_res_trans_end'
+            },
 
             # cmd_diag_abort
             # programmer abort diagnostic
@@ -86,8 +90,12 @@ class DiagScannable(OWNSubSystem):
             # res_ko_value
             # device answers with it's key/object, value and state
             # *#[who]*[where]*30*[slot]*[keyo]*[state]##
-            (r'^\*(?P<virt_id>\d{1,4})\*30\*(?P<slot>\d{1,3})\*'
-             r'(?P<keyo>\d{1,5})\*(?P<state>[01])##$', '_diag_res_ko_value', ),
+            {
+                'name': 'RES_KO_VALUE',
+                're': r'^\*(?P<virt_id>\d{1,4})\*30\*(?P<slot>\d{1,3})\*'
+                      r'(?P<keyo>\d{1,5})\*(?P<state>[01])##$',
+                'func': '_diag_res_ko_value'
+            },
 
             # res_ko_sys
             # device answers with it's key/object, system and address",
@@ -95,11 +103,14 @@ class DiagScannable(OWNSubSystem):
             (r'^\*(?P<virt_id>\d{1,4})\*32#(?P<slot>\d{1,3})\*(?P<sys>\d{1,3})'
              r'\*(?P<addr>\d{1,5})##$', '_diag_res_ko_sys', ),
 
-            # res_param_ko
             # device answers with the key/value of key/object
             # *#[who]*[where]*35#[index]#[slot]*[val_par]##
-            (r'\*(?P<virt_id>\d{1,4})\*35#(?P<index>\d{1,3})#(?P<slot>\d{1,3})'
-             r'\*(?P<val_par>\d{1,5})##', '_diag_res_param_ko', ),
+            {
+                'name': 'RES_PARAM_KO',
+                're': r'\*(?P<virt_id>\d{1,4})\*35#(?P<index>\d{1,3})#'
+                      r'(?P<slot>\d{1,3})\*(?P<val_par>\d{1,5})##',
+                'func': '_diag_res_param_ko'
+            },
         ]
     }
 
@@ -146,16 +157,25 @@ class DiagScannable(OWNSubSystem):
         return True
 
     def _diag_res_trans_end(self, matches):
-        res = self.system.devices.eot_event(self, matches)
-        if not res:
-            self.log('res_trans_end %s' % (str(matches)))
-        return res
+
+        def end_of_transmission_event():
+            res = self.system.devices.eot_event(self, matches)
+            if not res:
+                self.log('res_trans_end %s' % (str(matches)))
+                return False
+            return True
+
+        return end_of_transmission_event
 
     def _diag_cmd_diag_abort(self, matches):
-        # self.log('cmd_diag_abort %s' % (str(matches)))
-        self.system.devices.end_config_read()
-        self.system.devices.reset_active_device()
-        return True
+
+        def end_of_configuration():
+            self.log('Signaling the end of configuration')
+            self.system.devices.end_config_read()
+            self.system.devices.reset_active_device()
+            return True
+
+        return end_of_configuration
 
     def _diag_cmd_diag_id(self, matches):
         _hw_addr = int(matches.get('hw_addr', None))
