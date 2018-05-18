@@ -99,15 +99,6 @@ class Gateway(object):
     # socket related stuff
     #
 
-    def socket(self, mode):
-        if not self.available:
-            self.log("ERROR attempting to create a socket for "
-                     "unavailable gateway %s" % (str(self)))
-            return None
-        sock = OWNSocket(self.address, self.port, self.passwd, mode)
-        # find the original system level logger
-        return sock
-
     @property
     def socket_info(self):
         return (self.address, self.port, self.passwd, )

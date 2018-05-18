@@ -25,12 +25,6 @@ class Config(object):
         self._file_lock = threading.RLock()
         self.load_file(self.config_file)
 
-    # sets the main loop
-    # starts up all loaded systems
-    def set_main_loop(self, ml):
-        self.main_loop = ml
-        self.systems.run()
-
     def set_async_loop(self, al):
         self.async_loop = al
         self.systems.run()

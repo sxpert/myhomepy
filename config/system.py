@@ -75,14 +75,6 @@ class System(object):
         return self.systems.index(self)
 
     @property
-    def main_loop(self):
-        if not self.systems:
-            self.log("ERROR: Unable to access the systems list object")
-            return None
-        ml = getattr(self.systems, 'main_loop', None)
-        return ml
-
-    @property
     def async_loop(self):
         if not self.systems:
             self.log("ERROR: Unable to access the systems list object")
@@ -156,8 +148,6 @@ class System(object):
             }
             self.log('new task %s' % (str(taskinfo)))
             return self.task_queue.put_nowait(taskinfo)
-        if self.main_loop:
-            return self.monitor.push_task(task, wait, callback, params)
 
     def run_async(self):
         """
@@ -177,11 +167,6 @@ class System(object):
             self.push_task(CmdScanAid)
 
     def run(self):
-        # try main_loop (thread based)
-        if self.main_loop is not None:
-            from myopen.monitor import OWNMonitor
-            self.monitor = OWNMonitor(self)
-            return True
         if self.async_loop is not None:
             self.run_async()
             return True

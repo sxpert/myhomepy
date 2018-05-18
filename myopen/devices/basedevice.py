@@ -152,10 +152,7 @@ class BaseDevice(json.JSONEncoder):
         }
 
         # only for thread based stuff
-        if self.devices.system.main_loop:
-            from ..commands import CmdDiagDeviceByAid
-            self.devices.system.push_task(CmdDiagDeviceByAid, params=params)
-        elif self.devices.system.async_loop:
+        if self.devices.system.async_loop:
             from ..commands.asyncio_cmd_diag_aid import CmdDiagAid
             self.devices.system.push_task(CmdDiagAid, params=params)
         else:

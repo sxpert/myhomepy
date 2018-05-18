@@ -50,18 +50,17 @@ class AsyncIOOWNConnection(object):
         # start with the login procedure
         while self._run:
             if not self.sock.connected:
+                self.log('not connected')
                 self.is_ready.clear()
                 self.msg_handler = self.state_start
                 await self.sock.connect()
             else:
+                self.log('connected, waiting for packet')
                 try:
                     msg = await self.get_packet()
-                    await self.msg_handler(msg)
                 except ConnectionAbortedError:
-                    self.log('connection lost')
-                    self.log('sleep 10s')
-                    await asyncio.sleep(10)
-                    self.log('attempt reconnecting')
+                    continue
+                await self.msg_handler(msg)
         self.log('AsyncIOOWNConnection.run : %s the end' % (str(self)))
 
     def stop(self):

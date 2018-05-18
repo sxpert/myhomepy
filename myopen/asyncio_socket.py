@@ -22,15 +22,21 @@ class AsyncIOSock(object):
 
     async def _sock_connect(self, sock):
         # catch socket.gaierror
+        _had_msg = False
         while not self.connected:
             try:
-                self.log('attempt socket connection')
-                sock.connect((self.host, self.port))
+                if not _had_msg:
+                    self.log('attempt socket connection')
+                await self.loop.sock_connect(sock, (self.host, self.port))
             except (socket.gaierror, socket.timeout) as e:
-                self.log('unable to connect to %s:%d' % (self.host, self.port))
-                self.log('wait 10s')
-                await asyncio.sleep(10)
+                if not _had_msg:
+                    _had_msg = True
+                    self.log('unable to connect to %s:%d'
+                             % (self.host, self.port))
+                await asyncio.sleep(.5)
                 continue
+            self.log('connected to %s:%d'
+                     % (self.host, self.port))
             self.connected = True
 
     async def _gen_sock(self):
@@ -40,8 +46,10 @@ class AsyncIOSock(object):
         sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPINTVL, 1)
         sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPCNT, 2)
         sock.settimeout(1)
-        await self._sock_connect(sock)
         sock.setblocking(0)
+        await self._sock_connect(sock)
+        self.log('should be connected')
+        self.connected = True
         return sock
 
     def stop(self):
@@ -63,6 +71,7 @@ class AsyncIOSock(object):
             try:
                 b = await self.loop.sock_recv(self.sock, 1)
             except TimeoutError:
+                self.log('timeout reading char')
                 self.connected = False
                 raise ConnectionAbortedError
             if b == sep_at_pos:
