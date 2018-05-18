@@ -31,6 +31,12 @@ class Automator(object):
         try:
             self.loop.run_forever()
         except KeyboardInterrupt:
+            tasks = asyncio.gather(
+                        *asyncio.Task.all_tasks(loop=self.loop), 
+                        loop=self.loop, 
+                        return_exceptions=True)
+            tasks.add_done_callback(lambda t: self.loop.stop())
+            tasks.cancel()
             return
         # # initializes the web server
         # addr = ('', 8000)
