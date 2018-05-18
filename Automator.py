@@ -19,10 +19,10 @@ from core.logger import *
 
 class Automator(object):
     def run(self):
-        SYSTEM_LOGGER.level = LOG_INFO
+        SYSTEM_LOGGER.level = LOG_ERROR
         self.loop = asyncio.get_event_loop()
         logging.basicConfig(level=logging.DEBUG)
-        self.loop.set_debug(True)
+        self.loop.set_debug(False)
         self.config = Config(self)
         # print(self.loop)
         self.config.set_async_loop(self.loop)
