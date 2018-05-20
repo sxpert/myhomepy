@@ -18,14 +18,14 @@ class Callbacks(object):
                 self.log("WARNING: wrong object passed "
                          "to Callbacks.__init__ %s" % (str(obj)))
 
-    def load(self, data):
+    def loads(self, data):
         self.log('loading callbacks')
         if not isinstance(data, list):
             self.log("expecting a list of callback elements")
             return
         for cb_data in data:
             cb = callback.Callback(self)
-            cb.load(cb_data)
+            cb.loads(cb_data)
             # add callback to this dict
             key = cb.map_callback()
             if key in self.keys():

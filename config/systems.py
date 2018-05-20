@@ -14,13 +14,13 @@ class Systems(list):
                 self.config = config
                 self.log = self.config.log
 
-    def load(self, data):
+    def loads(self, data):
         if type(data) is not list:
             self.log("ERROR loading Systems, list expected")
         else:
             # enumerate all systems, and load each
             for s in data:
-                s = system.System(self.log).load(s)
+                s = system.System(self.log).loads(s)
                 self.append(s)
         return self
 

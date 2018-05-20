@@ -7,6 +7,7 @@ from .subsystem import OWNSubSystem
 
 
 class Gateway(OWNSubSystem):
+    SYSTEM_NAME = 'GATEWAY'
     SYSTEM_WHO = 13
 
     OP_RES_TIME_INFO = 0

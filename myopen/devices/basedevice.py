@@ -3,8 +3,11 @@
 import json
 import threading
 
+from core.logger import *
+from myopen.subsystems import *
 
-class BaseDevice(json.JSONEncoder):
+
+class BaseDevice(object):
     # this comes from the MHCatalogue.db file
 
     BRAND_UNDEFINED = 0
@@ -109,26 +112,52 @@ class BaseDevice(json.JSONEncoder):
     _VIRT_ID_CHECK_LENIENT = False
     _VIRT_ID_CHECK_STRICT = True
 
-    def __new__(cls, devices, subsystem, params):
-        dev_sys = getattr(cls, 'DEVICE_SYSTEM', None)
-        sys_who = getattr(subsystem, 'SYSTEM_DIAG_WHO', None)
-        if sys_who is None:
-            print('PANIC : subsystem %s has no SYSTEM_DIAG_WHO'
-                  % (str(subsystem)))
-            return None
-        if dev_sys is not None and dev_sys != sys_who:
-            print('PANIC : subsystem %s, device %d'
-                  % (str(subsystem), dev_sys))
-            return None
-        return json.JSONEncoder.__new__(cls)
+    # def __new__(cls, devices, subsystem, params):
+    #     print(cls, devices, subsystem, params)
+    #     dev_sys = getattr(cls, 'DEVICE_SYSTEM', None)
+    #     if dev_sys is None:
+    #         print('dev_sys is None : ', cls)
+
+    #     sys_who = getattr(subsystem, 'SYSTEM_WHO')
+    #     if dev_sys is not None:
+    #         if sys_who is None:
+    #             print('PANIC : subsystem %s has no SYSTEM_WHO'
+    #                 % (str(subsystem)))
+    #         sys_diag_who = getattr(subsystem, 'SYSTEM_DIAG_WHO', None)
+    #         # we have a diagnostic subsystem, find the actual
+    #         # subsystem
+    #         if sys_diag_who is not None:
+    #             sys_who = sys_diag_who
+
+    #         print(dev_sys)
+    #         print(isinstance(dev_sys, OWNSubSystem))
+    #         if isinstance(dev_sys, OWNSubSystem):
+    #             dev_sys = dev_sys.__class__
+    #         print(dev_sys)
+    #         print(issubclass(dev_sys, OWNSubSystem))
+    #         if issubclass(dev_sys, OWNSubSystem):
+    #             dev_sys = getattr(dev_sys, 'SYSTEM_WHO', None)
+    #         if dev_sys is not None and dev_sys != sys_who:
+    #             print('PANIC : subsystem %s, device %s, sys_who %s'
+    #                 % (str(subsystem), str(dev_sys), str(sys_who)))
+    #             return None
+    #     print('dev_sys %s, sys_who %s' % (str(dev_sys), str(sys_who)))
+    #     return object.__new__(cls)
 
     def __init__(self, devices, subsystem, params):
         self.devices = devices
         self.log = devices.log
+        # if we get the diag_* subsystem here, find the
+        # right one
+        sys_diag_who = getattr(subsystem, 'SYSTEM_DIAG_WHO', None)
+        if sys_diag_who is not None:
+            # we have the diag_* subsystem
+            # get the right class of device
+            subsystem = find_subsystem(sys_diag_who)
         self.subsystem = subsystem
         self._discovery_lock = threading.RLock()
         self._discovery = False
-        self.update_base_data(params)
+        self._error = not self.update_base_data(params)
 
     def queue_for_discovery(self):
         """
@@ -155,6 +184,10 @@ class BaseDevice(json.JSONEncoder):
         if self.devices.system.async_loop:
             from ..commands.asyncio_cmd_diag_aid import CmdDiagAid
             if self.devices.format_hw_addr(self.hw_addr) == '0095F706':
+                self.log('BaseDevice.queue_for_discovery : '
+                         'CmdDiagAid %s'
+                         % (str(params)),
+                         LOG_ERROR)
                 self.devices.system.push_task(CmdDiagAid, params=params)
         else:
             self.log('BaseDevice.queue_for_discovery : '
@@ -166,15 +199,143 @@ class BaseDevice(json.JSONEncoder):
         self._hw_addr = params.get('hw_addr', None)
         if isinstance(self._hw_addr, str):
             # TODO: check if we get an exception
-            self._hw_addr = int(self._hw_addr)
+            try:
+                self._hw_addr = int(self._hw_addr)
+            except ValueError:
+                # this may be an 8 chars hex string
+                try:
+                    self._hw_addr = int(self._hw_addr, 16)
+                except ValueError:
+                    self.log('BaseDevice.update_base_data : '
+                             'Unable to parse hw_addr, '
+                             'should be either an int or an hex string',
+                             LOG_ERROR)
+                    return False
+        return True
 
     def __str__(self):
         _class = '<%s [%s] ' % (self.__class__.__name__, hex(id(self)))
+        if self.subsystem is not None:
+            _class += '%s ' % (str(self.subsystem))
+        brand_name = self.dump_brand()
+        if brand_name is not None:
+            _class += '%s ' % (brand_name)
+            line_name = self.dump_product_line()
+            if line_name is not None:
+                _class += '%s ' % (line_name)
+        fw = self.fw_version_as_string()
+        if fw is not None:
+            _class += 'fw:%s ' % (fw)
+        confs = self.dump_configurators()
+        if confs is not None:
+            _class += '%s ' % (str(confs))
         if self.valid:
             from . import Devices
             return '%sid: %s>' % \
                    (_class, Devices.format_hw_addr(self._hw_addr))
         return '%sINVALID>' % (_class)
+
+    def find_brand_id(self, brand_id):
+        if isinstance(brand_id, str):
+            if brand_id.isnumeric():
+                brand_id = int(brand_id)
+                if brand_id > 0 and brand_id < len(self.BRANDS):
+                    return brand_id
+                return None
+            else:
+                for brand_num in range(0, len(self.BRANDS)):
+                    brand_data = self.BRANDS[brand_num]
+                    brand_id_label = brand_data.get('id', None)
+                    if brand_id_label is not None and \
+                       brand_id_label == brand_id:
+                        return brand_num
+                    names = brand_data.get('names', None)
+                    if names is not None:
+                        short_name = names.get('short', None)
+                        if short_name is not None and short_name == brand_id:
+                            return brand_num
+                        long_name = names.get('long', None)
+                        if long_name is not None and long_name == brand_id:
+                            return brand_num
+        return None
+
+    def set_brand_id(self, brand_id):
+        brand_num = self.find_brand_id(brand_id)
+        if brand_num is not None:
+            self._brand_id = brand_num
+
+    def find_product_line(self, product_line):
+        brand_info = self.BRANDS[self._brand_id]
+        lines = brand_info.get('lines', None)
+        if lines is None:
+            return None
+        for k in lines.keys():
+            v = lines[k]
+            if v == product_line:
+                return k
+        return None
+
+    def set_product_line(self, product_line):
+        line_num = self.find_product_line(product_line)
+        if line_num is not None:
+            self._product_line = line_num
+
+    def loads(self, data):
+        if not isinstance(data, dict):
+            self.log('devices should contain a list', LOG_ERROR)
+            return None
+
+        confs = data.get('configurators', None)
+        if confs is not None:
+            self._configurators = confs
+
+        brand_id = data.get('brand_id', None)
+        if brand_id is not None:
+            self.set_brand_id(brand_id)
+            # line_id can only make sense if we have a brand
+            product_line = data.get('product_line', None)
+            if product_line is not None:
+                self.set_product_line(product_line)
+        fw = data.get('firmware_version', None)
+        if fw is not None:
+            self._fw_version = fw
+
+        model_id = data.get('model_id', None)
+
+        if self.__class__ is not BaseDevice:
+            # time to load slots
+            slots = data.get('slots', None)
+            if slots is not None and isinstance(slots, list):
+                # slot ids start at 1
+                for sid in range(0, len(slots)):
+                    self.load_slot(sid + 1, slots[sid])
+            return self
+
+        if model_id is None:
+            return self
+
+        dc = self.find_device_class(model_id)
+        nd = dc(self.devices, self.subsystem, data)
+        if nd.__class__ != BaseDevice:
+            nd.loads(data)
+        return nd
+
+    def load_slot(self, sid, slot_data):
+        self.slot_set_slot(sid, slot_data)
+
+    def dump_subsystem(self):
+        subsystem_id = self.subsystem.SYSTEM_WHO
+        if issubclass(self.subsystem.__class__, DiagScannable):
+            subsystem_id = self.subsystem.SYSTEM_DIAG_WHO
+        # try to find a name
+        subs = find_subsystem(subsystem_id)
+        subsystem_name = getattr(subs, 'SYSTEM_NAME', None)
+        res = subsystem_id
+        if subsystem_name is not None:
+            res = subsystem_name
+        if not isinstance(res, str):
+            res = str(res)
+        return res
 
     def dump_configurators(self):
         """
@@ -219,6 +380,15 @@ class BaseDevice(json.JSONEncoder):
             return pln
         return pln_s
 
+    def fw_version_as_string(self):
+        fw = getattr(self, '_fw_version', None)
+        if fw is not None:
+            fw = '%d.%d.%d' \
+                 % (fw['major'],
+                    fw['minor'],
+                    fw['build'])
+        return fw
+
     def dump_slots(self):
         slots = getattr(self, '_slots', None)
         return slots
@@ -239,7 +409,7 @@ class BaseDevice(json.JSONEncoder):
             if model_id is not None:
                 data['_model_id'] = model_id
 
-        data['subsystem'] = str(self.subsystem)
+        data['subsystem'] = self.dump_subsystem()
 
         confs = self.dump_configurators()
         if confs is not None:
@@ -286,25 +456,34 @@ class BaseDevice(json.JSONEncoder):
             return False
         return True
 
+    def find_device_class(self, model_id):
+        from . import DeviceTypes
+        for dt in DeviceTypes:
+            mss = getattr(dt, 'DEVICE_SYSTEM', None)
+            if mss is None:
+                continue
+            mid = getattr(dt, 'MODEL_ID', None)
+            if mid is None:
+                continue
+            if mss is self.subsystem and mid == model_id:
+                return dt
+        return None
+
     def res_object_model(self, virt_id, model_id,
                          nb_conf, brand_id, prod_line):
         if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_LENIENT):
             return False
-        if self.__class__.__name__ == BaseDevice.__name__:
-            from . import DeviceTypes
-            for d in DeviceTypes:
-                mid = getattr(d, 'MODEL_ID', None)
-                if mid is not None and mid == model_id:
-                    nd = d(self.devices, self.subsystem,
-                           {'virt_id': self._virt_id,
-                            'hw_addr': self._hw_addr})
-                    # object creation may fail if we're in the wrong subsystem,
-                    # continue looking for other devices that may fit better
-                    if nd is not None:
-                        nd.res_object_model(virt_id, model_id,
-                                            nb_conf, brand_id, prod_line)
-                        self.devices.replace_active_device(nd)
-                        return True
+        if self.__class__ == BaseDevice:
+            dc = self.find_device_class(model_id)
+            if dc is not None:
+                nd = dc(self.devices, self.subsystem,
+                        {'virt_id': self._virt_id,
+                         'hw_addr': self._hw_addr})
+                if nd is not None:
+                    nd.res_object_model(virt_id, model_id,
+                                        nb_conf, brand_id, prod_line)
+                    self.devices.replace_active_device(nd)
+                    return True
             # couldn't find a proper model id
             self._model_id = model_id
             return False

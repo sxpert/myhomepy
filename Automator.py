@@ -24,16 +24,14 @@ class Automator(object):
         logging.basicConfig(level=logging.DEBUG)
         self.loop.set_debug(False)
         self.config = Config(self)
-        # print(self.loop)
         self.config.set_async_loop(self.loop)
-        # self.gateway = AsyncIOGateway(self.loop)
-        # asyncio.ensure_future(self.gateway.run(), loop=self.loop)
+        # webserver should be added here
         try:
             self.loop.run_forever()
         except KeyboardInterrupt:
             tasks = asyncio.gather(
-                        *asyncio.Task.all_tasks(loop=self.loop), 
-                        loop=self.loop, 
+                        *asyncio.Task.all_tasks(loop=self.loop),
+                        loop=self.loop,
                         return_exceptions=True)
             tasks.add_done_callback(lambda t: self.loop.stop())
             tasks.cancel()

@@ -6,7 +6,8 @@ import inspect
 __all__ = (
     'LOG_EMERG', 'LOG_ALERT', 'LOG_CRITICAL', 'LOG_ERROR',
     'LOG_WARNING', 'LOG_NOTICE', 'LOG_INFO', 'LOG_DEBUG',
-    'COLOR_CYAN',
+    'COLOR_RED', 'COLOR_GREEN', 'COLOR_YELLOW',
+    'COLOR_BLUE', 'COLOR_MAGENTA', 'COLOR_CYAN',
     'COLOR_LT_RED', 'COLOR_LT_GREEN', 'COLOR_LT_YELLOW',
     'COLOR_LT_BLUE', 'COLOR_LT_MAGENTA', 'COLOR_LT_CYAN',
     'COLOR_DEFAULT',
@@ -27,6 +28,11 @@ LOG_NOTICE = 5
 LOG_INFO = 6
 LOG_DEBUG = 7
 
+COLOR_RED = '\33[31m'
+COLOR_GREEN = '\33[32m'
+COLOR_YELLOW = '\33[33m'
+COLOR_BLUE = '\33[34m'
+COLOR_MAGENTA = '\33[35m'
 COLOR_CYAN = '\33[36m'
 COLOR_LT_RED = '\033[91m'
 COLOR_LT_GREEN = '\033[92m'
@@ -136,7 +142,7 @@ class Logger(object):
         if color != COLOR_DEFAULT:
             prtmsg = '%s %s%s%s%s' % \
                 (date_string, color, hdr, msg, COLOR_DEFAULT)
-        print(prtmsg)
+        print(prtmsg, flush=True)
 
         # log to file
         if self._logfile:

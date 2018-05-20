@@ -11,13 +11,16 @@ from .diag_gateway import DiagGateway
 
 
 __all__ = [
+    'OWNSubSystem',
     'Lighting', 'TempControl', 'Gateway',
     'DiagLighting', 'DiagTempControl', 'DiagGateway',
     'DiagScannable',
     'TX_CMD_SCAN_SYSTEM', 'TX_CMD_DIAG_ABORT',
     'TX_CMD_DIAG_ID', 'TX_CMD_SCAN_CHECK',
     'TX_CMD_RESET', 'TX_CMD_PARAM_ALL_KO',
-    'find_subsystem', 'find_scannable', 'replace_in_command'
+    'find_subsystem',
+    'find_diag_subsystem', 'find_scannable',
+    'replace_in_command'
 ]
 
 SubSystems = [Lighting,
@@ -44,6 +47,13 @@ def find_subsystem(who):
         if isinstance(who, str):
             if getattr(s, 'SYSTEM_NAME', 'UNKNOWN') == who:
                 return s
+    return None
+
+
+def find_diag_subsystem(who):
+    for s in SubSystems:
+        if getattr(s, 'SYSTEM_DIAG_WHO', None) == who:
+            return s
     return None
 
 

@@ -1,3 +1,4 @@
+from core.logger import *
 from myopen.asyncio_connection import *
 from myopen.devices import BaseDevice
 from myopen.subsystems import *
@@ -13,17 +14,18 @@ class CmdDiagAid(BaseCommand):
         self.device = self.params.get('device', None)
 
         if self.device is None:
-            self.log('device is None, aborting')
+            self.log('device is None, aborting', LOG_ERROR)
             return self.end()
 
         if not issubclass(self.device.__class__, BaseDevice):
-            self.log('device invalid \'%s\'' % (str(self.device)))
+            self.log('device invalid \'%s\'' % (str(self.device)),
+                     LOG_ERROR)
             return self.end()
 
         self.hw_addr = getattr(self.device, 'hw_addr', None)
         if self.hw_addr is None:
             self.log('device %s has no _hw_addr registered, aborting'
-                     % (self.device))
+                     % (self.device), LOG_ERROR)
             return self.end()
 
         self.subsystem = self.device.subsystem
@@ -32,13 +34,23 @@ class CmdDiagAid(BaseCommand):
             return self.end()
 
         if not issubclass(self.subsystem.__class__, DiagScannable):
-            self.log('subsystem %s is not fit for purpose'
-                     % (str(self.subsystem)))
-            return self.end()
+            subs = self.subsystem
+            # find the related diag_* subsystem
+            sys_who = getattr(subs, 'SYSTEM_WHO', None)
+            self.subsystem = None
+            if sys_who is not None:
+                self.subsystem = find_diag_subsystem(sys_who)
+            if self.subsystem is None:
+                self.log('subsystem %s is not fit for purpose'
+                         % (str(subs)), LOG_ERROR)
+                return self.end()
+            self.log('found subsystem %s'
+                     % (str(self.subsystem)), LOG_ERROR)
 
         self.who = getattr(self.subsystem, 'SYSTEM_WHO', None)
         if self.who is None:
-            self.log('subsystem has no SYSTEM_WHO value, aborting')
+            self.log('subsystem has no SYSTEM_WHO value, aborting',
+                     LOG_ERROR)
             return self.end()
 
         self.log('Launching diagnostic on %s' % (str(self.device)))

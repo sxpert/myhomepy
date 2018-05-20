@@ -5,7 +5,7 @@ from .subsystem import OWNSubSystem
 
 
 class Lighting(OWNSubSystem):
-    SYSTEM_NAME = "LIGHTING"
+    SYSTEM_NAME = 'LIGHTING'
     SYSTEM_WHO = 1
 
     OP_LIGHTING_OFF = 0
@@ -20,8 +20,10 @@ class Lighting(OWNSubSystem):
 
     SYSTEM_REGEXPS = {
         'COMMAND': [
-            (r'^\*(?P<command>[01])\*(?P<light>\d{2,4})##$', '_light_device', ),
-            (r'^\*(?P<command>[01])\*#(?P<group>\d{1,3})##$', '_group_device', ),
+            (r'^\*(?P<command>[01])\*(?P<light>\d{2,4})##$',
+             '_light_device', ),
+            (r'^\*(?P<command>[01])\*#(?P<group>\d{1,3})##$',
+             '_group_device', ),
         ]
     }
 
@@ -32,7 +34,7 @@ class Lighting(OWNSubSystem):
         _order = int(matches['command'])
         _device = {'light': matches['light']}
         return self.gen_callback_dict(_order, _device, None)
-        
+
     def _group_device(self, matches):
         _order = int(matches['command'])
         _device = {'group': matches['group']}

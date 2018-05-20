@@ -23,7 +23,7 @@ class System(object):
         self._free = None
         self._task = None
 
-    def load(self, data):
+    def loads(self, data):
         if type(data) is not dict:
             self.log("ERROR loading System, dictionnary expected")
         else:
@@ -32,19 +32,19 @@ class System(object):
             gateway_data = data.get('gateway', None)
             if gateway_data is not None:
                 self.gateway = gateway.Gateway(self)
-                self.gateway.load(gateway_data)
+                self.gateway.loads(gateway_data)
             else:
                 self.log("WARNING: no gateway entry in system")
             _devices = data.get('devices', None)
             from myopen.devices import Devices
             self.devices = Devices(self)
             if _devices is not None:
-                self.devices.load(_devices)
+                self.devices.loads(_devices)
             self.log("system.devices %s" % (str(self.devices)))
             callbacks_data = data.get('callbacks', None)
             if callbacks_data is not None:
                 self._callbacks = callbacks.Callbacks(self)
-                self._callbacks.load(callbacks_data)
+                self._callbacks.loads(callbacks_data)
         return self
 
     def __to_json__(self):

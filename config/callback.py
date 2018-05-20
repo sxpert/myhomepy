@@ -34,7 +34,7 @@ class Condition(object):
             self.map_condition()
         )
 
-    def load(self, data):
+    def loads(self, data):
         self.log('Condition.load')
         self._system_str = data.get("system", None)
         self._order_str = data.get("order", None)
@@ -90,7 +90,7 @@ class Action(object):
         return "<%s %s>" % (
             self.__class__.__name__, a)
 
-    def load(self, data):
+    def loads(self, data):
         _plugin = data.get("plugin", None)
         if _plugin is not None and isinstance(_plugin, dict):
             self._action_mode = self.AC_PLUGIN
@@ -196,18 +196,18 @@ class Callback(object):
             str(self.action)
         )
 
-    def load(self, data):
+    def loads(self, data):
         # callbacks must have 2 sections :
         cond_data = data.get("conditions", None)
         if cond_data is None:
             cond_data = data.get("condition", None)
         if cond_data is not None:
             self.condition = Condition(self)
-            self.condition.load(cond_data)
+            self.condition.loads(cond_data)
         action_data = data.get("action", None)
         if action_data is not None:
             self.action = Action(self)
-            self.action.load(action_data)
+            self.action.loads(action_data)
 
     def __to_json__(self):
         data = {}

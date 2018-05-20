@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-import json as system_json
+import json
 import threading
 
-import core.json as json
+import core.core_json_encoder as cje
 from core.logger import *
 
 from . import gateway, system, systems, tls
@@ -15,7 +15,7 @@ class Config(object):
     _file_lock = None
 
     def __init__(self, app, config_file=None):
-        self.log = get_logger(LOG_INFO, '[CONF]', COLOR_LT_YELLOW)
+        self.log = get_logger(LOG_INFO, '[CONF]', COLOR_YELLOW)
         self.log('Initializing configuration')
         self.app = app
         if config_file is None:
@@ -40,17 +40,17 @@ class Config(object):
             # read the configuration file
             d = f.read()
             f.close()
-            self.load(d)
+            self.loads(d)
 
-    def load(self, data):
+    def loads(self, data):
             if len(data) > 0:
-                data = system_json.loads(data)
+                data = json.loads(data)
                 if type(data) is dict:
                     k = data.keys()
                     if 'tls' in k:
-                        self.tls.load(data['tls'])
+                        self.tls.loads(data['tls'])
                     if 'systems' in k:
-                        self.systems.load(data['systems'])
+                        self.systems.loads(data['systems'])
                 else:
                     self.log("invalid configuration format")
             else:
@@ -63,10 +63,12 @@ class Config(object):
         return data
 
     def save(self):
-        # should save to a temp file, then move
+        # get all data, if it crashes, no harm done to the
+        # existing config file
+        json_data = cje.dumps(self, indent=4)
+        # dump the data to the file (this should not crash)
         self._file_lock.acquire()
         f = open(self.config_file, 'w')
-        json_data = json.dumps(self, indent=4)
         f.write(json_data)
         f.close()
         self._file_lock.release()

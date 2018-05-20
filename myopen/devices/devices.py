@@ -2,6 +2,7 @@
 
 from .basedevice import BaseDevice
 from core.logger import *
+from myopen.subsystems import *
 
 
 class Devices(object):
@@ -13,8 +14,19 @@ class Devices(object):
         self._discovery_busy = False
         self._active_device = None
 
-    def load(self, data):
-        pass
+    def loads(self, data):
+        if not isinstance(data, list):
+            self.log('devices should contain a list', LOG_ERROR)
+            return None
+        # we have a list
+        for dev_data in data:
+            subsystem = dev_data.get('subsystem', None)
+            if subsystem is not None:
+                self.log('subsystem : %s' % (subsystem), LOG_ERROR)
+            subs = find_subsystem(subsystem)
+            dev = BaseDevice(self, subs, dev_data)
+            dev = dev.loads(dev_data)
+            self.log(dev, LOG_ERROR)
 
     def __to_json__(self):
         if len(self._devs) == 0:

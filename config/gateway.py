@@ -44,7 +44,7 @@ class Gateway(object):
         self.system = system
         self.log = system.log
 
-    def load(self, data):
+    def loads(self, data):
         if type(data) is not dict:
             self.log("ERROR loading Gateway, dictionnary expected")
         else:

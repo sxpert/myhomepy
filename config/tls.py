@@ -18,7 +18,7 @@ class Tls(object):
                       "to Systems.__init__ %s" % (str(obj)))
         self.log("TLS initialized")
 
-    def load(self, data):
+    def loads(self, data):
         if data is None:
             pass
         elif type(data) is not dict:
