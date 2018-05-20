@@ -83,6 +83,9 @@ class Device4652_Base(BaseDevice):
         if mode != self.MODE_UNCONFIGURED and state == 1 or \
            mode == self.MODE_UNCONFIGURED and state == 0:
             # should not happen
+            self.log('Device4652_Base.res_ko_value ERROR: '
+                     'mode %d and state %d don\'t macth'
+                     % (mode, state))
             self.slot_set_value(slot, 'state', state)
         return True
 
@@ -103,6 +106,12 @@ class Device4652_Base(BaseDevice):
                     value += val_par * 256
                     self.log('new value %d' % (value), LOG_ERROR)
                     self.slot_set_value(slot, 'cenplus', value)
+                    return True
+                elif index == 2:
+                    self.slot_set_value(slot, 'button_up', val_par)
+                    return True
+                elif index == 3:
+                    self.slot_set_value(slot, 'button_down', val_par)
                     return True
 
         self.slot_set_param(slot, index, val_par)

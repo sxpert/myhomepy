@@ -162,11 +162,8 @@ class Gateway(object):
             if data is not None:
                 handled = False
                 if self.system.is_cmd_busy:
-                    self.log('msg_queue cmd %s' % str(data), LOG_ERROR)
                     handled = self.system.dispatch_message(data)
-                    self.log('msg handled %s' % (str(handled)), LOG_ERROR)
                 if not handled:
-                    self.log('msg_queue default %s' % str(data), LOG_ERROR)
                     msg, src = data
                     m = Message(msg, self)
                     m.dispatch()

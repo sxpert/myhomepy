@@ -89,7 +89,6 @@ class CmdDiagAid(BaseCommand):
         """
         self.log(msg)
         if msg.name == 'RES_PARAM_KO':
-            self.log(msg.name, LOG_ERROR)
             if msg.conn is MODE_COMMAND:
                 # handle the messages from the command socket
                 return False
