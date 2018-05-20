@@ -112,38 +112,6 @@ class BaseDevice(object):
     _VIRT_ID_CHECK_LENIENT = False
     _VIRT_ID_CHECK_STRICT = True
 
-    # def __new__(cls, devices, subsystem, params):
-    #     print(cls, devices, subsystem, params)
-    #     dev_sys = getattr(cls, 'DEVICE_SYSTEM', None)
-    #     if dev_sys is None:
-    #         print('dev_sys is None : ', cls)
-
-    #     sys_who = getattr(subsystem, 'SYSTEM_WHO')
-    #     if dev_sys is not None:
-    #         if sys_who is None:
-    #             print('PANIC : subsystem %s has no SYSTEM_WHO'
-    #                 % (str(subsystem)))
-    #         sys_diag_who = getattr(subsystem, 'SYSTEM_DIAG_WHO', None)
-    #         # we have a diagnostic subsystem, find the actual
-    #         # subsystem
-    #         if sys_diag_who is not None:
-    #             sys_who = sys_diag_who
-
-    #         print(dev_sys)
-    #         print(isinstance(dev_sys, OWNSubSystem))
-    #         if isinstance(dev_sys, OWNSubSystem):
-    #             dev_sys = dev_sys.__class__
-    #         print(dev_sys)
-    #         print(issubclass(dev_sys, OWNSubSystem))
-    #         if issubclass(dev_sys, OWNSubSystem):
-    #             dev_sys = getattr(dev_sys, 'SYSTEM_WHO', None)
-    #         if dev_sys is not None and dev_sys != sys_who:
-    #             print('PANIC : subsystem %s, device %s, sys_who %s'
-    #                 % (str(subsystem), str(dev_sys), str(sys_who)))
-    #             return None
-    #     print('dev_sys %s, sys_who %s' % (str(dev_sys), str(sys_who)))
-    #     return object.__new__(cls)
-
     def __init__(self, devices, subsystem, params):
         self.devices = devices
         self.log = devices.log
@@ -279,6 +247,76 @@ class BaseDevice(object):
         line_num = self.find_product_line(product_line)
         if line_num is not None:
             self._product_line = line_num
+
+    # ------------------------------------------------------------------------
+    # parameters loading and checking
+    #
+
+    def split_byte_addr(self, addr):
+        a = addr // 16
+        pl = addr % 16
+        return (a, pl)
+
+    def check_byte_addr(self, addr):
+        # NOTE: MyHome_Suite authorizes :
+        # A 0-10
+        # PL 0-15
+        # this violates the official docs
+
+        # if addr == 0:
+        #     return False
+        split = self.split_byte_addr(addr)
+        a, pl = split
+        if a not in range(0, 11):
+            return False
+        if pl not in range(0, 16):
+            return False
+        return True
+
+    def get_param(self, index, slot):
+        params = slot.get(self.PARAMS_KEY, None)
+        if params is None:
+            return None
+        value = params.get(index, None)
+        if value is not None:
+            return value
+        value = params.get(str(index), None)
+        return value
+
+    def check_value(self, value, tests):
+        valid = False
+
+        for t in tests:
+            if callable(t):
+                v = t(value)
+            else:
+                v = value in t
+            valid |= v
+        if valid:
+            return value
+        return None
+
+    def get_check_param(self,
+                        index, ivalues,
+                        name, nvalues,
+                        slot):
+        value = self.get_param(index, slot)
+        if value is not None:
+            value = self.check_value(value, ivalues)
+        if value is None:
+            value = slot.get(name, None)
+        if value is None:
+            self.log('BaseDevice.get_check_param : '
+                     'unable to find %s[%s] or %s in %s'
+                     % (self.PARAMS_KEY, str(index),
+                        str(name), slot), LOG_ERROR)
+            return None
+        value = self.check_value(value, nvalues)
+        return value
+
+    # ------------------------------------------------------------------------
+    # load from json representation
+    #
 
     def loads(self, data):
         if not isinstance(data, dict):

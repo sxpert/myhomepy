@@ -6,9 +6,9 @@ from myopen.subsystems import *
 
 
 class Devices(object):
-    _devs = {}
 
     def __init__(self, system):
+        self._devs = {}
         self.system = system
         self.log = system.log
         self._discovery_busy = False
@@ -27,6 +27,11 @@ class Devices(object):
             dev = BaseDevice(self, subs, dev_data)
             dev = dev.loads(dev_data)
             self.log(dev, LOG_ERROR)
+            # add device to list
+            k = Devices.format_hw_addr(dev.hw_addr)
+            self._devs[k] = dev
+            # if device is BaseDevice...
+            # dev.queue_for_discovery()
 
     def __to_json__(self):
         if len(self._devs) == 0:
