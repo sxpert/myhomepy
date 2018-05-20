@@ -389,8 +389,13 @@ class BaseDevice(object):
                     fw['build'])
         return fw
 
+    def dump_slot(self, sid):
+        return self.slot_get_slot(sid)
+
     def dump_slots(self):
-        slots = getattr(self, '_slots', None)
+        slots = []
+        for sid in range(0, self.slots_count()):
+            slots.append(self.dump_slot(sid+1))
         return slots
 
     def __to_json__(self):
@@ -539,6 +544,10 @@ class BaseDevice(object):
             self._slots = slots
         return slots
 
+    def slots_count(self):
+        slots = getattr(self, '_slots', [])
+        return len(slots)
+
     def slot_get_slot(self, slot_id):
         slots = self._slots_check(slot_id)
         # slot_id starts at 1
@@ -562,6 +571,16 @@ class BaseDevice(object):
             slot = {}
         slot[key] = value
         self.slot_set_slot(slot_id, slot)
+
+    def slot_del_value(self, slot_id, key, default=None):
+        slot = self.slot_get_slot(slot_id)
+        if slot is None:
+            slot = {}
+        value = default
+        if key in slot:
+            value = slot.pop(key)
+            self.slot_set_slot(slot_id, slot)
+        return value
 
     def slot_set_param(self, slot_id, index, val_par):
         params = self.slot_get_value(slot_id, self.PARAMS_KEY, {})

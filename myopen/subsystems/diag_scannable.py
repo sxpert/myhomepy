@@ -302,8 +302,14 @@ class DiagScannable(OWNSubSystem):
         _slot = int(matches['slot'])
         _index = int(matches['index'])
         _val_par = int(matches['val_par'])
-        res = self.system.devices.res_param_ko(_virt_id, _slot,
-                                               _index, _val_par)
-        if not res:
-            self.log('res_param_ko %s' % (str(matches)))
-        return res
+
+        def res_param_ko():
+            res = self.system.devices.res_param_ko(
+                _virt_id, _slot,
+                _index, _val_par)
+            if not res:
+                self.log('failed _diag_res_param_ko.res_param_ko '
+                         '%s' % (str(matches)))
+            return res
+
+        return res_param_ko

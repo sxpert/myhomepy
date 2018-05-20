@@ -159,16 +159,17 @@ class Gateway(object):
             except asyncio.TimeoutError:
                 data = None
 
-            handled = False
-            if self.system.is_cmd_busy:
-                if data is not None:
-                    self.log('msg_queue cmd %s' % str(data))
-                handled = self.system.dispatch_message(data)
-            if (data is not None) and (handled is not None) and (not handled):
-                self.log('msg_queue default %s' % str(data))
-                msg, src = data
-                m = Message(msg, self)
-                m.dispatch()
+            if data is not None:
+                handled = False
+                if self.system.is_cmd_busy:
+                    self.log('msg_queue cmd %s' % str(data), LOG_ERROR)
+                    handled = self.system.dispatch_message(data)
+                    self.log('msg handled %s' % (str(handled)), LOG_ERROR)
+                if not handled:
+                    self.log('msg_queue default %s' % str(data), LOG_ERROR)
+                    msg, src = data
+                    m = Message(msg, self)
+                    m.dispatch()
 
     # ------------------------------------------------------------------------
     #
