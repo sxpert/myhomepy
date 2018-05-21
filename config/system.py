@@ -22,6 +22,7 @@ class System(object):
         self.log = log
         self._free = None
         self._task = None
+        self.task_queue = asyncio.Queue()
 
     def loads(self, data):
         if type(data) is not dict:
@@ -73,6 +74,10 @@ class System(object):
         if not self.systems:
             return None
         return self.systems.index(self)
+
+    @property
+    def has_task_queue(self):
+        return self.task_queue is not None
 
     @property
     def async_loop(self):
@@ -141,15 +146,18 @@ class System(object):
             return res
 
     def push_task(self, task, wait=True, callback=None, params=None):
-        if self.async_loop is not None:
+        self.log('push task', LOG_ERROR)
+        if self.has_task_queue:
             taskinfo = {
                 'task': task,
                 'params': params
             }
             self.log('new task %s' % (str(taskinfo)))
             return self.task_queue.put_nowait(taskinfo)
+        else:
+            self.log('No task queue', LOG_ERROR)
 
-    def run_async(self):
+    def run(self):
         """
         initializes the asyncio based coroutines.
         - starts up the gateway with the default monitor connection
@@ -157,21 +165,13 @@ class System(object):
         - if there are no devices registered, posts a scanning task
           to the queue
         """
-        import asyncio
         self.monitor = self.gateway
         self.gateway.setup_async()
-        self.task_queue = asyncio.Queue(loop=self.async_loop)
         asyncio.ensure_future(self.run_tasks(), loop=self.async_loop)
         if len(self.devices) == 0:
             from myopen.commands.asyncio_cmd_scan_aid import CmdScanAid
             self.push_task(CmdScanAid)
-
-    def run(self):
-        if self.async_loop is not None:
-            self.run_async()
-            return True
-        self.log("ERROR: Unable to start system, there is no system loop")
-        return False
+        return True
 
     def callback(self, *args, **kwargs):
         if self._callbacks is None:

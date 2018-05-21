@@ -32,16 +32,8 @@ def check_byte_addr(addr):
     return True
 
 
-def check_value(value, tests):
-    valid = False
-
-    for t in tests:
-        if callable(t):
-            v = t(value)
-        else:
-            v = value in t
-        valid |= v
-    if valid:
+def check_value(value, values):
+    if value in values:
         return value
     return None
 
@@ -79,19 +71,23 @@ def get_value(data, name):
     return value
 
 
-def get_check_value(data, name, values, warn=True):
+def get_check_value(data, name, ivalues, nvalues, warn=True):
     value = get_value(data, name)
     if value is None:
         return None
-    v = check_value(value, values)
-    if v is None and warn:
-        print(
-            'get_check_value : invalid value %s for var %s '
-            'expected %s' % (value, name, str(values)))
+    v = check_value(value, ivalues)
+    if v is not None:
+        return v
+    v = check_value(value, nvalues)
+    if v is not None:
+        i = nvalues.index(v)
+        value = ivalues[i]
+        print('found value %s as index %d -> returning %d' % (v, i, value))
+        return value
     return v
 
 
-def get_check(data, index, ivalues, name, nvalues, warn=True):
+def get_check(data, index, name, ivalues, nvalues, warn=True):
     value = get_param(data, index)
     if value is not None:
         v = check_value(value, ivalues)
@@ -108,8 +104,36 @@ def get_check(data, index, ivalues, name, nvalues, warn=True):
                   'unable to find valid param(%s) or %s in %s'
                   % (str(index), str(name), str(data)))
         return None
-    v = check_value(value, nvalues)
-    if v is None and warn:
-        print('get_check : Found invalid value %s for %s'
-              % (str(value), str(name)))
+    if isinstance(value, str):
+        if value.isdecimal():
+            value = int(value)
+            v = check_value(value, ivalues)
+            if v is not None:
+                return v
+        if nvalues is not None:
+            v = check_value(value, nvalues)
+            if v is None:
+                if warn:
+                    print('get_check : Found invalid value %s for %s'
+                          % (str(value), str(name)))
+            else:
+                i = nvalues.index(v)
+                value = ivalues[i]
     return value
+
+
+def map_value(value, values):
+    if value in values:
+        return values.index(value)
+    print('map_value ERROR => value %s not in %s' % (value, str(values)))
+    return None
+
+
+def json_find_value(value, values):
+    try:
+        if value >= 0 and value < len(values):
+            return values[value]
+    except TypeError:
+        pass
+    print('invalid index %s %s' % (value, str(values)))
+    return None

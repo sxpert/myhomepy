@@ -120,46 +120,42 @@ class Device4652_Slot(BaseSlot):
         self.set_value(SLOT_VAR_MODE, mode)
 
         if mode == self.MODE_LIGHT_CTRL:
-            light_control = get_check(
-                data, 0, (self.LIGHT_CTRL,), SLOT_VAR_LIGHT_CONTROL,
-                (self.LIGHT_CTRL, self.LIGHT_CTRL_IDS))
+            light_control = get_check(data, 0, SLOT_VAR_LIGHT_CONTROL,
+                                      self.LIGHT_CTRL, self.LIGHT_CTRL_IDS)
             if light_control is None:
                 return False
             self.set_value(SLOT_VAR_LIGHT_CONTROL, light_control)
 
             if light_control == self.LIGHT_CTRL_TIMED_ON:
-                delay = self.get_check_param(
-                    data, 17, (self.DELAYS,), self.SLOT_VAR_DELAY,
-                    (self.DELAYS, self.DELAYS_IDS))
+                delay = self.get_check_param(data, 17, SLOT_VAR_DELAY,
+                                             self.DELAYS, self.DELAYS_IDS)
                 if delay is None:
                     return False
                 self.set_value(SLOT_VAR_DELAY, delay)
 
         if mode == self.MODE_AUTOMATION_CTRL:
             automation_control = get_check(
-                data, 0, (self.AUTOMATION,), SLOT_VAR_AUTOMATION_CONTROL,
-                (self.AUTOMATION, self.AUTOMATION_IDS))
+                data, 0, SLOT_VAR_AUTOMATION_CONTROL,
+                self.AUTOMATION, self.AUTOMATION_IDS)
             if automation_control is None:
                 return False
             self.set_value(SLOT_VAR_AUTOMATION_CONTROL, automation_control)
 
         if mode in (self.MODE_LIGHT_CTRL, self.MODE_AUTOMATION_CTRL):
-            address_type = get_check(
-                data, 1, (self.ADDR_TYPE,), SLOT_VAR_ADDRESS_TYPE,
-                (self.ADDR_TYPE, self.ADDR_TYPE_IDS))
+            address_type = get_check(data, 1, SLOT_VAR_ADDRESS_TYPE,
+                                     self.ADDR_TYPE, self.ADDR_TYPE_IDS)
             if address_type is None:
                 return False
             self.set_value(SLOT_VAR_ADDRESS_TYPE, address_type)
 
             if address_type == self.ADDR_TYPE_P2P:
                 # this is not fatal as we have other options
-                address = get_check(
-                    data, 2, (check_byte_addr,),
-                    SLOT_VAR_ADDRESS, (check_byte_addr,), warn=False)
+                address = get_check(data, 2, SLOT_VAR_ADDRESS,
+                                    check_byte_addr, None, warn=False)
                 if address is None:
                     # look for a and pl
-                    a = get_check_value(data, SLOT_VAR_A, (range(0, 11),))
-                    pl = get_check_value(data, SLOT_VAR_PL, (range(0, 16),))
+                    a = get_check_value(data, SLOT_VAR_A, range(0, 11), None)
+                    pl = get_check_value(data, SLOT_VAR_PL, range(0, 16), None)
                     if a is None or pl is None:
                         return False
                 else:
@@ -168,31 +164,28 @@ class Device4652_Slot(BaseSlot):
                 self.set_value(SLOT_VAR_PL, pl)
 
             if address_type == self.ADDR_TYPE_AREA:
-                area = get_check(
-                    data, 2, (range(0, 11),),
-                    SLOT_VAR_AREA, (range(0, 11),))
+                area = get_check(data, 2, SLOT_VAR_AREA,
+                                 range(0, 11), None)
                 if area is None:
                     return False
                 self.set_value(SLOT_VAR_AREA, area)
 
             if address_type == self.ADDR_TYPE_GROUP:
-                group = get_check(
-                    data, 2, (range(1, 255),),
-                    SLOT_VAR_GROUP, (range(1, 255),))
+                group = get_check(data, 2, SLOT_VAR_GROUP,
+                                  range(1, 255), None)
                 if group is None:
                     return False
                 self.set_value(SLOT_VAR_GROUP, group)
 
             if address_type in (self.ADDR_TYPE_AREA, self.ADDR_TYPE_GROUP,):
-                ref_address = get_check(
-                    data, 5, (check_byte_addr,),
-                    SLOT_VAR_REF_ADDRESS, (check_byte_addr,), warn=False)
+                ref_address = get_check(data, 5, SLOT_VAR_REF_ADDRESS,
+                                        check_byte_addr, None, warn=False)
                 if ref_address is None:
                     # look for a and pl
                     ref_a = get_check_value(data, SLOT_VAR_REF_A,
-                                            (range(0, 11),))
+                                            range(0, 11), None)
                     ref_pl = get_check_value(data, SLOT_VAR_REF_PL,
-                                             (range(0, 16),))
+                                             range(0, 16), None)
                     if ref_a is None or ref_pl is None:
                         return False
                 else:
@@ -208,8 +201,8 @@ class Device4652_Slot(BaseSlot):
                 self.CEN_PLUS_MIN,
                 self.CEN_PLUS_MAX + 1)
 
-            cen_plus = get_check_value(
-                data, SLOT_VAR_CEN_PLUS, (range_cen_plus,))
+            cen_plus = get_check_value(data, SLOT_VAR_CEN_PLUS,
+                                       range_cen_plus, None)
             if cen_plus is None:
                 # TODO: look for params 0 and 1
                 return False
@@ -219,16 +212,14 @@ class Device4652_Slot(BaseSlot):
                 self.CEN_PLUS_BUTTON_MIN,
                 self.CEN_PLUS_BUTTON_MAX + 1)
 
-            button_up = get_check(
-                data, 2, (range_cen_plus_button,),
-                SLOT_VAR_BUTTON_UP, (range_cen_plus_button,))
+            button_up = get_check(data, 2, SLOT_VAR_BUTTON_UP,
+                                  range_cen_plus_button, None)
             if button_up is None:
                 return False
             self.set_value(SLOT_VAR_BUTTON_UP, button_up)
 
-            button_down = get_check(
-                data, 3, (range_cen_plus_button,),
-                SLOT_VAR_BUTTON_DOWN, (range_cen_plus_button,))
+            button_down = get_check(data, 3, SLOT_VAR_BUTTON_DOWN,
+                                    range_cen_plus_button, None)
             if button_down is None:
                 return False
             self.set_value(SLOT_VAR_BUTTON_DOWN, button_down)
@@ -250,7 +241,8 @@ class Device4652_Slot(BaseSlot):
     def json_light_control(self, data):
         light_control = self.get_value(SLOT_VAR_LIGHT_CONTROL, None)
         if light_control is not None:
-            data[SLOT_VAR_LIGHT_CONTROL] = self.LIGHT_CTRL_IDS[light_control]
+            data[SLOT_VAR_LIGHT_CONTROL] = \
+                json_find_value(light_control, self.LIGHT_CTRL_IDS)
         if light_control is self.LIGHT_CTRL_TIMED_ON:
             delay = self.json_set_var(SLOT_VAR_DELAY, None)
             if delay is None:
@@ -282,8 +274,8 @@ class Device4652_Slot(BaseSlot):
                 if group is None:
                     return None
             if address_type in (self.ADDR_TYPE_AREA, self.ADDR_TYPE_GROUP,):
-                ref_a = self.json_set_var(SLOT_VAR_REF_PL, data)
-                ref_pl = self.json_set_Var(SLOT_VAR_REF_PL, data)
+                ref_a = self.json_set_var(SLOT_VAR_REF_A, data)
+                ref_pl = self.json_set_var(SLOT_VAR_REF_PL, data)
                 if ref_a is None or ref_pl is None:
                     return None
         return address_type
@@ -348,7 +340,10 @@ class Device4652_Slot(BaseSlot):
         if mode is not None:
             if mode == self.MODE_LIGHT_CTRL:
                 if index == 0:
-                    self.set_value(SLOT_VAR_LIGHT_CONTROL, val_par)
+                    val = map_value(val_par, self.LIGHT_CTRL)
+                    print('light_control : mapped %d -> %d'
+                          % (val_par, val))
+                    self.set_value(SLOT_VAR_LIGHT_CONTROL, val)
                     return True
                 if index == 17:
                     light_control = self.get_value(
@@ -358,7 +353,10 @@ class Device4652_Slot(BaseSlot):
                         return True
             if mode == self.MODE_AUTOMATION_CTRL:
                 if index == 0:
-                    self.set_value(SLOT_VAR_AUTOMATION_CONTROL, val_par)
+                    val = map_value(val_par, self.AUTOMATION)
+                    print('automation_control : mapped %d -> %d'
+                          % (val_par, val))
+                    self.set_value(SLOT_VAR_AUTOMATION_CONTROL, val)
                     return True
             if mode in (self.MODE_LIGHT_CTRL, self.MODE_AUTOMATION_CTRL,):
                 if index == 1:

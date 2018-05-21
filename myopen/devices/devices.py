@@ -31,7 +31,11 @@ class Devices(object):
             k = Devices.format_hw_addr(dev.hw_addr)
             self._devs[k] = dev
             # if device is BaseDevice...
-            # dev.queue_for_discovery()
+            self.log('%s' % (str(dev.__class__)), LOG_ERROR)
+            self.log('%s' % (str(dev.__class__ is BaseDevice)), LOG_ERROR)
+            if dev.__class__ is BaseDevice:
+                self.log('queuing %s' % (str(dev)), LOG_ERROR)
+                dev.queue_for_discovery()
 
     def __to_json__(self):
         if len(self._devs) == 0:

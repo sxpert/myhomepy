@@ -122,10 +122,12 @@ class BaseDevice(object):
         """
         self._discovery_lock.acquire()
         if self.devices is None:
+            self.log('devices is None', LOG_ERROR)
             self._discovery_lock.release()
             return False
 
         if self._discovery:
+            self.log('already set for discovery', LOG_ERROR)
             self._discovery_lock.release()
             return False
 
@@ -136,15 +138,16 @@ class BaseDevice(object):
             'device': self
         }
 
-        # only for thread based stuff
-        if self.devices.system.async_loop:
+        self.log('GO !', LOG_ERROR)
+        if self.devices.system.has_task_queue:
+            self.log('async loop found', LOG_ERROR)
             from ..commands.asyncio_cmd_diag_aid import CmdDiagAid
-            if self.devices.format_hw_addr(self.hw_addr) == '0095F706':
-                self.log('BaseDevice.queue_for_discovery : '
-                         'CmdDiagAid %s'
-                         % (str(params)),
-                         LOG_ERROR)
-                self.devices.system.push_task(CmdDiagAid, params=params)
+            # if self.devices.format_hw_addr(self.hw_addr) == '0095F706':
+            self.log('BaseDevice.queue_for_discovery : '
+                     'CmdDiagAid %s'
+                     % (str(params)),
+                     LOG_ERROR)
+            self.devices.system.push_task(CmdDiagAid, params=params)
         else:
             self.log('BaseDevice.queue_for_discovery : '
                      'no main loop, not doing anything')

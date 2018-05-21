@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from core.logger import *
-
 from ..constants import *
 from ..subsystems.lighting import Lighting
 from .basedevice import BaseDevice
