@@ -74,18 +74,6 @@ class Device4652_Slot(BaseSlot):
     #
     # ========================================================================
 
-    def get_mode_from_keyo(self, keyo):
-        mode = None
-        if keyo is not None:
-            if keyo in self.KOS:
-                mode = self.KOS.index(keyo)
-            else:
-                self.log('Device4652_Base ERROR: '
-                         'keyo %d unknown %s'
-                         % (keyo, str(self.KOS)),
-                         LOG_ERROR)
-        return mode
-
     def get_mode(self, data):
         mode = None
         keyo = data.get(SLOT_VAR_KEYO, None)
@@ -341,8 +329,6 @@ class Device4652_Slot(BaseSlot):
             if mode == self.MODE_LIGHT_CTRL:
                 if index == 0:
                     val = map_value(val_par, self.LIGHT_CTRL)
-                    print('light_control : mapped %d -> %d'
-                          % (val_par, val))
                     self.set_value(SLOT_VAR_LIGHT_CONTROL, val)
                     return True
                 if index == 17:
@@ -354,8 +340,6 @@ class Device4652_Slot(BaseSlot):
             if mode == self.MODE_AUTOMATION_CTRL:
                 if index == 0:
                     val = map_value(val_par, self.AUTOMATION)
-                    print('automation_control : mapped %d -> %d'
-                          % (val_par, val))
                     self.set_value(SLOT_VAR_AUTOMATION_CONTROL, val)
                     return True
             if mode in (self.MODE_LIGHT_CTRL, self.MODE_AUTOMATION_CTRL,):

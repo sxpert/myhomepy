@@ -27,6 +27,24 @@ class BaseSlot(object):
     #
     # ========================================================================
 
+    def get_mode_from_keyo(self, keyo):
+        mode = None
+        if keyo is not None:
+            KOS = getattr(self, VAR_KOS, None)
+            if KOS is None:
+                self.log('BaseSlot ERROR : '
+                         '%s not defined in class'
+                         % (VAR_KOS), LOG_ERROR)
+                return None
+            if keyo in KOS:
+                mode = KOS.index(keyo)
+            else:
+                self.log('BaseSlot ERROR : '
+                         'keyo %d unknown %s'
+                         % (keyo, str(KOS)),
+                         LOG_ERROR)
+        return mode
+
     def loads(self, data):
         if not isinstance(data, dict):
             return False

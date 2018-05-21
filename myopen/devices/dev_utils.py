@@ -15,6 +15,21 @@ def split_byte_addr(addr):
     return (a, pl)
 
 
+def split_long_addr(addr):
+    l = len(addr)
+    if l == 2:
+        s_a = addr[0]
+        s_pl = addr[1]
+    elif l == 4:
+        s_a = addr[0:2]
+        s_pl = addr[2:4]
+    else:
+        print('split_long_addr ERROR: unknown format length %d \'%s\''
+              % (l, addr))
+        return (None, None,)
+    return (int(s_a), int(s_pl))
+
+
 def check_byte_addr(addr):
     # NOTE: MyHome_Suite authorizes :
     # A 0-10

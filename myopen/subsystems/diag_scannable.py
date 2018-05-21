@@ -100,8 +100,12 @@ class DiagScannable(OWNSubSystem):
             # res_ko_sys
             # device answers with it's key/object, system and address",
             # *#[who]*[where]*32#[slot]*[sys]*[addr]##
-            (r'^\*(?P<virt_id>\d{1,4})\*32#(?P<slot>\d{1,3})\*(?P<sys>\d{1,3})'
-             r'\*(?P<addr>\d{1,5})##$', '_diag_res_ko_sys', ),
+            {
+                'name': 'RES_KO_SYS',
+                're': r'^\*(?P<virt_id>\d{1,4})\*32#(?P<slot>\d{1,3})'
+                      r'\*(?P<sys>\d{1,3})\*(?P<addr>\d{1,5})##$',
+                'func': '_diag_res_ko_sys'
+            },
 
             # device answers with the key/value of key/object
             # *#[who]*[where]*35#[index]#[slot]*[val_par]##
@@ -291,11 +295,16 @@ class DiagScannable(OWNSubSystem):
         _virt_id = matches['virt_id']
         _slot = int(matches['slot'])
         _sys = int(matches['sys'])
-        _addr = int(matches['addr'])
-        res = self.system.devices.res_ko_sys(_virt_id, _slot, _sys, _addr)
-        if not res:
-            self.log('res_ko_sys %s' % (str(matches)))
-        return res
+        _addr = matches['addr']
+
+        def res_ko_sys():
+            res = self.system.devices.res_ko_sys(
+                _virt_id, _slot, _sys, _addr)
+            if not res:
+                self.log('res_ko_sys %s' % (str(matches)))
+            return res
+
+        return res_ko_sys
 
     def _diag_res_param_ko(self, matches):
         _virt_id = matches['virt_id']
@@ -305,8 +314,7 @@ class DiagScannable(OWNSubSystem):
 
         def res_param_ko():
             res = self.system.devices.res_param_ko(
-                _virt_id, _slot,
-                _index, _val_par)
+                _virt_id, _slot, _index, _val_par)
             if not res:
                 self.log('failed _diag_res_param_ko.res_param_ko '
                          '%s' % (str(matches)))
