@@ -5,6 +5,8 @@ import threading
 
 from core.logger import *
 from myopen.subsystems import *
+from myopen.constants import *
+from .slots import *
 
 
 class BaseDevice(object):
@@ -37,20 +39,17 @@ class BaseDevice(object):
     BRANDS = [
         {
             'id': 'BRAND_UNDEFINED',
-            'names': {
-                'short': '_',
-                'long': 'Undefined'
-            },
+            'names': {'short': '_', 'long': 'Undefined'},
+            'note': 'Lots of devices have no brand specified, '
+                    'in particular older devices',
             'lines': {
                 PROD_LINE_UNDEFINED: 'Undefined'
             }
         },
         {
             'id': 'BRAND_BTICINO',
-            'names': {
-                'short': 'BT',
-                'long': 'BTicino'
-            },
+            'names': {'short': 'BT', 'long': 'BTicino'},
+            'note': 'Italian originated brand, global market',
             'lines': {
                 PROD_LINE_L_N_NT: 'L/N/NT',
                 PROD_LINE_MATIX: 'Matix',
@@ -63,10 +62,8 @@ class BaseDevice(object):
         },
         {
             'id': 'BRAND_LEGRAND',
-            'names': {
-                'short': 'LG',
-                'long': 'Legrand'
-            },
+            'names': {'short': 'LG', 'long': 'Legrand'},
+            'note': 'French originated brand, global market',
             'lines': {
                 PROD_LINE_VELA: 'Vela',
                 PROD_LINE_ARTEOR: 'Arteor',
@@ -76,38 +73,28 @@ class BaseDevice(object):
         },
         {
             'id': 'BRAND_TEGUI',
-            'names': {
-                'short': 'TG',
-                'long': 'Tegui',
-            }
+            'names': {'short': 'TG', 'long': 'Tegui'},
+            'note': 'Spanish originated brand'
         },
         {
             'id': 'BRAND_SHIDEAN',
-            'names': {
-                'short': 'SH',
-                'long': 'Shidean'
-            }
+            'names': {'short': 'SH', 'long': 'Shidean'},
+            'note': 'Chinese brand, south asia market ?'
         },
         {
             'id': 'BRAND_LEGRAND_BTICINO',
-            'names': {
-                'short': 'LGG',
-                'long': 'LegrandBticino'
-            },
+            'names': {'short': 'LGG', 'long': 'LegrandBticino'},
+            'note': 'Global brand'
         },
         {
             'id': 'BRAND_ARNOULD',
-            'names': {
-                'short': 'AR',
-                'long': 'Arnould'
-            },
+            'names': {'short': 'AR', 'long': 'Arnould'},
+            'note': 'High level brand, french market',
             'lines': {
                 PROD_LINE_ESPACE_EVOLUTON: 'Espace Évolution'
             }
         }
     ]
-
-    PARAMS_KEY = '_PARAMS'
 
     _VIRT_ID_CHECK_LENIENT = False
     _VIRT_ID_CHECK_STRICT = True
@@ -117,7 +104,7 @@ class BaseDevice(object):
         self.log = devices.log
         # if we get the diag_* subsystem here, find the
         # right one
-        sys_diag_who = getattr(subsystem, 'SYSTEM_DIAG_WHO', None)
+        sys_diag_who = getattr(subsystem, VAR_SYSTEM_DIAG_WHO, None)
         if sys_diag_who is not None:
             # we have the diag_* subsystem
             # get the right class of device
@@ -126,6 +113,7 @@ class BaseDevice(object):
         self._discovery_lock = threading.RLock()
         self._discovery = False
         self._error = not self.update_base_data(params)
+        self.slots = Slots(self)
 
     def queue_for_discovery(self):
         """
@@ -203,6 +191,12 @@ class BaseDevice(object):
                    (_class, Devices.format_hw_addr(self._hw_addr))
         return '%sINVALID>' % (_class)
 
+    # ========================================================================
+    #
+    # brands and product lines handling
+    #
+    # ========================================================================
+
     def find_brand_id(self, brand_id):
         if isinstance(brand_id, str):
             if brand_id.isnumeric():
@@ -248,75 +242,11 @@ class BaseDevice(object):
         if line_num is not None:
             self._product_line = line_num
 
-    # ------------------------------------------------------------------------
-    # parameters loading and checking
+    # ========================================================================
     #
-
-    def split_byte_addr(self, addr):
-        a = addr // 16
-        pl = addr % 16
-        return (a, pl)
-
-    def check_byte_addr(self, addr):
-        # NOTE: MyHome_Suite authorizes :
-        # A 0-10
-        # PL 0-15
-        # this violates the official docs
-
-        # if addr == 0:
-        #     return False
-        split = self.split_byte_addr(addr)
-        a, pl = split
-        if a not in range(0, 11):
-            return False
-        if pl not in range(0, 16):
-            return False
-        return True
-
-    def get_param(self, index, slot):
-        params = slot.get(self.PARAMS_KEY, None)
-        if params is None:
-            return None
-        value = params.get(index, None)
-        if value is not None:
-            return value
-        value = params.get(str(index), None)
-        return value
-
-    def check_value(self, value, tests):
-        valid = False
-
-        for t in tests:
-            if callable(t):
-                v = t(value)
-            else:
-                v = value in t
-            valid |= v
-        if valid:
-            return value
-        return None
-
-    def get_check_param(self,
-                        index, ivalues,
-                        name, nvalues,
-                        slot):
-        value = self.get_param(index, slot)
-        if value is not None:
-            value = self.check_value(value, ivalues)
-        if value is None:
-            value = slot.get(name, None)
-        if value is None:
-            self.log('BaseDevice.get_check_param : '
-                     'unable to find %s[%s] or %s in %s'
-                     % (self.PARAMS_KEY, str(index),
-                        str(name), slot), LOG_ERROR)
-            return None
-        value = self.check_value(value, nvalues)
-        return value
-
-    # ------------------------------------------------------------------------
     # load from json representation
     #
+    # ========================================================================
 
     def loads(self, data):
         if not isinstance(data, dict):
@@ -344,9 +274,11 @@ class BaseDevice(object):
             # time to load slots
             slots = data.get('slots', None)
             if slots is not None and isinstance(slots, list):
-                # slot ids start at 1
-                for sid in range(0, len(slots)):
-                    self.load_slot(sid + 1, slots[sid])
+                if not self.slots.loads(slots):
+                    self.log('BaseDevice.loads ERROR : '
+                             'unable to load slots %s'
+                             % (str(slots)), LOG_ERROR)
+                self.log('slots -> %s' % (str(self.slots)), LOG_ERROR)
             return self
 
         if model_id is None:
@@ -358,8 +290,8 @@ class BaseDevice(object):
             nd.loads(data)
         return nd
 
-    def load_slot(self, sid, slot_data):
-        self.slot_set_slot(sid, slot_data)
+    # def load_slot(self, sid, slot_data):
+    #     return slot_data
 
     def dump_subsystem(self):
         subsystem_id = self.subsystem.SYSTEM_WHO
@@ -367,7 +299,7 @@ class BaseDevice(object):
             subsystem_id = self.subsystem.SYSTEM_DIAG_WHO
         # try to find a name
         subs = find_subsystem(subsystem_id)
-        subsystem_name = getattr(subs, 'SYSTEM_NAME', None)
+        subsystem_name = getattr(subs, VAR_SYSTEM_NAME, None)
         res = subsystem_id
         if subsystem_name is not None:
             res = subsystem_name
@@ -427,15 +359,6 @@ class BaseDevice(object):
                     fw['build'])
         return fw
 
-    def dump_slot(self, sid):
-        return self.slot_get_slot(sid)
-
-    def dump_slots(self):
-        slots = []
-        for sid in range(0, self.slots_count()):
-            slots.append(self.dump_slot(sid+1))
-        return slots
-
     def __to_json__(self):
         data = {}
         data['virt_id'] = self._virt_id
@@ -443,7 +366,7 @@ class BaseDevice(object):
 
         # MODEL_ID handling
         # the proper model_id
-        model_id = getattr(self, 'MODEL_ID', None)
+        model_id = getattr(self, VAR_MODEL_ID, None)
         if model_id is not None:
             data['model_id'] = model_id
         # if the model wasn't known, this may be available
@@ -470,10 +393,7 @@ class BaseDevice(object):
         if fw_version is not None:
             data['firmware_version'] = fw_version
 
-        slots = self.dump_slots()
-        if slots is not None:
-            data['slots'] = slots
-
+        data[VAR_SLOTS] = self.slots
         return data
 
     @property
@@ -484,6 +404,12 @@ class BaseDevice(object):
     @property
     def hw_addr(self):
         return self._hw_addr
+
+    # ========================================================================
+    #
+    # callbacks used by the configuration system in the bus
+    #
+    # ========================================================================
 
     def _virt_id_check(self, virt_id, strict=True):
         _virt_id = getattr(self, '_virt_id', None)
@@ -502,10 +428,10 @@ class BaseDevice(object):
     def find_device_class(self, model_id):
         from . import DeviceTypes
         for dt in DeviceTypes:
-            mss = getattr(dt, 'DEVICE_SYSTEM', None)
+            mss = getattr(dt, VAR_DEVICE_SYSTEM, None)
             if mss is None:
                 continue
-            mid = getattr(dt, 'MODEL_ID', None)
+            mid = getattr(dt, VAR_MODEL_ID, None)
             if mid is None:
                 continue
             if mss is self.subsystem and mid == model_id:
@@ -568,72 +494,13 @@ class BaseDevice(object):
                 self.log('Unable to set configurator %d to value %d' % (i, v))
         return True
 
-    def _slots_check(self, slot_id):
-        slots = getattr(self, '_slots', [])
-        # slot ids start at 1
-        if slot_id < 1:
-            self.log('slot_set_value : slot_id %d invalid' % (slot_id))
-        if slot_id > 32:
-            self.log('slot_set_value : slot_id %d appears too large'
-                     % (slot_id))
-        if len(slots) < slot_id:
-            # enlarge (hihi) the slots
-            slots += [None]*(slot_id-len(slots))
-            self._slots = slots
-        return slots
-
-    def slots_count(self):
-        slots = getattr(self, '_slots', [])
-        return len(slots)
-
-    def slot_get_slot(self, slot_id):
-        slots = self._slots_check(slot_id)
-        # slot_id starts at 1
-        return slots[slot_id-1]
-
-    def slot_set_slot(self, slot_id, slot_contents):
-        slots = self._slots_check(slot_id)
-        # slot_id starts at 1
-        slots[slot_id-1] = slot_contents
-        return True
-
-    def slot_get_value(self, slot_id, key, default=None):
-        slot = self.slot_get_slot(slot_id)
-        if slot is None:
-            return default
-        return slot.get(key, default)
-
-    def slot_set_value(self, slot_id, key, value):
-        slot = self.slot_get_slot(slot_id)
-        if slot is None:
-            slot = {}
-        slot[key] = value
-        self.slot_set_slot(slot_id, slot)
-
-    def slot_del_value(self, slot_id, key, default=None):
-        slot = self.slot_get_slot(slot_id)
-        if slot is None:
-            slot = {}
-        value = default
-        if key in slot:
-            value = slot.pop(key)
-            self.slot_set_slot(slot_id, slot)
-        return value
-
-    def slot_set_param(self, slot_id, index, val_par):
-        params = self.slot_get_value(slot_id, self.PARAMS_KEY, {})
-        params[index] = val_par
-        self.slot_set_value(slot_id, self.PARAMS_KEY, params)
-
     def res_ko_value(self, virt_id, slot, keyo, state):
         if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_STRICT):
             return False
         if self.__class__.__name__ == BaseDevice.__name__:
             self.log('can\'t set keyo and state on a BaseDevice instance')
             return False
-        self.slot_set_value(slot, 'keyo', keyo)
-        self.slot_set_value(slot, 'state', state)
-        return True
+        return self.slots.res_ko_value(slot, keyo, state)
 
     def res_ko_sys(self, virt_id, slot, sys, addr):
         if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_STRICT):
@@ -641,9 +508,7 @@ class BaseDevice(object):
         if self.__class__.__name__ == BaseDevice.__name__:
             self.log('can\'t set sys and addr on a BaseDevice instance')
             return False
-        self.slot_set_value(slot, 'sys', sys)
-        self.slot_set_value(slot, 'addr', addr)
-        return True
+        return self.slots.res_ko_sys(slot, sys, addr)
 
     def res_param_ko(self, virt_id, slot, index, val_par):
         if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_STRICT):
@@ -651,8 +516,7 @@ class BaseDevice(object):
         if self.__class__.__name__ == BaseDevice.__name__:
             self.log('can\'t set parameter on a BaseDevice instance')
             return False
-        self.slot_set_param(slot, index, val_par)
-        return True
+        return self.slots.res_param_ko(slot, index, val_par)
 
     def end_config_read(self):
         self._discovery = False

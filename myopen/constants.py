@@ -1,0 +1,35 @@
+# -*- coding: utf-8 -*-
+
+MIN_SLOTS = 1
+MAX_SLOTS = 32
+
+SLOT_VAR_A = 'a'
+SLOT_VAR_ADDR = 'addr'
+SLOT_VAR_ADDRESS = 'address'
+SLOT_VAR_ADDRESS_TYPE = 'address_type'
+SLOT_VAR_AREA = 'area'
+SLOT_VAR_AUTOMATION_CONTROL = 'automation_control'
+SLOT_VAR_BUTTON_DOWN = 'button_down'
+SLOT_VAR_BUTTON_UP = 'button_up'
+SLOT_VAR_CEN_PLUS = 'cen_plus'
+SLOT_VAR_DELAY = 'delay'
+SLOT_VAR_GROUP = 'group'
+SLOT_VAR_KEYO = 'keyo'
+SLOT_VAR_LIGHT_CONTROL = 'light_control'
+SLOT_VAR_MODE = 'mode'
+SLOT_VAR_PL = 'pl'
+SLOT_VAR_REF_A = 'ref_a'
+SLOT_VAR_REF_ADDRESS = 'ref_address'
+SLOT_VAR_REF_PL = 'ref_pl'
+SLOT_VAR_STATE = 'state'
+SLOT_VAR_SYS = 'sys'
+
+VAR_DEVICE_SYSTEM = 'DEVICE_SYSTEM'
+VAR_MODEL_ID = 'MODEL_ID'
+VAR_NB_SLOTS = 'NB_SLOTS'
+VAR_PARAMS_KEY = '_PARAMS'
+VAR_SLOTS = 'slots'
+VAR_SLOT_CLASS = 'SLOT_CLASS'
+VAR_SYSTEM_DIAG_WHO = 'SYSTEM_DIAG_WHO'
+VAR_SYSTEM_NAME = 'SYSTEM_NAME'
+VAR_SYSTEM_WHO = 'SYSTEM_WHO'

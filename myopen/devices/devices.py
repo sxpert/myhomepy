@@ -115,7 +115,7 @@ class Devices(object):
         if k not in self.keys():
             # registers the device
             self._register(caller, {'hw_addr': hw_addr})
-
+        self.log('setting active device to %s' % (str(self[k])), LOG_ERROR)
         self._active_device = self[k]
         self._active_device_caller = caller
         return True

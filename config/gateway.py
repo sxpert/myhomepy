@@ -122,8 +122,9 @@ class Gateway(object):
                                          self.msg_queue,
                                          MODE_COMMAND,
                                          loop=self.loop)
-                asyncio.ensure_future(self.cmd_conn.run(),
-                                      loop=self.loop)
+                self.cmd_conn_future = \
+                    asyncio.ensure_future(self.cmd_conn.run(),
+                                          loop=self.loop)
                 await self.cmd_conn.is_ready.wait()
                 self.log('Gateway.handle_send_queue : CMD conn is ready')
             self.log('Gateway.handle_send_queue : sending \'%s\'' % (str(pkt)))
@@ -132,6 +133,10 @@ class Gateway(object):
     def stop_cmd_conn(self):
         if self.cmd_conn is not None:
             self.cmd_conn.stop()
+            if self.cmd_conn_future is not None:
+                self.cmd_conn_future.cancel()
+                asyncio.wait(self.cmd_conn_future)
+                self.cmd_conn_future = None
             self.cmd_conn = None
 
     def setup_async(self):
