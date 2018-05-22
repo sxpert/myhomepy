@@ -1,0 +1,11 @@
+<html>
+    <head>
+        <title>Hello, world</title>
+        <link rel="stylesheet" href="/static/main.css">
+    </head>
+    <body>
+        <div>systems list</div>{% for s in systems %}
+        <div><span class="tree_arrow">⏵</span><a href="/system/{{ s.id}}">{{ s.display_name }}</a></div>
+        {% endfor %}
+    </body>
+</html>

@@ -27,7 +27,7 @@ class Automator(object):
         self.config = Config(self)
         self.config.set_async_loop(self.loop)
         # webserver should be added here
-        self.webserver = WebServer(loop=self.loop)
+        self.webserver = WebServer(config=self.config, loop=self.loop)
         try:
             self.loop.run_forever()
         except KeyboardInterrupt:

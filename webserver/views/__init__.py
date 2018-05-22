@@ -1,3 +1,6 @@
+from .api import *
 from .index import *
 
-__all__ = ['index']
+__all__ = [
+    'Index'
+]

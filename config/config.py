@@ -5,7 +5,7 @@ import threading
 import core.core_json_encoder as cje
 from core.logger import *
 
-from . import gateway, system, systems, tls
+from . import system, systems, tls
 
 CONFIG_FILE_NAME = 'config.json'
 
@@ -75,36 +75,6 @@ class Config(object):
         f.write(json_data)
         f.close()
         self._file_lock.release()
-
-    def add_system(self, ip, port, password):
-        # search if we already have this system
-        # TODO: restore this functionnality
-
-        # for s in self.systems:
-        #     # TODO: fix
-        #     try:
-        #         gw = s['gateway']
-        #     except KeyError:
-        #         self.log("no gateway entry in system")
-        #         continue
-        #     try:
-        #         gw_ip = gw['ip']
-        #         gw_port = gw['port']
-        #         gw_password = gw['password']
-        #     except KeyError as e:
-        #         self.log("gateway entry missing one of (ip, port, password)")
-        #         continue
-        #     if gw_ip == ip and gw_port == port and gw_password == password:
-        #         self.log("a system with identical values has already been "
-        #                  "configured")
-        #         return False
-        # # couldn't find system
-        openwebnet_gateway = gateway.Gateway(ip, port, password)
-        new_system = system.System(self.log)
-        new_system.set_gateway(openwebnet_gateway)
-        self.systems.append(new_system)
-        new_system.run()
-        self.save()
 
     @property
     def nb_systems(self):

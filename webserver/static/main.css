@@ -1,0 +1,8 @@
+.tree_arrow {
+    display: inline-block;
+    text-align: center;
+    height: 16pt;
+    width: 16pt;
+    color: gray;
+    cursor: default;
+}

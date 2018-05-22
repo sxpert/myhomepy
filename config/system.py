@@ -16,14 +16,67 @@ class System(object):
         self._task = None
         self.task_queue = asyncio.Queue()
         # things loaded from the configuration
-        name = None
-        _db = None
-        _database = None
-        gateway = None
-        devices = None
-        _callbacks = None
-        monitor = None
-        systems = None
+        self.name = None
+        self._db = None
+        self._database = None
+        self.gateway = None
+        self.devices = None
+        self._callbacks = None
+        self.monitor = None
+        self.systems = None
+
+    def __repr__(self):
+        return "<%s %s>" % (
+            self.__class__.__name__, self.gateway)
+
+    @property
+    def database(self):
+        if self._db is None:
+            if self._database is None:
+                self.log('config.System.database WARNING : '
+                         'No database specified anywhere')
+            else:
+                self.log('config.System.database : '
+                         'Opening database %s' % (self._database),
+                         LOG_INFO)
+                self._db = database.Database(self._database, self)
+        return self._db
+
+    @property
+    def id(self):
+        if not self.systems:
+            return None
+        return self.systems.index(self)
+
+    @property
+    def display_name(self):
+        if self.name is None:
+            return 'System #%d' % (self.id)
+        else:
+            return self.name
+
+    @property
+    def has_task_queue(self):
+        return self.task_queue is not None
+
+    @property
+    def async_loop(self):
+        if not self.systems:
+            self.log("ERROR: Unable to access the systems list object")
+            return None
+        al = getattr(self.systems, 'async_loop', None)
+        if al is None:
+            self.log('WARNING: async_loop is None')
+        return al
+
+    @property
+    def is_cmd_busy(self):
+        return not self._free.is_set()
+
+    def set_gateway(self, gateway):
+        self.gateway = gateway
+        gateway.set_system(self)
+        return self
 
     def loads(self, data):
         if type(data) is not dict:
@@ -59,52 +112,6 @@ class System(object):
         data['devices'] = self.devices
         data['callbacks'] = self._callbacks
         return data
-
-    @property
-    def database(self):
-        if self._db is None:
-            if self._database is None:
-                self.log('config.System.database WARNING : '
-                         'No database specified anywhere')
-            else:
-                self.log('config.System.database : '
-                         'Opening database %s' % (self._database),
-                         LOG_INFO)
-                self._db = database.Database(self._database, self)
-        return self._db
-
-    @property
-    def id(self):
-        if not self.systems:
-            return None
-        return self.systems.index(self)
-
-    @property
-    def has_task_queue(self):
-        return self.task_queue is not None
-
-    @property
-    def async_loop(self):
-        if not self.systems:
-            self.log("ERROR: Unable to access the systems list object")
-            return None
-        al = getattr(self.systems, 'async_loop', None)
-        if al is None:
-            self.log('WARNING: async_loop is None')
-        return al
-
-    def set_gateway(self, gateway):
-        self.gateway = gateway
-        gateway.set_system(self)
-        return self
-
-    def __repr__(self):
-        return "<%s %s>" % (
-            self.__class__.__name__, self.gateway)
-
-    @property
-    def is_cmd_busy(self):
-        return not self._free.is_set()
 
     async def run_tasks(self):
         self._free = asyncio.Event()
