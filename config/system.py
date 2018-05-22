@@ -9,25 +9,27 @@ from . import callbacks, gateway
 
 
 class System(object):
-    _db = None
-    _database = None
-    gateway = None
-    devices = None
-    _callbacks = None
-    # system = None
-    monitor = None
-    systems = None
 
     def __init__(self, log=None):
         self.log = log
         self._free = None
         self._task = None
         self.task_queue = asyncio.Queue()
+        # things loaded from the configuration
+        name = None
+        _db = None
+        _database = None
+        gateway = None
+        devices = None
+        _callbacks = None
+        monitor = None
+        systems = None
 
     def loads(self, data):
         if type(data) is not dict:
             self.log("ERROR loading System, dictionnary expected")
         else:
+            self.name = data.get('name', None)
             self._database = data.get('database', None)
             self.log('database: %s' % (self._database))
             gateway_data = data.get('gateway', None)
@@ -50,6 +52,8 @@ class System(object):
 
     def __to_json__(self):
         data = {}
+        if self.name is not None:
+            data['name'] = self.name
         data['database'] = self._database
         data['gateway'] = self.gateway
         data['devices'] = self.devices

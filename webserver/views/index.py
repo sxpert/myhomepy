@@ -2,7 +2,7 @@
 import aiohttp_jinja2
 from aiohttp import web
 from aiohttp_session import get_session
-from decorators import *
+from webserver.decorators import login_required
 
 
 class index(web.View):

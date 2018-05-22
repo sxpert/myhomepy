@@ -7,8 +7,10 @@ import os
 import cryptography.fernet
 from aiohttp import web
 
-from decorators import login, login_page
-from views import index
+from .decorators import login, login_page
+from .views import index
+
+__all__ = ['WebServer']
 
 # reloading a module :
 #

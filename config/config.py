@@ -47,6 +47,9 @@ class Config(object):
                 data = json.loads(data)
                 if type(data) is dict:
                     k = data.keys()
+                    if 'webserver' in k:
+                        # webserver configuration data
+                        pass
                     if 'tls' in k:
                         self.tls.loads(data['tls'])
                     if 'systems' in k:

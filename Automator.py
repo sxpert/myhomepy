@@ -15,6 +15,7 @@ import re
 
 from config.config import Config
 from core.logger import *
+from webserver import *
 
 
 class Automator(object):
@@ -26,6 +27,7 @@ class Automator(object):
         self.config = Config(self)
         self.config.set_async_loop(self.loop)
         # webserver should be added here
+        self.webserver = WebServer(loop=self.loop)
         try:
             self.loop.run_forever()
         except KeyboardInterrupt:
