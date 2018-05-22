@@ -25,8 +25,6 @@ class Automator(object):
         self.loop.set_debug(False)
         self.config = Config(self, loop=self.loop)
         self.config.run()
-        # webserver should be added here
-        # self.webserver = WebServer(config=self.config, loop=self.loop)
         try:
             self.loop.run_forever()
         except KeyboardInterrupt:

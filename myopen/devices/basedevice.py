@@ -3,7 +3,7 @@
 import json
 import threading
 
-from core.logger import LOG_ERROR
+from core.logger import LOG_ERROR, LOG_DEBUG
 from myopen.subsystems import DiagScannable, find_subsystem
 from myopen.constants import (
     VAR_SYSTEM_DIAG_WHO, VAR_SYSTEM_NAME, VAR_MODEL_ID,
@@ -438,25 +438,25 @@ class BaseDevice(object):
 
     def find_device_class(self, model_id):
         from . import DeviceTypes
-        self.log('find_device_class %d' % (model_id), LOG_ERROR)
+        self.log('find_device_class %d' % (model_id), LOG_DEBUG)
         for dt in DeviceTypes:
-            self.log('    1. looking for %s' % (VAR_DEVICE_SYSTEM), LOG_ERROR)
+            self.log('    1. looking for %s' % (VAR_DEVICE_SYSTEM), LOG_DEBUG)
             mss = getattr(dt, VAR_DEVICE_SYSTEM, None)
             if mss is None:
                 continue
-            self.log('    2. found %s' % (str(mss)), LOG_ERROR)
-            self.log('    3. looking for %s' % (VAR_MODEL_ID), LOG_ERROR)
+            self.log('    2. found %s' % (str(mss)), LOG_DEBUG)
+            self.log('    3. looking for %s' % (VAR_MODEL_ID), LOG_DEBUG)
             mid = getattr(dt, VAR_MODEL_ID, None)
             if mid is None:
                 continue
-            self.log('    4. found %s' % (str(mid)), LOG_ERROR)
+            self.log('    4. found %s' % (str(mid)), LOG_DEBUG)
             self.log('    5. checking for a match with (%s, %d)'
-                     % (str(self.subsystem), model_id), LOG_ERROR)
+                     % (str(self.subsystem), model_id), LOG_DEBUG)
             if mss is self.subsystem and mid == model_id:
-                self.log('    6. found %s' % (str(dt)), LOG_ERROR)
+                self.log('    6. found %s' % (str(dt)), LOG_DEBUG)
                 return dt
-            self.log('    7. NOT found', LOG_ERROR)
-        self.log('FAILED', LOG_ERROR)
+            self.log('    7. NOT found', LOG_DEBUG)
+        self.log('FAILED', LOG_DEBUG)
         return None
 
     def res_object_model(self, virt_id, model_id,

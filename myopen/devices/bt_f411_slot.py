@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
-from ..constants import *
-from .dev_utils import *
+from ..constants import (
+    SLOT_VAR_A, SLOT_VAR_ADDR, SLOT_VAR_GROUPS, SLOT_VAR_MODE, SLOT_VAR_PL, SLOT_VAR_STATE, SLOT_VAR_SYS,
+    VAR_PARAMS_KEY
+)
+from .dev_utils import split_long_addr
 from .baseslot import BaseSlot
 
 
@@ -36,6 +39,13 @@ class DeviceF411_Slot(BaseSlot):
     # json loading function
     #
     # ========================================================================
+
+    def loads(self, data):
+        mode = self.get_mode(data)
+        if mode is None:
+            return False
+
+        self.set_value(SLOT_VAR_MODE, mode)        
 
     # ========================================================================
     #

@@ -16,3 +16,5 @@ lgg-software*
 test.py
 venv
 .vscode/settings.json
+.vscode/.ropeproject/config.py
+.vscode/.ropeproject/objectdb

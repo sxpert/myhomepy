@@ -1,12 +1,20 @@
 # -*- coding: utf-8 -*-
-from ..constants import *
-from .dev_utils import *
+from ..constants import (
+    SLOT_VAR_ADDR, SLOT_VAR_KEYO, SLOT_VAR_MODE,
+    SLOT_VAR_STATE, SLOT_VAR_SYS, 
+    VAR_KOS, VAR_MODE_IDS, VAR_PARAMS_KEY, )
+from .dev_utils import map_value
+from core.logger import LOG_ERROR
 
 __all__ = ['BaseSlot']
 
 
 class BaseSlot(object):
-    def __init__(self):
+    log = None
+
+    def __init__(self, slots):
+        self._slots = slots
+        self.log = slots.log
         self._values = {}
         self._params = {}
 
@@ -43,6 +51,31 @@ class BaseSlot(object):
                          'keyo %d unknown %s'
                          % (keyo, str(KOS)),
                          LOG_ERROR)
+        return mode
+
+    def get_mode(self, data):
+        MODE_IDS = getattr(self, VAR_MODE_IDS, None)
+        if MODE_IDS is None:
+            self.log('BaseSlot ERROR: No %s in %s' %
+                        (VAR_MODE_IDS, self.__class__.__name__))
+        mode = None
+        keyo = data.get(SLOT_VAR_KEYO, None)
+        if keyo is not None:
+            mode = self.get_mode_from_keyo(keyo)
+        if mode is None:
+            m = data.get(SLOT_VAR_MODE, None)
+            if isinstance(m, str):
+                if m.isdecimal():
+                    m = int(m)
+                else:
+                    m = map_value(m, MODE_IDS)
+            if isinstance(m, int):
+                if m in range(0, len(MODE_IDS)):
+                    mode = m
+        if mode is None:
+            self.log('BaseSlot ERROR: '
+                     'unable to read mode value',
+                     LOG_ERROR)
         return mode
 
     def loads(self, data):

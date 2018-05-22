@@ -36,6 +36,30 @@ class WebServer(object):
         self.site_data = site_data
         self.config = config
 
+    # ========================================================================
+    #
+    # Reading and saving the configuration
+    #
+    # ========================================================================
+
+    def loads(self, data):
+        print(data)
+
+    def __to_json__(self):
+        data = {}
+        data['address'] = self.address
+        data['port'] = self.port
+        key = self.key.decode('unicode-escape')
+        print(key)
+        data['session_key'] = key
+        return data
+
+    # ========================================================================
+    #
+    # Methods to setup and run the webserver
+    #
+    # ========================================================================
+
     def setup_sessions(self):
         from aiohttp_session import setup
         from aiohttp_session.cookie_storage import EncryptedCookieStorage

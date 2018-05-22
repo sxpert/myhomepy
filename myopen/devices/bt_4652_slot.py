@@ -1,6 +1,15 @@
 # -*- coding: utf-8 -*-
-from ..constants import *
-from .dev_utils import *
+from ..constants import (
+    SLOT_VAR_A,
+    SLOT_VAR_ADDRESS, SLOT_VAR_ADDRESS_TYPE, SLOT_VAR_AREA,
+    SLOT_VAR_AUTOMATION_CONTROL, 
+    SLOT_VAR_BUTTON_DOWN, SLOT_VAR_BUTTON_UP, SLOT_VAR_CEN_PLUS,
+    SLOT_VAR_DELAY, SLOT_VAR_GROUP, 
+    SLOT_VAR_LIGHT_CONTROL, SLOT_VAR_MODE, SLOT_VAR_PL,
+    SLOT_VAR_REF_A, SLOT_VAR_REF_ADDRESS, SLOT_VAR_REF_PL,
+    SLOT_VAR_STATE,
+)
+from .dev_utils import split_byte_addr, check_byte_addr, get_check, get_check_value, map_value, json_find_value
 from .baseslot import BaseSlot
 
 
@@ -12,10 +21,8 @@ class Device4652_Slot(BaseSlot):
     MODE_CEN_PLUS = 4
 
     KOS = (500, 400, 401, 404, 406)
-    MODE_IDS = ('UNCONFIGURED', 'LIGHT_CONTROL', 'AUTOMATION_CONTROL',
-                'CEN', 'CEN_PLUS')
-    MODE_NAMES = ('Unconfigured', 'Light control', 'Automation control',
-                  'CEN', 'CEN+')
+    MODE_IDS = ('UNCONFIGURED', 'LIGHT_CONTROL', 'AUTOMATION_CONTROL', 'CEN', 'CEN_PLUS')
+    MODE_NAMES = ('Unconfigured', 'Light control', 'Automation control', 'CEN', 'CEN+')
     LIGHT_CTRL_TOGGLE = 0
     LIGHT_CTRL_TIMED_ON = 1
     LIGHT_CTRL_TOGGLE_DIMMER = 2
@@ -74,29 +81,29 @@ class Device4652_Slot(BaseSlot):
     #
     # ========================================================================
 
-    def get_mode(self, data):
-        mode = None
-        keyo = data.get(SLOT_VAR_KEYO, None)
-        if keyo is not None:
-            mode = self.get_mode_from_keyo(keyo)
-        if mode is None:
-            m = data.get(SLOT_VAR_MODE, None)
-            if isinstance(m, str):
-                if m.isdecimal():
-                    m = int(m)
-                else:
-                    try:
-                        m = self.MODE_IDS.index(m)
-                    except ValueError:
-                        pass
-            if isinstance(m, int):
-                if m >= 0 and m < len(self.MODE_IDS):
-                    mode = m
-        if mode is None:
-            self.log('Device4652_Slot ERROR: '
-                     'unable to read mode value',
-                     LOG_ERROR)
-        return mode
+    # def get_mode(self, data):
+    #     mode = None
+    #     keyo = data.get(SLOT_VAR_KEYO, None)
+    #     if keyo is not None:
+    #         mode = self.get_mode_from_keyo(keyo)
+    #     if mode is None:
+    #         m = data.get(SLOT_VAR_MODE, None)
+    #         if isinstance(m, str):
+    #             if m.isdecimal():
+    #                 m = int(m)
+    #             else:
+    #                 try:
+    #                     m = self.MODE_IDS.index(m)
+    #                 except ValueError:
+    #                     pass
+    #         if isinstance(m, int):
+    #             if m >= 0 and m < len(self.MODE_IDS):
+    #                 mode = m
+    #     if mode is None:
+    #         self.log('Device4652_Slot ERROR: '
+    #                  'unable to read mode value',
+    #                  LOG_ERROR)
+    #     return mode
 
     def loads(self, data):
         print('%s.loads : %s'
@@ -115,8 +122,9 @@ class Device4652_Slot(BaseSlot):
             self.set_value(SLOT_VAR_LIGHT_CONTROL, light_control)
 
             if light_control == self.LIGHT_CTRL_TIMED_ON:
-                delay = self.get_check_param(data, 17, SLOT_VAR_DELAY,
-                                             self.DELAYS, self.DELAYS_IDS)
+                delay = get_check(data, 17, SLOT_VAR_DELAY,
+                                  range(0, len(self.DELAYS_IDS)),
+                                  self.DELAYS_IDS)
                 if delay is None:
                     return False
                 self.set_value(SLOT_VAR_DELAY, delay)

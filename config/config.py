@@ -3,7 +3,7 @@ import json
 import threading
 
 import core.core_json_encoder as cje
-from core.logger import *
+from core.logger import (get_logger, LOG_INFO, COLOR_YELLOW)
 
 import webserver
 from . import system, systems, tls
@@ -60,9 +60,8 @@ class Config(object):
                 data = json.loads(data)
                 if type(data) is dict:
                     k = data.keys()
-                    if 'webserver' in k:
-                        # webserver configuration data
-                        pass
+                    if 'web' in k:
+                        self.web.loads(data['web'])
                     if 'tls' in k:
                         self.tls.loads(data['tls'])
                     if 'systems' in k:
@@ -80,6 +79,7 @@ class Config(object):
 
     def __to_json__(self):
         data = {}
+        data['web'] = self.web
         data['tls'] = self.tls
         data['systems'] = self.systems
         return data
@@ -97,6 +97,8 @@ class Config(object):
     # ========================================================================
 
     def run(self):
+        # time to save the configuration
+        self.save()
         self.web.run()
         self.systems.run()
 

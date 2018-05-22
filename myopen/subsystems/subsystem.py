@@ -3,7 +3,7 @@
 import json
 import re
 
-from core.logger import *
+from core.logger import LOG_INFO, COLOR_LT_RED, get_logger
 
 
 class OWNSubSystem(object):

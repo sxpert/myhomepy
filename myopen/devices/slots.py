@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
-from ..constants import *
-from .baseslot import *
+from ..constants import (
+    MAX_SLOTS, MIN_SLOTS,
+    VAR_NB_SLOTS, VAR_SLOT_CLASS,
+)
+from .baseslot import BaseSlot
 
 
 class Slots(object):
     def __init__(self, parent):
-        self._parent = parent
-        self._max_slots = MAX_SLOTS
+        self.parent = parent
+        self.log = parent.log
+        self.max_slots = MAX_SLOTS
         nb_slots = 0
         if parent is not None:
             ns = getattr(parent, VAR_NB_SLOTS, None)
@@ -15,11 +19,11 @@ class Slots(object):
             else:
                 ns = 0
             nb_slots = ns
-        self._slots = [None] * nb_slots
+        self.slots = [None] * nb_slots
 
     def __str__(self):
         s = '<Slots (max=%d)' % (self._max_slots)
-        for slot in self._slots:
+        for slot in self.slots:
             s += ' %s' % (str(slot))
         s += '>'
         return s
@@ -35,12 +39,12 @@ class Slots(object):
             return False
         ok = True
         for sid in range(0, len(data)):
-            slot = self._ensure_store_slot(sid + 1)
+            slot = self.ensure_store_slot(sid + 1)
             ok &= slot.loads(data[sid])
         return ok
 
     def __to_json__(self):
-        return self._slots
+        return self.slots
 
     # ========================================================================
     #
@@ -48,22 +52,22 @@ class Slots(object):
     #
     # ========================================================================
 
-    def _ensure_slot(self, sid):
+    def ensure_slot(self, sid):
         if sid < MIN_SLOTS:
             return False
         if sid > self._max_slots:
             return False
         # only happens when parent is None
-        if len(self._slots) < sid:
+        if len(self.slots) < sid:
             # we don't have enough slots
-            slots = self._slots
+            slots = self.slots
             slots += [None] * (sid - len(slots))
-            self._slots = slots
+            self.slots = slots
         # everything is well, returns the slot
-        return self._slots[sid - 1]
+        return self.slots[sid - 1]
 
-    def _ensure_store_slot(self, sid):
-        slot = self._ensure_slot(sid)
+    def ensure_store_slot(self, sid):
+        slot = self.ensure_slot(sid)
         if slot is False:
             return None
         # we have something in the slot
@@ -71,10 +75,10 @@ class Slots(object):
             return slot
         # create a new slot object
         slot_class = BaseSlot
-        if self._parent is not None:
-            slot_class = getattr(self._parent, VAR_SLOT_CLASS, BaseSlot)
-        slot = slot_class()
-        self._slots[sid - 1] = slot
+        if self.parent is not None:
+            slot_class = getattr(self.parent, VAR_SLOT_CLASS, BaseSlot)
+        slot = slot_class(self)
+        self.slots[sid - 1] = slot
         return slot
 
     # ========================================================================
@@ -84,19 +88,19 @@ class Slots(object):
     # ========================================================================
 
     def get_value(self, sid, key, default):
-        slot = self._ensure_slot(sid)
+        slot = self.ensure_slot(sid)
         if slot is False:
             return None
         return slot.get_value(key, default)
 
     def set_value(self, sid, key, value):
-        slot = self._ensure_store_slot(sid)
+        slot = self.ensure_store_slot(sid)
         if slot is False:
             return False
         return slot.set_value(key, value)
 
     def del_value(self, sid, key):
-        slot = self._ensure_slot(sid)
+        slot = self.ensure_slot(sid)
         if slot is False:
             return False
         # we got an empty slot, nothing to delete
@@ -105,19 +109,19 @@ class Slots(object):
         slot.del_value(key)
 
     def get_param(self, sid, key, default):
-        slot = self._ensure_slot(sid)
+        slot = self.ensure_slot(sid)
         if slot is False:
             return None
         return slot.get_param(key, default)
 
     def set_param(self, sid, key, value):
-        slot = self._ensure_store_slot(sid)
+        slot = self.ensure_store_slot(sid)
         if slot is False:
             return False
         return slot.set_param(key, value)
 
     def del_param(self, sid, key):
-        slot = self._ensure_slot(sid)
+        slot = self.ensure_slot(sid)
         if slot is False:
             return False
         # we got an empty slot, nothing to delete
@@ -132,19 +136,19 @@ class Slots(object):
     # ========================================================================
 
     def res_ko_value(self, sid, keyo, state):
-        slot = self._ensure_store_slot(sid)
+        slot = self.ensure_store_slot(sid)
         if slot is False:
             return False
         return slot.res_ko_value(keyo, state)
 
     def res_ko_sys(self, sid, sys, addr):
-        slot = self._ensure_store_slot(sid)
+        slot = self.ensure_store_slot(sid)
         if slot is False:
             return False
         return slot.res_ko_sys(sys, addr)
 
     def res_param_ko(self, sid, index, val_par):
-        slot = self._ensure_store_slot(sid)
+        slot = self.ensure_store_slot(sid)
         if slot is False:
             return False
         return slot.res_param_ko(index, val_par)
