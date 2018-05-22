@@ -35,7 +35,6 @@ class WebServer(object):
         self.key = key
         self.site_data = site_data
         self.config = config
-        asyncio.ensure_future(self.start(), loop=self.loop)
 
     def setup_sessions(self):
         from aiohttp_session import setup
@@ -51,23 +50,31 @@ class WebServer(object):
         loader = jinja2.FileSystemLoader(templates)
         aiohttp_jinja2.setup(self.app, loader=loader)
 
+    # self.web.register_routes(
+    #     [
+    #         ["^/$", website.ow_index.OW_index],
+    #         ["^/API/ping$", website.ow_index.OW_ping],
+    #         ["^/API/config$", website.ow_config.OW_config],
+    #         ["^/API/ScanIds$", website.ow_scan_ids.OW_scan_ids],
+    #         ["^/API/add_system(.*)$",
+    #             website.ow_add_system.OW_add_system],
+    #         ["^/API/GeneralOff$", website.ow_general_off.OW_general_off],
+    #         ["^/API/temperatures(.*)$",
+    #          website.ow_temperatures.OW_list_temperatures],
+    #     ]
+
     def setup_routes(self):
         self.app.router.add_get('/login', decorators.login_page, name='login')
         self.app.router.add_post('/login', decorators.login)
 
         self.app.router.add_view('/', views.Index, name='index')
-        self.app.router.add_view('/actions/all_off', views.api.actions.AllOff, 
+        self.app.router.add_view('/actions/all_off', views.api.actions.AllOff,
                                  name='actions_all-off')
 
         static = os.path.join(self.path, 'static')
         self.app.router.add_static('/static/', path=static, name='static')
 
     async def start(self):
-        self.app = web.Application(loop=self.loop, debug=True)
-        self.app['config'] = self.config
-        self.setup_sessions()
-        self.setup_jinja2()
-        self.setup_routes()
         self.runner = web.AppRunner(self.app)
         await self.runner.setup()
         self.site = web.TCPSite(self.runner, self.address, self.port)
@@ -75,6 +82,15 @@ class WebServer(object):
         print('------ serving on %s:%d ------'
               % (self.address, self.port))
         print('session key', self.b64_key)
+
+    def run(self):
+        self.app = web.Application(loop=self.loop, debug=True)
+        self.app['config'] = self.config
+        self.setup_sessions()
+        self.setup_jinja2()
+        self.setup_routes()
+        import asyncio
+        asyncio.ensure_future(self.start(), loop=self.config.async_loop)
 
     async def index(self, request):
         return web.Response(text='Hello Aiohttp!!')

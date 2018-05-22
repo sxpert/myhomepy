@@ -5,6 +5,7 @@ import threading
 import core.core_json_encoder as cje
 from core.logger import *
 
+import webserver
 from . import system, systems, tls
 
 CONFIG_FILE_NAME = 'config.json'
@@ -14,19 +15,29 @@ class Config(object):
     app = None
     _file_lock = None
 
-    def __init__(self, app, config_file=None):
+    def __init__(self, app, config_file=None, loop=None):
         self.log = get_logger(LOG_INFO, '[CONF]', COLOR_YELLOW)
         self.log('Initializing configuration')
+
         self.app = app
         if config_file is None:
             self.config_file = CONFIG_FILE_NAME
+
+        self.web = webserver.WebServer(config=self)
         self.tls = tls.Tls(self)
         self.systems = systems.Systems(self)
-        self._file_lock = threading.RLock()
+
         self.load_file(self.config_file)
 
-    def set_async_loop(self, al):
-        self.async_loop = al
+    @property
+    def async_loop(self):
+        if self.app is None:
+            return None
+        l = getattr(self.app, 'loop', None)
+        return l
+
+    def run(self):
+        self.web.run()
         self.systems.run()
 
     def load_file(self, file):
