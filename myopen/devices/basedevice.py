@@ -162,18 +162,8 @@ class BaseDevice(object):
         self._hw_addr = params.get('hw_addr', None)
         if isinstance(self._hw_addr, str):
             # TODO: check if we get an exception
-            try:
+            if self._hw_addr.isdecimal():
                 self._hw_addr = int(self._hw_addr)
-            except ValueError:
-                # this may be an 8 chars hex string
-                try:
-                    self._hw_addr = int(self._hw_addr, 16)
-                except ValueError:
-                    self.log('BaseDevice.update_base_data : '
-                             'Unable to parse hw_addr, '
-                             'should be either an int or an hex string',
-                             LOG_ERROR)
-                    return False
         return True
 
     def __str__(self):

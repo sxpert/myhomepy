@@ -24,6 +24,11 @@ class Devices(object):
             if subsystem is not None:
                 self.log('subsystem : %s' % (subsystem), LOG_ERROR)
             subs = find_subsystem(subsystem)
+            # at this point, hw_addr is an 8 chars hex string
+            hw_addr = dev_data.get('hw_addr', None)
+            if hw_addr is not None and len(hw_addr) == 8:
+                hw_addr = int(hw_addr, 16)
+                dev_data['hw_addr'] = hw_addr
             dev = BaseDevice(self, subs, dev_data)
             dev = dev.loads(dev_data)
             self.log(dev, LOG_ERROR)

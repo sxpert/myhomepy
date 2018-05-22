@@ -21,8 +21,8 @@ class DeviceF411_Slot(BaseSlot):
     GROUP_MIN_IDX = 240
     GROUP_MAX_IDX = 249
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, slots):
+        super().__init__(slots)
         self._groups = [None]*(self.GROUP_MAX_IDX - self.GROUP_MIN_IDX + 1)
 
     # ========================================================================
@@ -46,6 +46,7 @@ class DeviceF411_Slot(BaseSlot):
             return False
 
         self.set_value(SLOT_VAR_MODE, mode)        
+        return True
 
     # ========================================================================
     #
