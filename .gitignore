@@ -15,3 +15,4 @@ lgg-databases*
 lgg-software*
 test.py
 venv
+.vscode/settings.json

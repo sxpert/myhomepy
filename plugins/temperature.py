@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 import database
-from core.logger import *
+from core.logger import LOG_INFO
 
 
 def log_to_database(system, params, device, data):
