@@ -15,14 +15,14 @@ class Slots(object):
         if parent is not None:
             ns = getattr(parent, VAR_NB_SLOTS, None)
             if ns is not None:
-                self._max_slots = ns
+                self.max_slots = ns
             else:
                 ns = 0
             nb_slots = ns
         self.slots = [None] * nb_slots
 
     def __str__(self):
-        s = '<Slots (max=%d)' % (self._max_slots)
+        s = '<Slots (max=%d)' % (self.max_slots)
         for slot in self.slots:
             s += ' %s' % (str(slot))
         s += '>'
@@ -55,7 +55,7 @@ class Slots(object):
     def ensure_slot(self, sid):
         if sid < MIN_SLOTS:
             return False
-        if sid > self._max_slots:
+        if sid > self.max_slots:
             return False
         # only happens when parent is None
         if len(self.slots) < sid:

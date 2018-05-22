@@ -81,30 +81,6 @@ class Device4652_Slot(BaseSlot):
     #
     # ========================================================================
 
-    # def get_mode(self, data):
-    #     mode = None
-    #     keyo = data.get(SLOT_VAR_KEYO, None)
-    #     if keyo is not None:
-    #         mode = self.get_mode_from_keyo(keyo)
-    #     if mode is None:
-    #         m = data.get(SLOT_VAR_MODE, None)
-    #         if isinstance(m, str):
-    #             if m.isdecimal():
-    #                 m = int(m)
-    #             else:
-    #                 try:
-    #                     m = self.MODE_IDS.index(m)
-    #                 except ValueError:
-    #                     pass
-    #         if isinstance(m, int):
-    #             if m >= 0 and m < len(self.MODE_IDS):
-    #                 mode = m
-    #     if mode is None:
-    #         self.log('Device4652_Slot ERROR: '
-    #                  'unable to read mode value',
-    #                  LOG_ERROR)
-    #     return mode
-
     def loads(self, data):
         print('%s.loads : %s'
               % (self.__class__.__name__, str(data)))
