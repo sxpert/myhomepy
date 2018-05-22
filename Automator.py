@@ -14,8 +14,7 @@ import logging
 import re
 
 from config.config import Config
-from core.logger import *
-from webserver import *
+from core.logger import SYSTEM_LOGGER, LOG_ERROR
 
 
 class Automator(object):

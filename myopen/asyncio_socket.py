@@ -2,11 +2,12 @@
 
 import asyncio
 import asyncio.events as events
+import platform
 import socket
 from asyncio.streams import (_DEFAULT_LIMIT, StreamReader,
                              StreamReaderProtocol, StreamWriter)
 
-from core.logger import *
+from core.logger import LOG_ERROR, LOG_INFO
 
 
 class AsyncIOSock(object):
@@ -28,7 +29,7 @@ class AsyncIOSock(object):
                 if not _had_msg:
                     self.log('attempt socket connection')
                 await self.loop.sock_connect(sock, (self.host, self.port))
-            except (socket.gaierror, socket.timeout) as e:
+            except (socket.gaierror, socket.timeout):
                 if not _had_msg:
                     _had_msg = True
                     self.log('unable to connect to %s:%d'
@@ -42,9 +43,14 @@ class AsyncIOSock(object):
     async def _gen_sock(self):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-        sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPIDLE, 1)
-        sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPINTVL, 1)
-        sock.setsockopt(socket.SOL_TCP, socket.TCP_KEEPCNT, 2)
+        system = platform.system()
+        if system == 'Linux':
+            TCP_KEEPIDLE = getattr(socket, 'TCP_KEEPIDLE')
+            sock.setsockopt(socket.SOL_TCP, TCP_KEEPIDLE, 1)
+            TCP_KEEPINTVL = getattr(socket, 'TCP_KEEPINTVL')
+            sock.setsockopt(socket.SOL_TCP, TCP_KEEPINTVL, 1)
+            TCP_KEEPCNT = getattr(socket, 'TCP_KEEPCNT')
+            sock.setsockopt(socket.SOL_TCP, TCP_KEEPCNT, 2)
         sock.settimeout(1)
         sock.setblocking(0)
         await self._sock_connect(sock)

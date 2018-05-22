@@ -3,10 +3,14 @@
 import json
 import threading
 
-from core.logger import *
-from myopen.subsystems import *
-from myopen.constants import *
-from .slots import *
+from core.logger import LOG_ERROR
+from myopen.subsystems import DiagScannable, find_subsystem
+from myopen.constants import (
+    VAR_SYSTEM_DIAG_WHO, VAR_SYSTEM_NAME, VAR_MODEL_ID,
+    VAR_SLOTS, VAR_DEVICE_SYSTEM,)
+from .slots import (
+    Slots
+)
 
 
 class BaseDevice(object):
@@ -288,6 +292,10 @@ class BaseDevice(object):
             return self
 
         dc = self.find_device_class(model_id)
+        if dc is None:
+            self.log('unable to find appropriate class for model_id %d'
+                     % (model_id), LOG_ERROR)
+            return self
         nd = dc(self.devices, self.subsystem, data)
         if nd.__class__ != BaseDevice:
             nd.loads(data)
@@ -430,15 +438,25 @@ class BaseDevice(object):
 
     def find_device_class(self, model_id):
         from . import DeviceTypes
+        self.log('find_device_class %d' % (model_id), LOG_ERROR)
         for dt in DeviceTypes:
+            self.log('    1. looking for %s' % (VAR_DEVICE_SYSTEM), LOG_ERROR)
             mss = getattr(dt, VAR_DEVICE_SYSTEM, None)
             if mss is None:
                 continue
+            self.log('    2. found %s' % (str(mss)), LOG_ERROR)
+            self.log('    3. looking for %s' % (VAR_MODEL_ID), LOG_ERROR)
             mid = getattr(dt, VAR_MODEL_ID, None)
             if mid is None:
                 continue
+            self.log('    4. found %s' % (str(mid)), LOG_ERROR)
+            self.log('    5. checking for a match with (%s, %d)'
+                     % (str(self.subsystem), model_id), LOG_ERROR)
             if mss is self.subsystem and mid == model_id:
+                self.log('    6. found %s' % (str(dt)), LOG_ERROR)
                 return dt
+            self.log('    7. NOT found', LOG_ERROR)
+        self.log('FAILED', LOG_ERROR)
         return None
 
     def res_object_model(self, virt_id, model_id,

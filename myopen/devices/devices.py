@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from .basedevice import BaseDevice
-from core.logger import *
-from myopen.subsystems import *
+from core.logger import LOG_ERROR, LOG_INFO
+from myopen.subsystems import find_subsystem
 
 
 class Devices(object):

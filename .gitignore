@@ -10,7 +10,8 @@ devices.txt
 *.db
 *.swp
 *.pem
-.vscode/*
+settings.json
 lgg-databases*
 lgg-software*
 test.py
+venv

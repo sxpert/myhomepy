@@ -115,7 +115,7 @@ class Logger(object):
                 if len(_self) == 1:
                     _self = _self[0]
                 else:
-                    print(self.COLOR_RED, _self, self.COLOR_DEFAULT)
+                    print(COLOR_RED, _self, COLOR_DEFAULT)
             if not isinstance(_self, list):
                 _class_name = _self.__class__.__name__
             else:
