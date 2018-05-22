@@ -31,10 +31,19 @@ class WebServer(object):
             loop = asyncio.get_event_loop()
         self.loop = loop
         if key is None:
-            key = cryptography.fernet.Fernet.generate_key()
-        self.key = key
+            self.generate_new_key()
+        else:
+            self.set_key(key)
         self.site_data = site_data
         self.config = config
+
+    def set_key(self, key):
+        self.key = key
+        self.b64_key = base64.urlsafe_b64decode(key)
+
+    def generate_new_key(self):
+        key = cryptography.fernet.Fernet.generate_key()
+        self.set_key(key)
 
     # ========================================================================
     #
@@ -44,13 +53,22 @@ class WebServer(object):
 
     def loads(self, data):
         print(data)
+        self.address = data.get('address', '127.0.0.1')
+        self.port = data.get('port', 8080)
+        k = data.get('session_key', None)
+        if k is not None:
+            key = k.encode('ascii')
+            self.set_key(key)
+        else:
+            # create new key
+            self.generate_new_key()
+        return True
 
     def __to_json__(self):
         data = {}
         data['address'] = self.address
         data['port'] = self.port
-        key = self.key.decode('unicode-escape')
-        print(key)
+        key = self.key.decode('ascii')
         data['session_key'] = key
         return data
 
@@ -63,7 +81,6 @@ class WebServer(object):
     def setup_sessions(self):
         from aiohttp_session import setup
         from aiohttp_session.cookie_storage import EncryptedCookieStorage
-        self.b64_key = base64.urlsafe_b64decode(self.key)
         self.sessions = EncryptedCookieStorage(self.b64_key)
         setup(self.app, self.sessions)
 
