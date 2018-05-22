@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from ..constants import *
+from ..constants import VAR_PARAMS_KEY
 
 # ========================================================================
 #
@@ -152,4 +152,3 @@ def json_find_value(value, values):
         pass
     print('invalid index %s %s' % (value, str(values)))
     raise IndexError
-    return None
