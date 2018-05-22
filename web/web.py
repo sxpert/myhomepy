@@ -1,61 +1,85 @@
 #!/usr/bin/env python3.6
 # -*- coding: utf-8 -*-
 import asyncio
+import base64
+import os
+
+import cryptography.fernet
 from aiohttp import web
+
+from decorators import login, login_page
+from views import index
+
+# reloading a module :
+#
+# import inspect, importlib
+# m = inspect.getmodule(index)
+# print(m)
+# importlib.reload(m)
+# print(inspect.getmodule(index))
 
 
 class WebServer(object):
-    def __init__(self, address='127.0.0.1', port=8080, loop=None):
+    def __init__(self, address='127.0.0.1', port=8080,
+                 site_data=None, loop=None, key=None):
+        self.path = os.path.dirname(os.path.abspath(__file__))
         self.address = address
         self.port = port
         if loop is None:
             loop = asyncio.get_event_loop()
         self.loop = loop
+        if key is None:
+            key = cryptography.fernet.Fernet.generate_key()
+        self.key = key
+        self.site_data = site_data
+
         asyncio.ensure_future(self.start(), loop=self.loop)
+
+    def setup_sessions(self):
+        from aiohttp_session import setup
+        from aiohttp_session.cookie_storage import EncryptedCookieStorage
+        self.b64_key = base64.urlsafe_b64decode(self.key)
+        self.sessions = EncryptedCookieStorage(self.b64_key)
+        setup(self.app, self.sessions)
+
+    def setup_jinja2(self):
+        import aiohttp_jinja2
+        import jinja2
+        templates = os.path.join(self.path, 'templates')
+        loader = jinja2.FileSystemLoader(templates)
+        aiohttp_jinja2.setup(self.app, loader=loader)
+
+    def setup_routes(self):
+        self.app.router.add_view('/', index, name='index')
+        self.app.router.add_get('/login', login_page, name='login')
+        self.app.router.add_post('/login', login)
+
+        static = os.path.join(self.path, 'static')
+        self.app.router.add_static('/static/', path=static, name='static')
 
     async def start(self):
         self.app = web.Application(loop=self.loop, debug=True)
+        self.setup_sessions()
+        self.setup_jinja2()
         self.setup_routes()
         self.runner = web.AppRunner(self.app)
         await self.runner.setup()
-        #
-        # for some reason, the aiohttp people really don't want to
-        # make this object accept a loop, and insist on the thing
-        # using the get_event_loop() call inside
-        #
         self.site = web.TCPSite(self.runner, self.address, self.port)
         await self.site.start()
         print('------ serving on %s:%d ------'
               % (self.address, self.port))
-
-    def setup_routes(self):
-        self.app.router.add_get('/', self.index)
+        print('session key', self.b64_key)
 
     async def index(self, request):
         return web.Response(text='Hello Aiohttp!!')
 
 
-class LoopTester(object):
-    def __init__(self, loop=None):
-        if loop is None:
-            loop = asyncio.get_event_loop()
-        self.loop = loop
-        self.counter = 0
-        asyncio.ensure_future(self.run(), loop=self.loop)
-
-    async def run(self):
-        while self.loop.is_running():
-            print('basic test %d' % (self.counter))
-            self.counter += 1
-            await asyncio.sleep(1)
-
 if __name__ == '__main__':
     import logging
-
+    import cryptography.fernet
     loop = asyncio.get_event_loop()
     logging.basicConfig(level=logging.DEBUG)
     loop.set_debug(False)
-    lt = LoopTester(loop=loop)
     ws = WebServer(loop=loop)
     try:
         loop.run_forever()

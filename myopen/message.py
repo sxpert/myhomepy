@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+from core.logger import *
 from .subsystems import find_subsystem
 
 
@@ -139,7 +140,7 @@ class Message(object):
                        str(self._who),
                        _sc_name,
                        self._msg)
-                self.log(msg)
+                self.log(msg, LOG_ERROR)
 
             self._parsed = True
         if self._parsed:
