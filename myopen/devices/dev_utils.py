@@ -124,7 +124,7 @@ def get_check(data, index, name, ivalues, nvalues, warn=True):
             value = int(value)
             v = check_value(value, ivalues)
             if v is not None:
-                return v
+                return ivalues.index(v)
         if nvalues is not None:
             v = check_value(value, nvalues)
             if v is None:
@@ -132,8 +132,8 @@ def get_check(data, index, name, ivalues, nvalues, warn=True):
                     print('get_check : Found invalid value %s for %s'
                           % (str(value), str(name)))
             else:
-                i = nvalues.index(v)
-                value = ivalues[i]
+                # we return the index in the array of strings
+                return nvalues.index(v)
     return value
 
 
@@ -151,4 +151,5 @@ def json_find_value(value, values):
     except TypeError:
         pass
     print('invalid index %s %s' % (value, str(values)))
+    raise IndexError
     return None
