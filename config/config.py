@@ -36,9 +36,11 @@ class Config(object):
         l = getattr(self.app, 'loop', None)
         return l
 
-    def run(self):
-        self.web.run()
-        self.systems.run()
+    # ========================================================================
+    #
+    # loading the configuration from file
+    #
+    # ========================================================================
 
     def load_file(self, file):
         try:
@@ -70,6 +72,12 @@ class Config(object):
             else:
                 self.log("WARNING: configuration file is empty")
 
+    # ========================================================================
+    #
+    # loading the configuration from file
+    #
+    # ========================================================================
+
     def __to_json__(self):
         data = {}
         data['tls'] = self.tls
@@ -77,15 +85,20 @@ class Config(object):
         return data
 
     def save(self):
-        # get all data, if it crashes, no harm done to the
-        # existing config file
         json_data = cje.dumps(self, indent=4)
-        # dump the data to the file (this should not crash)
-        self._file_lock.acquire()
         f = open(self.config_file, 'w')
         f.write(json_data)
         f.close()
-        self._file_lock.release()
+
+    # ========================================================================
+    #
+    # start all tasks (only 2 for now)
+    #
+    # ========================================================================
+
+    def run(self):
+        self.web.run()
+        self.systems.run()
 
     @property
     def nb_systems(self):

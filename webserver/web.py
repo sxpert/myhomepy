@@ -91,24 +91,3 @@ class WebServer(object):
         self.setup_routes()
         import asyncio
         asyncio.ensure_future(self.start(), loop=self.config.async_loop)
-
-    async def index(self, request):
-        return web.Response(text='Hello Aiohttp!!')
-
-
-if __name__ == '__main__':
-    import logging
-    import cryptography.fernet
-    loop = asyncio.get_event_loop()
-    logging.basicConfig(level=logging.DEBUG)
-    loop.set_debug(False)
-    ws = WebServer(loop=loop)
-    try:
-        loop.run_forever()
-    except KeyboardInterrupt:
-        tasks = asyncio.gather(
-                    *asyncio.Task.all_tasks(loop=loop),
-                    loop=loop,
-                    return_exceptions=True)
-        tasks.add_done_callback(lambda t: loop.stop())
-        tasks.cancel()
