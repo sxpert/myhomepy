@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from ..constants import *
 from ..subsystems.lighting import Lighting
 from .basedevice import BaseDevice
 from .bt_4652_slot import Device4652_Slot
