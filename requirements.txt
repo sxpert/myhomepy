@@ -1,0 +1,3 @@
+aiohttp
+aiohttp_session[secure]
+aiohttp_jinja2
