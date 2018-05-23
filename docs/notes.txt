@@ -329,3 +329,32 @@ CEN+ command [0 - 2047]
 *#1001*0*#35#2#1*13##     Button Up
 *#1001*0*#35#3#1*17##     Button Down
 
+F411
+
+keyo 6 : light actuator
+
+param 0 : modality
+ 0 : light actuator / master
+11 : light actuator / slave
+15 : light actuator / master PUL
+16 : light actuator / slave and PUL
+
+param 2 :
+0 to 255 : delay in seconds prior to turning slaves off ?
+
+keyo 7: automation actuator (2 relays used)
+
+param 0 : modality
+ 0: master
+
+param 2: delay in seconds prior to turning off
+4 : 4 seconds
+
+automation actuator, 3/7, master, stop time 4s, gate
+<= *#1001*0*#30*3*7##
+<= *#1001*0*#32#3*1*37##
+<= *#1001*0*#35#0#3*0##
+<= *#1001*0*#35#2#3*4##
+
+
+

@@ -1,0 +1,94 @@
+programming session :
+
+<= *1001*9#9828102*0##
+<= *#1001*0*1*2*6*2*4##                   4652/2 or equivalent, 6 confs, legrand Céliane
+<= *#1001*0*2*9*5*1##                     firmware version 9.5.1
+<= *#1001*0*4*0*0*0*0*0*0##               configurators all empty
+<= *#1001*0*7*111111111111111101101111##  diag_bits: '111111111111111101101111
+<= *#1001*0*13*9828102##                  serial number 0095F706
+<= *#1001*0*30*1*404*0##                  rocker on left : current mode is CEN
+<= *#1001*0*30*2*400*0##                  rocker on right :current mode is Light Control
+<= *1001*4*0##                            end of base config info
+<= *1001*14#0*0##                         reset all slots
+<= *#1001*0*#30*1*404##                   set slot 1 to 404 (cen)
+<= *#1001*0*#32#1*1*34##                  sys = 1, addr = a=3/pl=4
+<= *#1001*0*#35#1#1*1##                   button up = 1
+<= *#1001*0*#35#2#1*2##                   button down = 2
+<= *1001*4*0##                            res_trans_end {'_junk': '0'} # from programmer to gateway
+<= *1001*52*0##                           end of slot 1 programming
+<= *#1001*0*#30*2*400##                   set slot 2 to 400 (light control)
+<= *#1001*0*#35#0#2*0##	                  command mode : toggle
+<= *#1001*0*#35#1#2*0##                   address-type : point to point
+<= *#1001*0*#35#2#2*3##                   address a=0/pl=3
+<= *1001*4*0##                            res_trans_end {'_junk': '0'}
+<= *1001*52*0##                           end of slot 2 programming
+<= *1001*2*0##                            end of device programming
+
+
+diagnostic session :
+
+<= *1001*10#9828102*0##                   request configuration from device
+<= *#1001*0*1*2*6*2*4##                   same 
+<= *#1001*0*2*9*5*1##                     same
+<= *#1001*0*4*0*0*0*0*0*0##               same
+<= *#1001*0*7*111111111111111101101111##  same
+<= *#1001*0*13*9828102##                  same
+<= *#1001*0*30*1*404*0##                  ok good, we have that CEN we requested
+                                          were is the info on the CEN address ??
+                                          should be getting *#1001*0*32#1*1*34## here
+<= *#1001*0*30*2*400*0##                  slot 2 is Light control as above, good
+<= *1001*4*0##                            end of basic config info, parameters follow
+                                        slot 1: 
+<= *#1001*0*35#1#1*1##                    button up as defined above
+<= *#1001*0*35#2#1*2##                    button down as defined above
+                                        slot 2:
+<= *#1001*0*35#0#2*0##                    toggle mode
+<= *#1001*0*35#1#2*0##                    point 2 point
+<= *#1001*0*35#2#2*3##                    a=0/pl=3
+<= *#1001*0*35#5#2*0##                    for some reason we get the referent a/pl even if not used
+<= *#1001*0*35#17#2*1##                   and the delay is set for 1mn even if it not used
+<= *1001*6*0##                            Signaling the end of diagnostic
+
+
+compare with F411/2 :
+
+<= *1001*10#8177893*0##                   request diagnostic
+<= *#1001*01*1*129*5*0*0##                model 129 is F411/2, 5 confs, no brand info (old device ?)
+<= *#1001*01*2*7*5*0##                    firmware 7.5.0
+<= *#1001*01*4*0*0*0*0*0*0##              confs empty
+<= *#1001*01*7*111111111111111101101111## diags
+<= *#1001*01*13*8177893##                 serial number
+<= *#1001*01*30*1*6*0##                   slot 1: mode 6 = light actuator (7 would be automation actuator)
+<= *#1001*01*32#1*1*01##                  slot responds to address a=0/pl=1
+<= *#1001*01*30*2*6*0##                   slot 2: mode 6 too
+<= *#1001*01*32#2*1*1000##                this one answers as a=10/pl=0
+<= *1001*4*0##                            go gor parameters
+                                        slot 1
+<= *#1001*01*35#0#1*0##                   modality: master
+<= *#1001*01*35#1#1*0##                   unused
+<= *#1001*01*35#2#1*0##                   delay before turning slaves off: 0s
+<= *#1001*01*35#240#1*0##                 groups 1 to 10
+<= *#1001*01*35#241#1*0##
+<= *#1001*01*35#242#1*0##
+<= *#1001*01*35#243#1*0##
+<= *#1001*01*35#244#1*0##
+<= *#1001*01*35#245#1*0##
+<= *#1001*01*35#246#1*0##
+<= *#1001*01*35#247#1*0##
+<= *#1001*01*35#248#1*0##
+<= *#1001*01*35#249#1*0##
+                                        slot 2 
+<= *#1001*01*35#0#2*0##
+<= *#1001*01*35#1#2*0##
+<= *#1001*01*35#2#2*0##
+<= *#1001*01*35#240#2*0##                 groups 1 to 10
+<= *#1001*01*35#241#2*0##
+<= *#1001*01*35#242#2*0##
+<= *#1001*01*35#243#2*0##
+<= *#1001*01*35#244#2*0##
+<= *#1001*01*35#245#2*0##
+<= *#1001*01*35#246#2*0##
+<= *#1001*01*35#247#2*0##
+<= *#1001*01*35#248#2*0##
+<= *#1001*01*35#249#2*0##
+<= *1001*6*0##                            end of diagnostic
