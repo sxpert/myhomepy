@@ -19,7 +19,6 @@ class BaseSlot(object):
         self._params = {}
 
     def __str__(self):
-        print(self._values, self._params)
         s = '<%s' % self.__class__.__name__
         for k, v in self._values.items():
             s += ' (%s: %s)' % (str(k), str(v))
@@ -51,6 +50,7 @@ class BaseSlot(object):
                          'keyo %d unknown %s'
                          % (keyo, str(KOS)),
                          LOG_ERROR)
+                raise IndexError
         return mode
 
     def get_mode(self, data):
@@ -78,19 +78,22 @@ class BaseSlot(object):
                      LOG_ERROR)
         return mode
 
+    def load_params(self, data, v):
+        if not isinstance(v, dict):
+            self.log('%s should be a dict in %s'
+                        % (VAR_PARAMS_KEY, str(data)),
+                        LOG_ERROR)
+            return False
+        for pk, pv in v.items():
+            self.set_param(pk, pv)
+        return True
+
     def loads(self, data):
         if not isinstance(data, dict):
             return False
         for k, v in data.items():
-            print(k, v)
             if k == VAR_PARAMS_KEY:
-                if not isinstance(v, dict):
-                    self.log('%s should be a dict in %s'
-                             % (VAR_PARAMS_KEY, str(data)),
-                             LOG_ERROR)
-                    continue
-                for pk, pv in v.items():
-                    self.set_param(pk, pv)
+                self.load_params(data, v)
             else:
                 self.set_value(k, v)
         return True

@@ -3,6 +3,7 @@ from ..constants import (
     MAX_SLOTS, MIN_SLOTS,
     VAR_NB_SLOTS, VAR_SLOT_CLASS,
 )
+from core.logger import LOG_ERROR
 from .baseslot import BaseSlot
 
 
@@ -40,7 +41,13 @@ class Slots(object):
         ok = True
         for sid in range(0, len(data)):
             slot = self.ensure_store_slot(sid + 1)
-            ok &= slot.loads(data[sid])
+            slot_ok = slot.loads(data[sid])
+            # default loader ?
+            if not slot_ok:
+                self.log('Loading slot %d => %s appears to have failed, launching default loader ?'
+                         % (sid, str(data[sid])), LOG_ERROR)
+                
+            ok &= slot_ok
         return ok
 
     def __to_json__(self):

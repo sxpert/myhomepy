@@ -21,8 +21,6 @@ class Devices(object):
         # we have a list
         for dev_data in data:
             subsystem = dev_data.get('subsystem', None)
-            if subsystem is not None:
-                self.log('subsystem : %s' % (subsystem), LOG_ERROR)
             subs = find_subsystem(subsystem)
             # at this point, hw_addr is an 8 chars hex string
             hw_addr = dev_data.get('hw_addr', None)
@@ -31,7 +29,6 @@ class Devices(object):
                 dev_data['hw_addr'] = hw_addr
             dev = BaseDevice(self, subs, dev_data)
             dev = dev.loads(dev_data)
-            self.log(dev, LOG_ERROR)
             # add device to list
             k = Devices.format_hw_addr(dev.hw_addr)
             self._devs[k] = dev
