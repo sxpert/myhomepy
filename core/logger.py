@@ -100,39 +100,35 @@ class Logger(object):
         # find name of caller
 
         if self._level == LOG_DEBUG:
-            for _caller in inspect.stack():
-                _func_name = _caller.function
-                if _func_name != 'log':
-                    # print(_caller)
-                    break
-            # _caller = inspect.stack()[2]
-            _func_name = _caller.function
-            _frame = _caller.frame
-            _locals = _frame.f_locals
-            _self = _locals.get('self', None)
-            _class_name = None
-            if isinstance(_self, list):
-                if len(_self) == 1:
-                    _self = _self[0]
-                else:
-                    print(COLOR_RED, _self, COLOR_DEFAULT)
-            if not isinstance(_self, list):
-                _class_name = _self.__class__.__name__
-            else:
-                # print("looking for class name")
-                # try:
-                #     print(str(_locals))
-                # except AssertionError as e:
-                #     print(self.COLOR_RED, e, self.COLOR_DEFAULT)
-                #     print(_locals.keys())
-                _class = _locals.get('__class__', None)
-                if _class:
-                    _class_name = _class.__name__
+            try:
+                for _caller in inspect.stack():
+                    _frame = _caller.frame
+                    _locals = _frame.f_locals
+                    _self = _locals.get('self', None)
+                    _caller_class = None
+                    if isinstance(_self, list) and len(_self) == 1:
+                        _self = _self[0]
+                    if not isinstance(_self, list):
+                        _caller_class = _self.__class__
+                    else:
+                        _caller_class = _locals.get('__class__', None)
+                    if _caller_class:
+                        _class_name = _caller_class.__name__
+                    # skip functions for the logger class
+                    if _class_name == 'logger':
+                        continue
+                    _func_name = _caller.function
+                    if _func_name != 'log':
+                        # print(_caller)
+                        break
+            except:
+                # inspect.stack() may fail
+                _class_name = None
             if not _class_name:
                 _class_name = "<unknown>"
 
             _caller_name = "%s.%s" % (_class_name, _func_name)
-            msg = "%s : %s" % (_caller_name, str(msg))
+            msg = "%s : %s" % (_caller_name, msg)
 
         hdr = ''
         if header != '':

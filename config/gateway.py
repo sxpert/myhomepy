@@ -2,8 +2,8 @@
 import asyncio
 from datetime import datetime, timedelta
 
-from core.logger import *
-from myopen.asyncio_connection import *
+from core.logger import LOG_INFO, COLOR_LT_RED, get_logger
+from myopen.asyncio_connection import AsyncIOOWNConnection, MODE_COMMAND, MODE_MONITOR
 from myopen.message import Message
 
 from . import system
@@ -169,7 +169,7 @@ class Gateway(object):
                 if self.system.is_cmd_busy:
                     handled = self.system.dispatch_message(data)
                 if not handled:
-                    msg, src = data
+                    msg, _ = data
                     m = Message(msg, self)
                     m.dispatch()
 

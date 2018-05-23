@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -14,12 +14,13 @@ import logging
 import re
 
 from config.config import Config
-from core.logger import SYSTEM_LOGGER, LOG_ERROR
+from core.logger import SYSTEM_LOGGER, LOG_ERROR, LOG_INFO, LOG_DEBUG
 
 
 class Automator(object):
     def run(self):
-        SYSTEM_LOGGER.level = LOG_ERROR
+        SYSTEM_LOGGER.level = LOG_INFO
+        SYSTEM_LOGGER.logfile = 'myopen.log'
         self.loop = asyncio.get_event_loop()
         logging.basicConfig(level=logging.DEBUG)
         self.loop.set_debug(False)

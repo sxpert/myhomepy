@@ -173,26 +173,31 @@ class Devices(object):
             return self._active_device\
                 .res_object_model(virt_id, model_id,
                                   nb_conf, brand_id, prod_line)
+        self.log('Devices.res_object_model : no active device', LOG_INFO)
         return False
 
     def res_fw_version(self, virt_id, fw_version):
         if self._active_device is not None:
             return self._active_device.res_fw_version(virt_id, fw_version)
+        self.log('Devices.res_fw_version : no active device', LOG_INFO)
         return False
 
     def res_conf_1_6(self, virt_id, conf_1_6):
         if self._active_device is not None:
             return self._active_device.res_conf_1_6(virt_id, conf_1_6)
+        self.log('Devices.res_conf_1_6 : no active device', LOG_INFO)
         return False
 
     def res_ko_value(self, virt_id, slot, keyo, state):
         if self._active_device is not None:
             return self._active_device.res_ko_value(virt_id, slot, keyo, state)
+        self.log('Devices.res_ko_value : no active device', LOG_INFO)
         return False
 
     def res_ko_sys(self, virt_id, slot, sys, addr):
         if self._active_device is not None:
             return self._active_device.res_ko_sys(virt_id, slot, sys, addr)
+        self.log('Devices.res_ko_sys : no active device', LOG_INFO)
         return False
 
     def eot_event(self, command, matches):
@@ -200,13 +205,14 @@ class Devices(object):
         if self._active_device is not None:
             return True
         # no active device, reply false
+        self.log('Devices.eot_event : no active device', LOG_INFO)
         return False
 
     def res_param_ko(self, virt_id, slot, index, val_par):
         if self._active_device is not None:
             return self._active_device.res_param_ko(virt_id, slot,
                                                     index, val_par)
-        self.log('no active device')
+        self.log('Devices.res_param_ko : no active device', LOG_INFO)
         return False
 
     def end_config_read(self):
