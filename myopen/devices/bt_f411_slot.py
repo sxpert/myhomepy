@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from core.logger import LOG_ERROR
+from core.logger import LOG_ERROR, LOG_DEBUG
 
 from ..constants import (SLOT_VAR_A, SLOT_VAR_ADDR, SLOT_VAR_GROUPS,
                          SLOT_VAR_MODE, SLOT_VAR_PL, SLOT_VAR_STATE,
@@ -53,6 +53,10 @@ class DeviceF411_Slot(BaseSlot):
             return False
         self.set_value(SLOT_VAR_MODE, mode)      
 
+        if mode == self.MODE_UNCONFIGURED:
+            # nothing left to load
+            return True
+
         sys = data.get(SLOT_VAR_SYS, None)
         if sys is None:
             return False
@@ -100,11 +104,11 @@ class DeviceF411_Slot(BaseSlot):
     def json_mode(self, data):
         mode = self.get_value(SLOT_VAR_MODE, None)
         self.log('DeviceF411_slot.json_mode : found mode %s in %s'
-                 % (str(mode), str(self._values)), LOG_ERROR)
+                 % (str(mode), str(self._values)), LOG_DEBUG)
         if mode is not None:
-            self.log('DeviceF411_slot.json_mode : mode is not none', LOG_ERROR)
+            self.log('DeviceF411_slot.json_mode : mode is not none', LOG_DEBUG)
             data[SLOT_VAR_MODE] = self.MODE_IDS[mode]
-        self.log('DeviceF411_slot.json_mode : returning %d' % mode, LOG_ERROR)
+        self.log('DeviceF411_slot.json_mode : returning %d' % mode, LOG_DEBUG)
         return mode
 
     def json_addr(self, data):
@@ -127,21 +131,21 @@ class DeviceF411_Slot(BaseSlot):
         data['_source'] = super().__class__.__name__
         _data = {}
         mode = self.json_mode(_data)
-        self.log('DeviceF411_Slot:__to_json__ : mode = %s' % str(mode), LOG_ERROR)
+        self.log('DeviceF411_Slot:__to_json__ : mode = %s' % str(mode), LOG_DEBUG)
         if mode is None:
-            self.log('DeviceF411_Slot:__to_json__ : mode is None', LOG_ERROR)
+            self.log('DeviceF411_Slot:__to_json__ : mode is None', LOG_DEBUG)
             return data
         if mode != self.MODE_UNCONFIGURED:
             sys = self.json_set_var(SLOT_VAR_SYS, _data)
             if sys is None:
-                self.log('DeviceF411_Slot:__to_json__ : sys is None', LOG_ERROR)
+                self.log('DeviceF411_Slot:__to_json__ : sys is None', LOG_DEBUG)
                 return data
             addr = self.json_addr(_data)
             if addr is None:
-                self.log('DeviceF411_Slot:__to_json__ : addr is None', LOG_ERROR)
+                self.log('DeviceF411_Slot:__to_json__ : addr is None', LOG_DEBUG)
                 return data
             _data[SLOT_VAR_GROUPS] = self.groups
-            self.log('DeviceF411_Slot:__to_json__ : groups is %s' % (str(self.groups)), LOG_ERROR)
+            self.log('DeviceF411_Slot:__to_json__ : groups is %s' % (str(self.groups)), LOG_DEBUG)
         if len(self._params) > 0:
             _data[VAR_PARAMS_KEY] = self._params
         return _data

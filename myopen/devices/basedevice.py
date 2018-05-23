@@ -142,15 +142,13 @@ class BaseDevice(object):
             'device': self
         }
 
-        self.log('GO !', LOG_ERROR)
         if self.devices.system.has_task_queue:
-            self.log('async loop found', LOG_ERROR)
             from ..commands.asyncio_cmd_diag_aid import CmdDiagAid
             # if self.devices.format_hw_addr(self.hw_addr) == '0095F706':
-            self.log('BaseDevice.queue_for_discovery : '
-                     'CmdDiagAid %s'
-                     % (str(params)),
-                     LOG_ERROR)
+            # self.log('BaseDevice.queue_for_discovery : '
+            #          'CmdDiagAid %s'
+            #          % (str(params)),
+            #          LOG_ERROR)
             self.devices.system.push_task(CmdDiagAid, params=params)
         else:
             self.log('BaseDevice.queue_for_discovery : '
@@ -275,7 +273,7 @@ class BaseDevice(object):
                     self.log('BaseDevice.loads ERROR : '
                              'unable to load slots %s'
                              % (str(slots)), LOG_ERROR)
-                self.log('slots -> %s' % (str(self.slots)), LOG_ERROR)
+                self.log('slots -> %s' % (str(self.slots)), LOG_DEBUG)
             return self
 
         if model_id is None:
@@ -422,7 +420,7 @@ class BaseDevice(object):
             error_msg = 'this device\'s virt_id is %s, ' \
                         'doesn\'t match with %s' \
                         % (self._virt_id, virt_id)
-            self.log(error_msg)
+            self.log(error_msg, LOG_ERROR)
             return False
         return True
 

@@ -39,25 +39,23 @@ class BaseSlot(object):
         if keyo is not None:
             KOS = getattr(self, VAR_KOS, None)
             if KOS is None:
-                self.log('BaseSlot ERROR : '
-                         '%s not defined in class'
+                self.log('BaseSlot ERROR : %s not defined in class'
                          % (VAR_KOS), LOG_ERROR)
                 return None
             if keyo in KOS:
                 mode = KOS.index(keyo)
             else:
-                self.log('BaseSlot ERROR : '
-                         'keyo %d unknown %s'
-                         % (keyo, str(KOS)),
-                         LOG_ERROR)
+                self.log('BaseSlot ERROR : keyo %d unknown %s'
+                         % (keyo, str(KOS)), LOG_ERROR)
                 raise IndexError
         return mode
 
     def get_mode(self, data):
         MODE_IDS = getattr(self, VAR_MODE_IDS, None)
         if MODE_IDS is None:
-            self.log('BaseSlot ERROR: No %s in %s' %
-                        (VAR_MODE_IDS, self.__class__.__name__))
+            self.log('BaseSlot ERROR: No %s in %s'
+                     % (VAR_MODE_IDS, self.__class__.__name__),
+                     LOG_ERROR)
         mode = None
         keyo = data.get(SLOT_VAR_KEYO, None)
         if keyo is not None:
@@ -80,7 +78,7 @@ class BaseSlot(object):
 
     def load_params(self, data, v):
         if not isinstance(v, dict):
-            self.log('%s should be a dict in %s'
+            self.log('BaseSlot.load_params: %s should be a dict in %s'
                         % (VAR_PARAMS_KEY, str(data)),
                         LOG_ERROR)
             return False

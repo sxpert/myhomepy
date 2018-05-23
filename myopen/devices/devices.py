@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from .basedevice import BaseDevice
-from core.logger import LOG_ERROR, LOG_INFO
+from core.logger import LOG_ERROR, LOG_INFO, LOG_DEBUG
 from myopen.subsystems import find_subsystem
 
 
@@ -16,7 +16,8 @@ class Devices(object):
 
     def loads(self, data):
         if not isinstance(data, list):
-            self.log('devices should contain a list', LOG_ERROR)
+            self.log('Devices.loads : devices should contain a list',
+                     LOG_ERROR)
             return None
         # we have a list
         for dev_data in data:
@@ -33,10 +34,13 @@ class Devices(object):
             k = Devices.format_hw_addr(dev.hw_addr)
             self._devs[k] = dev
             # if device is BaseDevice...
-            self.log('%s' % (str(dev.__class__)), LOG_ERROR)
-            self.log('%s' % (str(dev.__class__ is BaseDevice)), LOG_ERROR)
+            self.log('Devices.loads : device class %s'
+                     % (str(dev.__class__)), LOG_DEBUG)
+            self.log('Devices.loads : device is BaseDevice ? %s'
+                     % (str(dev.__class__ is BaseDevice)), LOG_DEBUG)
             if dev.__class__ is BaseDevice:
-                self.log('queuing %s' % (str(dev)), LOG_ERROR)
+                self.log('Devices.loads : queuing %s' % (str(dev)),
+                         LOG_ERROR)
                 dev.queue_for_discovery()
 
     def __to_json__(self):

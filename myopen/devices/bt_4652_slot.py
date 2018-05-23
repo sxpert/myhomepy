@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-from ..constants import (
-    SLOT_VAR_A,
-    SLOT_VAR_ADDRESS, SLOT_VAR_ADDRESS_TYPE, SLOT_VAR_AREA,
-    SLOT_VAR_AUTOMATION_CONTROL, 
-    SLOT_VAR_BUTTON_DOWN, SLOT_VAR_BUTTON_UP, SLOT_VAR_CEN_PLUS,
-    SLOT_VAR_DELAY, SLOT_VAR_GROUP, 
-    SLOT_VAR_LIGHT_CONTROL, SLOT_VAR_MODE, SLOT_VAR_PL,
-    SLOT_VAR_REF_A, SLOT_VAR_REF_ADDRESS, SLOT_VAR_REF_PL,
-    SLOT_VAR_STATE,
-)
-from .dev_utils import split_byte_addr, check_byte_addr, get_check, get_check_value, map_value, json_find_value
+from core.logger import LOG_DEBUG
+
+from ..constants import (SLOT_VAR_A, SLOT_VAR_ADDRESS, SLOT_VAR_ADDRESS_TYPE,
+                         SLOT_VAR_AREA, SLOT_VAR_AUTOMATION_CONTROL,
+                         SLOT_VAR_BUTTON_DOWN, SLOT_VAR_BUTTON_UP,
+                         SLOT_VAR_CEN_PLUS, SLOT_VAR_DELAY, SLOT_VAR_GROUP,
+                         SLOT_VAR_LIGHT_CONTROL, SLOT_VAR_MODE, SLOT_VAR_PL,
+                         SLOT_VAR_REF_A, SLOT_VAR_REF_ADDRESS, SLOT_VAR_REF_PL,
+                         SLOT_VAR_STATE)
 from .baseslot import BaseSlot
+from .dev_utils import (check_byte_addr, get_check, get_check_value,
+                        json_find_value, map_value, split_byte_addr)
 
 
 class Device4652_Slot(BaseSlot):
@@ -82,8 +82,9 @@ class Device4652_Slot(BaseSlot):
     # ========================================================================
 
     def loads(self, data):
-        print('%s.loads : %s'
-              % (self.__class__.__name__, str(data)))
+        self.log('%s.loads : %s'
+                 % (self.__class__.__name__, str(data)),
+                 LOG_DEBUG)
         mode = self.get_mode(data)
         if mode is None:
             return False
