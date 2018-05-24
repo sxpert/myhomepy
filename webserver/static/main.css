@@ -27,6 +27,28 @@ html {
     left: 0pt;
     width: 100%;
 }
+.tree_arrow {
+    font-family: sans-serif;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 10pt;
+    height: var(--tree-line-wh);
+    width: var(--tree-line-wh);
+    margin: 0;
+    color: black;
+    cursor: pointer;
+}
+.tree_blank {
+    font-family: sans-serif;
+    display: inline-block;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 10pt;
+    height: var(--tree-line-wh);
+    width: var(--tree-line-wh);
+    margin: 0;
+}
 .tree_icon {
     font-family: sans-serif;
     display: inline-block;
@@ -37,5 +59,8 @@ html {
     width: var(--tree-line-wh);
     margin-right: calc(var(--tree-line-wh) / 4);
     color: gray;
-    cursor: default;
+    cursor: pointer;
+}
+.tree_item {
+    cursor: pointer;
 }

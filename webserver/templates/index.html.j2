@@ -4,18 +4,10 @@
         <link rel="stylesheet" href="/static/main.css">
     </head>
     <body>
-        <div>systems list</div>{% for s in systems %}
-        <div class="tree">
-            <div class="tree_level">
-                <div class="tree_header"><span class="tree_icon">▸</span><a href="/system/{{ s.id}}">{{ s.display_name }}</a></div>
-                <div class="tree_level">
-                    <div class="tree_header"><span class="tree_icon"> </span><span>{{s.gateway.address}}</span></div>
-                    <div class="tree_level">
-                        <div class="tree_header"><span class="tree_icon"> </span><span>{{s.gateway.port}}</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
+        <div>systems list</div>
+        <div class="tree">{% for s in systems %}
+        {% include 'system.j2' %}{% block system_tree %}{% endblock %}
+        {% endfor %}</div>
+        
     </body>
 </html>

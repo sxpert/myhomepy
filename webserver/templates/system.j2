@@ -1,0 +1,10 @@
+{% block system_tree %}
+<div class="tree_level">
+    <div class="tree_header""><span class="tree_arrow"
+        >▸</span><img src="/static/images/house_icon.png" class="tree_icon"
+        /><span  class="tree_item" id="system-{{ s.id }}">{{ s.display_name }}</a></div>
+    <div class="tree_level">
+        {% include 'gateway.j2' %}{% block gateway_tree %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

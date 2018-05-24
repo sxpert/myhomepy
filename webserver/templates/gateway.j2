@@ -1,0 +1,9 @@
+{% block gateway_tree %}
+<div class="tree_header"><span class="tree_blank"> </span><img 
+    src="/static/images/F454_icon.png" 
+    class="tree_icon"/><span class="tree_item" id="system-{{ s.id }}-gateway">{{ s.gateway.address }}</span></div>
+<div class="tree_level">
+    <div class="tree_header"><div class="tree_header"><span class="tree_icon"
+        ></span><span class="tree_item">{{ s.gateway.port }}</span></div>
+</div>
+{% endblock %}
