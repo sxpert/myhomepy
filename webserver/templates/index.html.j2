@@ -5,7 +5,17 @@
     </head>
     <body>
         <div>systems list</div>{% for s in systems %}
-        <div><span class="tree_arrow">⏵</span><a href="/system/{{ s.id}}">{{ s.display_name }}</a></div>
+        <div class="tree">
+            <div class="tree_level">
+                <div class="tree_header"><span class="tree_icon">▸</span><a href="/system/{{ s.id}}">{{ s.display_name }}</a></div>
+                <div class="tree_level">
+                    <div class="tree_header"><span class="tree_icon"> </span><span>{{s.gateway.address}}</span></div>
+                    <div class="tree_level">
+                        <div class="tree_header"><span class="tree_icon"> </span><span>{{s.gateway.port}}</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
         {% endfor %}
     </body>
 </html>

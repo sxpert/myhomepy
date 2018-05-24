@@ -1,8 +1,41 @@
-.tree_arrow {
+html {
+    --tree-line-wh: 22px;
+}
+.tree {
+    position: relative;
+    display: inline-block;
+    width: 200pt;
+    line-height: var(--tree-line-wh);
+    font-family: sans-serif;
+    font-size: 10pt;
+}
+.tree_level {
+    position: relative;
+    display: block;
+    width: 100%;
+/*
+    padding-left: var(--tree-line-wh);
+*/
+}
+.tree_level > .tree_level {
+    margin-left: var(--tree-line-wh);
+}
+.tree_header {
+    position: relative;
+    display: block;
+    height: var(--tree-line-wh);
+    left: 0pt;
+    width: 100%;
+}
+.tree_icon {
+    font-family: sans-serif;
     display: inline-block;
     text-align: center;
-    height: 16pt;
-    width: 16pt;
+    vertical-align: middle;
+    font-size: 10pt;
+    height: var(--tree-line-wh);
+    width: var(--tree-line-wh);
+    margin-right: calc(var(--tree-line-wh) / 4);
     color: gray;
     cursor: default;
 }

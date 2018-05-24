@@ -143,7 +143,8 @@ class System(object):
                              'can\'t send message %s'
                              % (str(self._task), str(msg)))
                     return False
-                res = dispatch(msg)
+                if callable(dispatch):
+                    res = dispatch(msg)  # pylint: disable=E1102
             else:
                 res = None
 
