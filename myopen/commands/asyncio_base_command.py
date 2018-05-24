@@ -27,8 +27,11 @@ class BaseCommand(object):
         self.log('BaseCommand.dispatch %s' % (str(pkt)))
         msg = Message(pkt, self.system)
         msg.parse()
+        self.log('BaseCommand.dispatch : message parsed')
         if self.msg_handler is not None:
-            return self.msg_handler(msg)
+            self.log('BaseCommand.dispatch : calling handler')
+            return self.msg_handler(msg)  # pylint: disable=E1102
+        self.log('BaseCommand.dispatch : default system handler')
         return self.default_msg_handler(msg)
 
     def default_msg_handler(self, msg):

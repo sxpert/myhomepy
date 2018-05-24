@@ -180,6 +180,8 @@ class System(object):
         self.monitor = self.gateway
         self.gateway.setup_async()
         asyncio.ensure_future(self.run_tasks(), loop=self.async_loop)
+        from myopen.commands.asyncio_get_gateway_info import GetGatewayInfo
+        self.push_task(GetGatewayInfo)        
         if len(self.devices) == 0:
             from myopen.commands.asyncio_cmd_scan_aid import CmdScanAid
             self.push_task(CmdScanAid)

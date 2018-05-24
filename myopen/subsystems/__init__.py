@@ -30,6 +30,9 @@ SubSystems = [Lighting,
               DiagTempControl,
               DiagGateway, ]
 
+TX_CMD_REQ_GATEWAY_MODEL = "*#13**15##"
+TX_CMD_REQ_GATEWAY_FW_VERSION = "*#13**16##"
+
 TX_CMD_SCAN_SYSTEM = "*#[who]*0*13##"
 TX_CMD_DIAG_ABORT = "*[who]*6*0##"
 TX_CMD_DIAG_ID = "*[who]*10#[id]*0##"

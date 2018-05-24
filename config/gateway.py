@@ -169,8 +169,7 @@ class Gateway(object):
                 if self.system.is_cmd_busy:
                     handled = self.system.dispatch_message(data)
                 if not handled:
-                    msg, _ = data
-                    m = Message(msg, self)
+                    m = Message(data, self)
                     m.dispatch()
 
     # ------------------------------------------------------------------------

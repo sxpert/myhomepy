@@ -1,9 +1,10 @@
-from core.logger import *
-from myopen.asyncio_connection import *
+from core.logger import LOG_ERROR
 from myopen.devices import BaseDevice
-from myopen.subsystems import *
+from myopen.subsystems import (TX_CMD_DIAG_ABORT, TX_CMD_DIAG_ID,
+                               TX_CMD_PARAM_ALL_KO, DiagScannable,
+                               find_diag_subsystem, replace_in_command)
 
-from .asyncio_base_command import *
+from .asyncio_base_command import BaseCommand
 
 __all__ = ['CmdDiagAid']
 
@@ -69,7 +70,7 @@ class CmdDiagAid(BaseCommand):
 
     def read_base_device_config(self, msg):
         self.log(msg)
-        if msg.conn is MODE_COMMAND:
+        if msg.is_conn_command:
             if msg.is_ack:
                 self.log('Got the ACK on command socket')
                 return True
@@ -89,13 +90,13 @@ class CmdDiagAid(BaseCommand):
         """
         self.log(msg)
         if msg.name == 'RES_PARAM_KO':
-            if msg.conn is MODE_COMMAND:
+            if msg.is_conn_command:
                 # handle the messages from the command socket
                 return False
             # pretend those from the monitor socket are handled
             return True
         # let the rest handle itself
-        if msg.conn is MODE_COMMAND:
+        if msg.is_conn_command:
             if msg.is_ack:
                 self.end_diag()
         return False
@@ -109,8 +110,10 @@ class CmdDiagAid(BaseCommand):
         self.send(cmd)
 
     def wait_for_ack(self, msg):
-        if msg.conn is MODE_COMMAND:
+        if msg.is_conn_command:
             if msg.is_ack:
                 return self.end()
             self.log('Unexpected messsge %s' % (str(msg)))
+            # fall down
+        self.end()
         return False

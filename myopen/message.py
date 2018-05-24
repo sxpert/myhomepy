@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import re
-from core.logger import *
+from core.logger import LOG_ERROR
 from .subsystems import find_subsystem
+from .asyncio_connection import MODE_COMMAND, MODE_MONITOR
 
 
 class Message(object):
@@ -11,6 +12,7 @@ class Message(object):
     MSG_COMMAND = 2
     MSG_STATUS = 3
     MSG_TYPES = ['NACK', 'ACK', 'COMMAND', 'STATUS', ]
+    CNX_NAMES = ['CMD_CNX', 'MON_CNX', ]
 
     def __init__(self, msg=None, source=None):
         from config.gateway import Gateway
@@ -75,6 +77,8 @@ class Message(object):
         s = '<%s' % (self.__class__.__name__)
         if self._type is not None:
             s += ' %s' % (self.MSG_TYPES[self._type])
+        if self._conn is not None:
+            s += ' %s' % (self.CNX_NAMES[self._conn])
         if self._sc is not None:
             s += ' %s' % (self._sc.__name__)
         if self._name is not None:
@@ -91,6 +95,14 @@ class Message(object):
     @property
     def is_status(self):
         return self._type == self.MSG_STATUS
+
+    @property
+    def is_conn_command(self):
+        return self._conn == MODE_COMMAND
+
+    @property
+    def is_conn_monitor(self):
+        return self._conn == MODE_MONITOR
 
     @property
     def is_ack(self):
@@ -186,7 +198,7 @@ class Message(object):
         else:
             # ver is unknown
             self.log('Message._parse : expected an int for ver, got %s'
-                     (str(ver)))
+                     % (str(ver)), LOG_ERROR)
             return False
         return True
 

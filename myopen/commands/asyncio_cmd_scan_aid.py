@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-from myopen.subsystems import *
+#from myopen.asyncio_connection import *
+from myopen.subsystems import (TX_CMD_RESET, TX_CMD_SCAN_SYSTEM,
+                               find_scannable, replace_in_command)
 
-from .asyncio_base_command import *
-from myopen.asyncio_connection import *
+from .asyncio_base_command import BaseCommand
 
 __all__ = ['CmdScanAid']
 
@@ -37,7 +38,7 @@ class CmdScanAid(BaseCommand):
         self.send(cmd)
 
     def send_next_scan_command(self, msg):
-        if msg.conn is MODE_COMMAND:
+        if msg.is_conn_command:
             if msg.is_ack:
                 subsystem = self.scannable[self.current]
                 who = subsystem.SYSTEM_WHO
@@ -55,7 +56,7 @@ class CmdScanAid(BaseCommand):
         return False
 
     def receive_device_id(self, msg):
-        if msg.conn is MODE_MONITOR:
+        if msg.is_conn_monitor:
             self.log('CmdScanAid.receive_device_id : monitor %s' % (str(msg)))
             if msg.name == 'DIAG_RES_ID':
                 # pretend those are handled
@@ -72,7 +73,7 @@ class CmdScanAid(BaseCommand):
         return True
 
     def receive_end_ack(self, msg):
-        if msg.conn is MODE_MONITOR:
+        if msg.is_conn_monitor:
             return False
         if msg.is_ack:
             return self.end()
