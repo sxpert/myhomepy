@@ -3,7 +3,7 @@
 import asyncio
 
 import database
-from core.logger import *
+from core.logger import LOG_INFO, LOG_ERROR
 
 from . import callbacks, gateway
 
