@@ -53,21 +53,22 @@ class Message(object):
             self._type = self.MSG_ACK
             return
         # analyze the content of messages passed from the layer 1
-        m = re.match(r'^\*(?P<who>\d+)(?P<msg>\*.*)', self._str)
-        if m is not None:
+        m1 = re.match(r'^\*(?P<who>\d+)(?P<msg>\*.*)', self._str)
+        m2 = re.match(r"^\*#(?P<who>\d+)(?P<msg>\*.*)", self._str)
+        if m1 is not None:
             self._type = self.MSG_COMMAND
-        else:
-            m = re.match(r"^\*#(?P<who>\d+)(?P<msg>\*.*)", self._str)
-            if m is not None:
-                self._type = self.MSG_STATUS
+            m = m1
+        if m2 is not None:
+            self._type = self.MSG_STATUS
+            m = m2
         msg = self._str
         if self._type is not None:
             who, self._msg = m.groups()
             self._who = int(who)
             # we're done here
             return
-        else:
-            msg = 'Unknown first character in message '+msg
+        # else...
+        msg = 'Unknown first character in message '+msg
         # log something
         import inspect
         func = inspect.currentframe().f_code.co_name
@@ -139,6 +140,10 @@ class Message(object):
 
         if not self._parsed:
             self._sc = find_subsystem(self._who)
+            if self._sc is None:
+                self.log('Message.parse : no appropriate subsystem to parse %s' % str(self))
+                return False
+
             if self._sc is not None:
                 self.subsystem = self._sc(self.system)
                 self._fi = self.subsystem.parse(self)
@@ -147,14 +152,13 @@ class Message(object):
                 _sc_name = ''
                 if self._sc is not None:
                     _sc_name = '%s ' % self._sc.__name__
-                msg = "UNHANDLED %s message \'%s\' %s\'%s\'" % \
-                      (self.type_name,
-                       str(self._who),
-                       _sc_name,
-                       self._msg)
+                msg = "Message.parse : No regexp found to parse %s message \'%s\' %s\'%s\'" % \
+                      (self.type_name, str(self._who), _sc_name, self._msg)
                 self.log(msg, LOG_ERROR)
+                return False
 
             self._parsed = True
+        # at this point, self._parsed should always be True
         if self._parsed:
             self._parse()
         return self._parsed
