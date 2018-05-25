@@ -1,0 +1,10 @@
+{% block devices_tree %}
+<div class="tree_header"><span class="tree_arrow">▸</span><img 
+    src="/static/images/" class="tree_icon"/><span class="tree_item" 
+    id="system-{{ s.id }}-devices">devices</span></div>
+<div class="tree_level">{% for serial, device in s.devices.items() %}
+    <div class="tree_header"><div class="tree_header"><span class="tree_icon"
+        ></span><span class="tree_item">dev : {{ serial }} : {{ device.MODEL_ID }}</span></div>
+    {% endfor %}
+</div>
+{% endblock %}

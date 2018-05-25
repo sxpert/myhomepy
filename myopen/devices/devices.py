@@ -58,11 +58,26 @@ class Devices(object):
         return self._devs.keys()
 
     def __len__(self):
-        return len(self._devs)
+        l = len(self._devs)
+        self.log('requested length %d returned' % l, LOG_ERROR)
+        return l
 
     def __getitem__(self, key):
+        self.log('requested item with key %s %s' % (str(type(key)), str(key)), LOG_ERROR)
+        if isinstance(key, int):
+            keys = sorted(self._devs.keys())
+            self.log(keys, LOG_ERROR)
+            if key in range(0, len(keys)):
+                return self._devs[keys[key]]
+            raise KeyError
         return self._devs[key]
 
+    def __iter__(self):
+        return self._devs.__iter__()
+    
+    def items(self):
+        return self._devs.items()
+                
     def __setitem__(self, key, item):
         self._devs[key] = item
 
