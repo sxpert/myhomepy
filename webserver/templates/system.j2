@@ -5,6 +5,7 @@
         /><span  class="tree_item" id="system-{{ s.id }}">{{ s.display_name }}</a></div>
     <div class="tree_level">
         {% include 'gateway.j2' %}{% block gateway_tree %}{% endblock %}
+        <div><a href="/actions/all_off?system_id={{ s.id }}">ALL LIGHTS OFF</a></div>
     </div>
 </div>
 {% endblock %}

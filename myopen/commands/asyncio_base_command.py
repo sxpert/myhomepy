@@ -6,12 +6,13 @@ __all__ = ['BaseCommand']
 
 class BaseCommand(object):
 
-    def __init__(self, system, params=None):
+    def __init__(self, system, params=None, callback=None):
         self.system = system
         self.log = system.log
         self.msg_handler = None
         self._ended = False
         self.params = params
+        self.callback = callback
 
     @property
     def is_done(self):
@@ -42,4 +43,8 @@ class BaseCommand(object):
     def end(self):
         self._ended = True
         self.log('BaseCommand.end %s' % (str(self._ended)))
+        if self.callback is not None and callable(self.callback):
+            self.log('BaseCommand.end : calling callback %s' % str(self.callback))
+            self.callback(logger=self.log)
+            self.log('BaseCommand.end : callback done')
         return True

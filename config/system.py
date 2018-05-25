@@ -126,7 +126,8 @@ class System(object):
             taskcls = self._task.get('task', None)
             if issubclass(taskcls, BaseCommand):
                 params = self._task.get('params', None)
-                self._task = taskcls(self, params)
+                callback = self._task.get('callback', None)
+                self._task = taskcls(self, params, callback)
                 self._task.start()
             else:
                 self.log('System.run_tasks: Invalid task ERROR %s'
@@ -162,7 +163,8 @@ class System(object):
         if self.has_task_queue:
             taskinfo = {
                 'task': task,
-                'params': params
+                'params': params,
+                'callback': callback
             }
             self.log('new task %s' % (str(taskinfo)))
             return self.task_queue.put_nowait(taskinfo)
