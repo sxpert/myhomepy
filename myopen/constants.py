@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+CONST_DEVICE_ICON = 'device_icon.png'
+
 MIN_SLOTS = 1
 MAX_SLOTS = 32
 
@@ -26,6 +28,7 @@ SLOT_VAR_STATE = 'state'
 SLOT_VAR_SYS = 'sys'
 
 VAR_DEVICE_SYSTEM = 'DEVICE_SYSTEM'
+VAR_ICON = 'ICON'
 VAR_KOS = 'KOS'
 VAR_MODE_IDS = 'MODE_IDS'
 VAR_MODEL_ID = 'MODEL_ID'

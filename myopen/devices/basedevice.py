@@ -6,6 +6,7 @@ import threading
 from core.logger import LOG_ERROR, LOG_DEBUG
 from myopen.subsystems import DiagScannable, find_subsystem
 from myopen.constants import (
+    CONST_DEVICE_ICON, VAR_ICON,
     VAR_SYSTEM_DIAG_WHO, VAR_SYSTEM_NAME, VAR_MODEL_ID,
     VAR_SLOTS, VAR_DEVICE_SYSTEM,)
 from .slots import (
@@ -185,6 +186,18 @@ class BaseDevice(object):
             return '%sid: %s>' % \
                    (_class, Devices.format_hw_addr(self._hw_addr))
         return '%sINVALID>' % (_class)
+
+    # ========================================================================
+    #
+    # web frontend related functionnality
+    #
+    # ========================================================================
+
+    def icon(self):
+        icon = getattr(self, VAR_ICON, None)
+        if icon is None:
+            return CONST_DEVICE_ICON
+        return icon
 
     # ========================================================================
     #

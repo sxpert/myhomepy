@@ -26,6 +26,7 @@ html {
     height: var(--tree-line-wh);
     left: 0pt;
     width: 100%;
+    margin-bottom: 2pt;
 }
 .tree_arrow {
     font-family: sans-serif;
