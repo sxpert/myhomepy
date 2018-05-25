@@ -12,18 +12,26 @@ Main application module
 import asyncio
 import logging
 import re
+from socket import gaierror
 
 from config.config import Config
 from core.logger import SYSTEM_LOGGER, LOG_ERROR, LOG_INFO, LOG_DEBUG
 
 
 class Automator(object):
+    def exception_handler(self, loop, context):
+        exc = context['exception']
+        if exc.__class__ in (TimeoutError, gaierror, ):
+            return
+        print(context)
+
     def run(self):
         SYSTEM_LOGGER.level = LOG_INFO
         SYSTEM_LOGGER.logfile = 'myopen.log'
         self.loop = asyncio.get_event_loop()
         logging.basicConfig(level=logging.DEBUG)
         self.loop.set_debug(False)
+        self.loop.set_exception_handler(self.exception_handler)
         self.config = Config(self, loop=self.loop)
         self.config.run()
         try:

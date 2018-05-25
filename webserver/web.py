@@ -83,6 +83,7 @@ class WebServer(object):
         from aiohttp_session.cookie_storage import EncryptedCookieStorage
         self.sessions = EncryptedCookieStorage(self.b64_key)
         setup(self.app, self.sessions)
+        print('sessions setup')
 
     def setup_jinja2(self):
         import aiohttp_jinja2
@@ -90,6 +91,7 @@ class WebServer(object):
         templates = os.path.join(self.path, 'templates')
         loader = jinja2.FileSystemLoader(templates)
         aiohttp_jinja2.setup(self.app, loader=loader)
+        print('jinja2 setup')
 
     # self.web.register_routes(
     #     [
@@ -114,6 +116,7 @@ class WebServer(object):
 
         static = os.path.join(self.path, 'static')
         self.app.router.add_static('/static/', path=static, name='static')
+        print('routes setup')
 
     async def start(self):
         self.runner = web.AppRunner(self.app)
