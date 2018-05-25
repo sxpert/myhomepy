@@ -118,12 +118,21 @@ class WebServer(object):
     async def start(self):
         self.runner = web.AppRunner(self.app)
         await self.runner.setup()
+        # TODO: add ssl_context here
         self.site = web.TCPSite(self.runner, self.address, self.port)
         await self.site.start()
         print('------ serving on %s:%d ------' % (self.address, self.port))
         print('session key', self.b64_key)
+        print('site url : ', self.site.name)
+
+    async def stop(self):
+        await self.site.stop()
+        await self.runner.cleanup()
+        await self.loop.shutdown_asyncgens()
 
     def run(self):
+        import logging
+        logging.basicConfig(level=logging.DEBUG)
         self.app = web.Application(loop=self.loop, debug=True)
         self.app['config'] = self.config
         self.setup_sessions()
