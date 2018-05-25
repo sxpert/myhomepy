@@ -120,8 +120,7 @@ class WebServer(object):
         await self.runner.setup()
         self.site = web.TCPSite(self.runner, self.address, self.port)
         await self.site.start()
-        print('------ serving on %s:%d ------'
-              % (self.address, self.port))
+        print('------ serving on %s:%d ------' % (self.address, self.port))
         print('session key', self.b64_key)
 
     def run(self):
