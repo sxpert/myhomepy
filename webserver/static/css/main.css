@@ -65,3 +65,6 @@ html {
 .tree-item {
     cursor: pointer;
 }
+#main-content {
+    outline: 1px solid red;
+}

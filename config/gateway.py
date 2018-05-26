@@ -44,6 +44,20 @@ class Gateway(object):
         self.system = system
         self.log = system.log
 
+    @property
+    def display_name(self):
+        name = getattr(self, '_name', None)
+        if name is None:
+            return self.address
+        return name
+
+    @property
+    def model(self):
+        model = getattr(self, '_model', None)
+        if model is None:
+            return "F454"
+        return model
+
     def loads(self, data):
         if type(data) is not dict:
             self.log("ERROR loading Gateway, dictionnary expected")

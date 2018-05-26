@@ -111,7 +111,11 @@ class WebServer(object):
         self.app.router.add_post('/login', decorators.login)
 
         self.app.router.add_view('/', views.Index, name='index')
-        self.app.router.add_view('/actions/all_off', views.api.actions.AllOff,
+        self.app.router.add_view('/api/get-systems-list', 
+                                 views.api.get_systems_list.GetSystemList,
+                                 name='get-systems-list')
+        self.app.router.add_view('/actions/all_off', 
+                                 views.api.actions.AllOff,
                                  name='actions_all-off')
 
         static = os.path.join(self.path, 'static')
@@ -134,8 +138,6 @@ class WebServer(object):
         await self.loop.shutdown_asyncgens()
 
     def run(self):
-        import logging
-        logging.basicConfig(level=logging.DEBUG)
         self.app = web.Application(loop=self.loop, debug=True)
         self.app['config'] = self.config
         self.setup_sessions()
