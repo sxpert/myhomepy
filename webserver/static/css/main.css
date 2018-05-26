@@ -15,13 +15,8 @@
 .tree-item > .tree {
     margin-left: var(--tree-line-wh);
 }
-.tree-header {
-    position: relative;
-    display: block;
-    height: var(--tree-line-wh);
-    left: 0pt;
-    width: 100%;
-    margin-bottom: 2pt;
+.tree-header:hover {
+    background-color: #eee;
 }
 .tree-arrow {
     font-family: sans-serif;

@@ -32,6 +32,7 @@ export class TreeItem {
         this.icon = icon;
         this.items = new Array();
         this.dom_element = null;
+        this.de_header = null;
         this.de_arrow = null;
         this.de_icon = null;
         this.de_label = null;
@@ -89,13 +90,17 @@ export class TreeItem {
             // create the dom element
             var el = document.createElement('div');
             el.classList.add('tree-item');
+            this.de_header = document.createElement('div');
+            this.de_header.classList.add('tree-header');
+
             this.de_arrow = document.createElement('img');
             this.de_arrow.classList.add('tree-arrow');
             this.de_arrow.addEventListener('click', function() {
                 tree.toggle_tree() 
             });
             this.de_arrow.src = this.get_arrow_icon();
-            el.appendChild(this.de_arrow);
+            this.de_header.appendChild(this.de_arrow);
+            
             this.de_icon = document.createElement('img');
             this.de_icon.classList.add('tree-icon');
             var icon = gen_image_link(this.get_icon());
@@ -103,13 +108,16 @@ export class TreeItem {
                 icon = gen_image_link('blank');
             }
             this.de_icon.src = icon;
-            el.appendChild(this.de_icon);
+            this.de_header.appendChild(this.de_icon);
+            
             this.de_label = document.createElement('span');
             this.de_label.textContent = this.label;
+            this.de_header.appendChild(this.de_label);
             if (this.on_click_func !== null) {
-                this.de_label.addEventListener('click', this.on_click_func);
+                this.de_header.addEventListener('click', this.on_click_func);
             }
-            el.appendChild(this.de_label);
+            el.appendChild(this.de_header);
+
             this.de_items = document.createElement('div');
             this.de_items.classList.add('tree');
             if (!this.open) {
@@ -130,8 +138,8 @@ export class TreeItem {
     };
     on_click(func) {
         this.on_click_func = func
-        if (this.de_label !== null) {
-            this.de_label.addEventListener('click', func)
+        if (this.de_header !== null) {
+            this.de_header.addEventListener('click', func)
         } 
     }
 }
