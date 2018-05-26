@@ -14,7 +14,6 @@ class TreeControl {
         if (item !== null){
             this.items.push(item);
             var element = item.get_dom_element();
-            console.log(element);
             this.get_dom_element().appendChild(element);
         }
     }
@@ -36,6 +35,7 @@ class TreeItem {
         this.de_arrow = null;
         this.de_icon = null;
         this.de_label = null;
+        this.on_click_func = null;
         this.de_items = null;
         this.open = false;
     };
@@ -43,8 +43,17 @@ class TreeItem {
         if (item !== null) {
             this.items.push(item);
             this.update_arrow();
+            if (this.de_items === null) {
+                this.get_dom_element();
+            }
+            var el = item.get_dom_element()
+            this.de_items.appendChild(el);
         }
     };
+    empty() {
+        this.items = new Array();
+        this.de_items.innerHTML='';
+    }
     get_arrow_icon() {
         if (this.items.length > 0) {
             if (this.open) {
@@ -97,6 +106,9 @@ class TreeItem {
             el.appendChild(this.de_icon);
             this.de_label = document.createElement('span');
             this.de_label.textContent = this.label;
+            if (this.on_click_func !== null) {
+                this.de_label.addEventListener('click', this.on_click_func);
+            }
             el.appendChild(this.de_label);
             this.de_items = document.createElement('div');
             this.de_items.classList.add('tree');
@@ -116,6 +128,12 @@ class TreeItem {
     set_icon(icon) {
         console.log('TreeItem::set_icon', icon);
     };
+    on_click(func) {
+        this.on_click_func = func
+        if (this.de_label !== null) {
+            this.de_label.addEventListener('click', func)
+        } 
+    }
 }
 
 class Gateway {
@@ -126,13 +144,36 @@ class Gateway {
     };
     get_tree_item() {
         if (this.tree_item === null) {
-            this.tree_item = new TreeItem(this.display_name, this.model);
+            var item = new TreeItem(this.display_name, this.model);
+            this.tree_item = item;
         }
         return this.tree_item;
     }
 }
 
-
+class Device {
+    constructor(devices, data) {
+        this.tree_item = null;
+        this.devices = devices;
+        this.label = data.id;
+        this.icon = data.icon;
+    };
+    get_tree_item() {
+        if (this.tree_item === null) {
+            var item = new TreeItem(this.label, this.icon);
+            var device = this;
+            var click_func = function() {
+                device.click();
+            }
+            item.on_click(click_func);
+            this.tree_item = item;
+        }
+        return this.tree_item;
+    };
+    click() {
+        console.log(this.label, 'clicked')
+    }
+}
 
 class Devices {
     constructor(system) {
@@ -147,7 +188,6 @@ class Devices {
             this.tree_item = item;
             get_json('/api/get-system-devices?system_id='+this.system.system_id,
                 function(data) {
-                    console.log(data);
                     if (data.ok !== undefined && data.ok === true) {
                         devices.update_device_list(data);
                     }
@@ -156,8 +196,17 @@ class Devices {
         return this.tree_item;
     }
     update_device_list(devices){
-        console.log(this);
-        console.log(devices);
+        if ((devices.ok !== undefined) && (devices.ok)){
+            devices = devices.devices;
+            this.devices = [];
+            this.tree_item.empty()
+            devices.forEach(data => {
+                var device = new Device(this, data);
+                this.devices.push(device);
+                var elem = device.get_tree_item();
+                this.tree_item.append_item(elem);
+            });
+        }
 
     }
 }
@@ -165,7 +214,6 @@ class Devices {
 class System {
     constructor(system) {
         this.tree_item = null;
-        console.log(system)
         this.system_id = system.id;
         this.display_name = system.display_name;
         this.gateway = new Gateway(system.gateway)
