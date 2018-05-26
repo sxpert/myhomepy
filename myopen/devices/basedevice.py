@@ -193,6 +193,7 @@ class BaseDevice(object):
     #
     # ========================================================================
 
+    @property
     def icon(self):
         icon = getattr(self, VAR_ICON, None)
         if icon is None:

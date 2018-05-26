@@ -111,9 +111,18 @@ class WebServer(object):
         self.app.router.add_post('/login', decorators.login)
 
         self.app.router.add_view('/', views.Index, name='index')
+        #
+        # API for the website
+        #
         self.app.router.add_view('/api/get-systems-list', 
                                  views.api.get_systems_list.GetSystemList,
                                  name='get-systems-list')
+        self.app.router.add_view('/api/get-system-devices', 
+                                 views.api.get_system_devices.GetSystemDevices,
+                                 name='get-system-devices')
+        #
+        # web-accessible actions
+        #
         self.app.router.add_view('/actions/all_off', 
                                  views.api.actions.AllOff,
                                  name='actions_all-off')

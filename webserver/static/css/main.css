@@ -9,7 +9,7 @@ html {
     font-family: sans-serif;
     font-size: 10pt;
 }
-.tree-level {
+.tree-item {
     position: relative;
     display: block;
     width: 100%;
@@ -17,7 +17,7 @@ html {
     padding-left: var(--tree-line-wh);
 */
 }
-.tree-level > .tree-level {
+.tree-item > .tree {
     margin-left: var(--tree-line-wh);
 }
 .tree-header {

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-CONST_DEVICE_ICON = 'device_icon.png'
+CONST_DEVICE_ICON = 'device'
 
 MIN_SLOTS = 1
 MAX_SLOTS = 32
