@@ -1,10 +1,9 @@
 {% block system_tree %}
-<div class="tree_level">
-    <div class="tree_header"><span class="tree_arrow"
-        >▸</span><img src="/static/images/house_icon.png" class="tree_icon"
-        /><span  class="tree_item" id="system-{{ s.id }}">{{ s.display_name }}</a></div>
-    <div class="tree_level">
-        <div class="tree_header"><a href="/actions/all_off?system_id={{ s.id }}">ALL LIGHTS OFF</a></div>
+<div class="tree-level">
+    <div class="tree-header"><span class="tree-arrow">▸</span><img src="/static/images/house_icon.png" 
+        class="tree-icon"/><span  class="tree-item" id="system-{{ s.id }}">{{ s.display_name }}</a></div>
+    <div class="tree-level">
+        <div class="tree-header"><a href="/actions/all_off?system_id={{ s.id }}">ALL LIGHTS OFF</a></div>
         {% include 'gateway.j2' %}{% block gateway_tree %}{% endblock %}
         {% include 'devices.j2' %}{% block devices_tree %}{% endblock %}
     </div>

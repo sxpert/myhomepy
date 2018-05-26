@@ -9,7 +9,7 @@ html {
     font-family: sans-serif;
     font-size: 10pt;
 }
-.tree_level {
+.tree-level {
     position: relative;
     display: block;
     width: 100%;
@@ -17,10 +17,10 @@ html {
     padding-left: var(--tree-line-wh);
 */
 }
-.tree_level > .tree_level {
+.tree-level > .tree-level {
     margin-left: var(--tree-line-wh);
 }
-.tree_header {
+.tree-header {
     position: relative;
     display: block;
     height: var(--tree-line-wh);
@@ -28,7 +28,7 @@ html {
     width: 100%;
     margin-bottom: 2pt;
 }
-.tree_arrow {
+.tree-arrow {
     font-family: sans-serif;
     display: inline-block;
     text-align: center;
@@ -40,7 +40,7 @@ html {
     color: black;
     cursor: pointer;
 }
-.tree_blank {
+.tree-blank {
     font-family: sans-serif;
     display: inline-block;
     text-align: center;
@@ -50,7 +50,7 @@ html {
     width: var(--tree-line-wh);
     margin: 0;
 }
-.tree_icon {
+.tree-icon {
     font-family: sans-serif;
     display: inline-block;
     text-align: center;
@@ -62,6 +62,6 @@ html {
     color: gray;
     cursor: pointer;
 }
-.tree_item {
+.tree-item {
     cursor: pointer;
 }

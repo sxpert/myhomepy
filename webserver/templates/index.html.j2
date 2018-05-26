@@ -1,13 +1,13 @@
 <html>
     <head>
         <title>Automator</title>
-        <link rel="stylesheet" href="/static/main.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+        <script src="/static/js/main.js"></script>
     </head>
     <body>
         <div>systems list</div>
-        <div class="tree">{% for s in systems %}
+        <div id="object-tree" class="tree">{% for s in systems %}
         {% include 'system.j2' %}{% block system_tree %}{% endblock %}
         {% endfor %}</div>
-        
     </body>
 </html>
