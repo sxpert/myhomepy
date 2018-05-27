@@ -1,0 +1,24 @@
+.device-config {
+    font-family: sans-serif;
+}
+.device-config-header {
+    margin-bottom: 10pt;
+}
+.device-config-icon {
+    height: 64px;
+    width: 64px;
+}
+.device-config-caption {
+    display: inline-block;
+    vertical-align: top;
+}
+.device-config-name {
+    font-size: 18pt;
+    color: #bbb;
+}
+.device-config-description {
+    width: 800px;
+    height: 150px;
+    border: 1px solid #ccc;
+    margin-bottom: 10pt;
+}

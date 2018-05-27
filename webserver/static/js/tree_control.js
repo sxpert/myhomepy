@@ -1,6 +1,4 @@
-function gen_image_link(item) {
-    return '/static/images/'+item+'_icon.png';
-}
+import * as utilities from './utilities.js'
 
 export class TreeControl {
     // this TreeControl contains multiple TreeItem
@@ -58,12 +56,12 @@ export class TreeItem {
     get_arrow_icon() {
         if (this.items.length > 0) {
             if (this.open) {
-                return gen_image_link('arrow-open');
+                return utilities.gen_image_link('arrow-open');
             } else {
-                return gen_image_link('arrow-closed');
+                return utilities.gen_image_link('arrow-closed');
             }
         } else {
-            return gen_image_link('blank');
+            return utilities.gen_image_link('blank');
         }
     };
     get_icon() {
@@ -103,9 +101,9 @@ export class TreeItem {
             
             this.de_icon = document.createElement('img');
             this.de_icon.classList.add('tree-icon');
-            var icon = gen_image_link(this.get_icon());
+            var icon = utilities.gen_image_link(this.get_icon());
             if (icon === null) {
-                icon = gen_image_link('blank');
+                icon = utilities.gen_image_link('blank');
             }
             this.de_icon.src = icon;
             this.de_header.appendChild(this.de_icon);

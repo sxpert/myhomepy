@@ -37,8 +37,12 @@ export class Device {
     click() {
         console.log(this.label, 'clicked')
         var device = this;
-        ajax.get_json('/api/get-device-data?system_id='+this.devices.system.system_id+
-            '&device_id='+this.id,
+        var url = '/api/get-device-data?system_id='+
+            this.devices.system.system_id+
+            '&device_id='+
+            this.id;
+        console.log(url);
+        ajax.get_json(url,
             function(data) {
                 if (data.ok !== undefined && data.ok === true) {
                     console.log('success', data);
@@ -65,6 +69,8 @@ export class Device {
             return console.log('unable to find config page for model '+dev.subsystem+'.'+dev.model_id);
         if (this.config_page===null)
             this.config_page = new dev_config.Device_Config_Page('main-content');
+        data.icon = this.icon;
+        data.id = this.id;
         this.device = new device_class(data, this.config_page);
     };
 }

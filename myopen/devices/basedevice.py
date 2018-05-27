@@ -227,12 +227,14 @@ class BaseDevice(object):
         self._description = value
 
     @property
-    def brand_name(self):
-        return ''
+    def brand_id(self):
+        brand_id = self._brand_id
+        brand = self.BRANDS[brand_id]
+        return brand['id']
 
     @property
     def product_line(self):
-        return ''
+        return self._product_line
 
     @property
     def model_id(self):
@@ -256,7 +258,7 @@ class BaseDevice(object):
         data = {}
         data['name'] = self.name
         data['description'] = self.description
-        data['brand_name'] = self.brand_name
+        data['brand_id'] = self.brand_id
         data['product_line'] = self.product_line
         data['subsystem'] = self.dump_subsystem()
         data['model_id'] = self.model_id
