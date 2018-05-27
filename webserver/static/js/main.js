@@ -2,17 +2,26 @@ import * as ajax from './ajax.js';
 import * as tree from './tree_control.js';
 
 class Gateway {
-    constructor(gateway) {
+    constructor(system, gateway) {
         this.tree_item = null;
+        this.system = system;
         this.display_name = gateway.display_name;
         this.model = gateway.model;
     };
     get_tree_item() {
         if (this.tree_item === null) {
             var item = new tree.TreeItem(this.display_name, this.model);
+            var gateway = this;
+            var click_func = function() {
+                gateway.click();
+            }
+            item.on_click(click_func);
             this.tree_item = item;
         }
         return this.tree_item;
+    };
+    click() {
+        console.log('gateway for system #'+this.system.system_id+' clicked');
     }
 }
 
@@ -81,7 +90,7 @@ class System {
         this.tree_item = null;
         this.system_id = system.id;
         this.display_name = system.display_name;
-        this.gateway = new Gateway(system.gateway)
+        this.gateway = new Gateway(this, system.gateway)
         this.devices = new Devices(this);
     }
     get_tree_item() {
