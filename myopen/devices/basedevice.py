@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
-import threading
+import asyncio
 
 from core.logger import LOG_ERROR, LOG_DEBUG
 from myopen.subsystems import DiagScannable, find_subsystem
@@ -115,7 +115,6 @@ class BaseDevice(object):
             # get the right class of device
             subsystem = find_subsystem(sys_diag_who)
         self.subsystem = subsystem
-        self._discovery_lock = threading.RLock()
         self._discovery = False
         self._error = not self.update_base_data(params)
         self.slots = Slots(self)
@@ -125,15 +124,12 @@ class BaseDevice(object):
         Pushes the device to be discovered.
         Makes sure we only push it once
         """
-        self._discovery_lock.acquire()
         if self.devices is None:
             self.log('devices is None', LOG_ERROR)
-            self._discovery_lock.release()
             return False
 
         if self._discovery:
             self.log('already set for discovery', LOG_ERROR)
-            self._discovery_lock.release()
             return False
 
         self._discovery = True
@@ -154,7 +150,6 @@ class BaseDevice(object):
         else:
             self.log('BaseDevice.queue_for_discovery : '
                      'no main loop, not doing anything')
-        self._discovery_lock.release()
 
     def update_base_data(self, params):
         self._virt_id = params.get('virt_id', None)
@@ -440,25 +435,15 @@ class BaseDevice(object):
 
     def find_device_class(self, model_id):
         from . import DeviceTypes
-        self.log('find_device_class %d' % (model_id), LOG_DEBUG)
         for dt in DeviceTypes:
-            self.log('    1. looking for %s' % (VAR_DEVICE_SYSTEM), LOG_DEBUG)
             mss = getattr(dt, VAR_DEVICE_SYSTEM, None)
             if mss is None:
                 continue
-            self.log('    2. found %s' % (str(mss)), LOG_DEBUG)
-            self.log('    3. looking for %s' % (VAR_MODEL_ID), LOG_DEBUG)
             mid = getattr(dt, VAR_MODEL_ID, None)
             if mid is None:
                 continue
-            self.log('    4. found %s' % (str(mid)), LOG_DEBUG)
-            self.log('    5. checking for a match with (%s, %d)'
-                     % (str(self.subsystem), model_id), LOG_DEBUG)
             if mss is self.subsystem and mid == model_id:
-                self.log('    6. found %s' % (str(dt)), LOG_DEBUG)
                 return dt
-            self.log('    7. NOT found', LOG_DEBUG)
-        self.log('FAILED', LOG_DEBUG)
         return None
 
     def res_object_model(self, virt_id, model_id,
