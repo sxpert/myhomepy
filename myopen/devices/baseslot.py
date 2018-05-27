@@ -30,6 +30,28 @@ class BaseSlot(object):
 
     # ========================================================================
     #
+    # front-end related
+    #
+    # ========================================================================
+
+    @property
+    def slot_options(self):
+        return {}
+
+    @property
+    def web_data(self):
+        slot = {}
+        values = self._values.copy()
+        if '_source' in values.keys():
+            del(values['_source'])
+        slot['values'] = values
+        params = self._params.copy()
+        if len(params) > 0:
+            slot['params'] = self._params
+        return slot
+
+    # ========================================================================
+    #
     # json loading and generating functions
     #
     # ========================================================================

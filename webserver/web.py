@@ -120,6 +120,9 @@ class WebServer(object):
         self.app.router.add_view('/api/get-system-devices', 
                                  views.api.get_system_devices.GetSystemDevices,
                                  name='get-system-devices')
+        self.app.router.add_view('/api/get-device-data', 
+                                 views.api.get_device_data.GetDeviceData,
+                                 name='get-device-data')
         #
         # web-accessible actions
         #

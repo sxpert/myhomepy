@@ -1,5 +1,6 @@
 import * as ajax from './ajax.js';
 import * as tree from './tree_control.js';
+import * as mod_device from './device.js';
 
 class Gateway {
     constructor(system, gateway) {
@@ -22,30 +23,6 @@ class Gateway {
     };
     click() {
         console.log('gateway for system #'+this.system.system_id+' clicked');
-    }
-}
-
-class Device {
-    constructor(devices, data) {
-        this.tree_item = null;
-        this.devices = devices;
-        this.label = data.id;
-        this.icon = data.icon;
-    };
-    get_tree_item() {
-        if (this.tree_item === null) {
-            var item = new tree.TreeItem(this.label, this.icon);
-            var device = this;
-            var click_func = function() {
-                device.click();
-            }
-            item.on_click(click_func);
-            this.tree_item = item;
-        }
-        return this.tree_item;
-    };
-    click() {
-        console.log(this.label, 'clicked')
     }
 }
 
@@ -75,7 +52,7 @@ class Devices {
             this.devices = [];
             this.tree_item.empty()
             devices.forEach(data => {
-                var device = new Device(this, data);
+                var device = new mod_device.Device(this, data);
                 this.devices.push(device);
                 var elem = device.get_tree_item();
                 this.tree_item.append_item(elem);
@@ -86,8 +63,9 @@ class Devices {
 }
 
 class System {
-    constructor(system) {
+    constructor(app, system) {
         this.tree_item = null;
+        this.app = app;
         this.system_id = system.id;
         this.display_name = system.display_name;
         this.gateway = new Gateway(this, system.gateway)
@@ -118,7 +96,7 @@ class App {
         let systems = this.systems;
         ajax.get_json('/api/get-systems-list', function (data) {
             data.forEach(sys_data => {
-                var system = new System(sys_data);
+                var system = new System(app, sys_data);
                 app.add_system(system);
             });
         });

@@ -107,6 +107,15 @@ class BaseDevice(object):
     def __init__(self, devices, subsystem, params):
         self.devices = devices
         self.log = devices.log
+
+        # front-end related things
+        self._name = None
+        self._description = None
+        
+        # device things
+        self._virt_id = None
+        self._hw_addr = None
+
         # if we get the diag_* subsystem here, find the
         # right one
         sys_diag_who = getattr(subsystem, VAR_SYSTEM_DIAG_WHO, None)
@@ -194,6 +203,65 @@ class BaseDevice(object):
         if icon is None:
             return CONST_DEVICE_ICON
         return icon
+
+    @property
+    def name(self):
+        name = getattr(self, '_name', None)
+        if name is None:
+            name = ''
+        return name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
+
+    @property
+    def description(self):
+        description = getattr(self, '_description', None)
+        if description is None:
+            description = ''
+        return description
+
+    @description.setter
+    def description(self, value):
+        self._description = value
+
+    @property
+    def brand_name(self):
+        return ''
+
+    @property
+    def product_line(self):
+        return ''
+
+    @property
+    def model_id(self):
+        mid = getattr(self, VAR_MODEL_ID, None)
+        if mid is not None:
+            return mid
+        # if the model wasn't known, this may be available
+        if mid is None:
+            mid = getattr(self, '_model_id', None)
+            if mid is not None:
+                return mid
+        self.log('unable to find device\'s model_id %s' % self, LOG_ERROR)
+        return mid
+        
+    @property
+    def web_data(self):
+        """
+        this generates a dictionary of what the frontend requires 
+        to show the device configuration page
+        """
+        data = {}
+        data['name'] = self.name
+        data['description'] = self.description
+        data['brand_name'] = self.brand_name
+        data['product_line'] = self.product_line
+        data['subsystem'] = self.dump_subsystem()
+        data['model_id'] = self.model_id
+        data['slots'] = self.slots.web_data
+        return data
 
     # ========================================================================
     #

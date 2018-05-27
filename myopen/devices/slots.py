@@ -31,6 +31,25 @@ class Slots(object):
 
     # ========================================================================
     #
+    # front-end related 
+    #
+    # ========================================================================
+
+    @property
+    def slot_class(self):
+        if self.parent is not None:
+            return getattr(self.parent, VAR_SLOT_CLASS, BaseSlot)
+        return BaseSlot
+
+    @property
+    def web_data(self):
+        slots = []
+        for slot in self.slots:
+            slots.append(slot.web_data)
+        return slots
+
+    # ========================================================================
+    #
     # json loading and unloading
     #
     # ========================================================================
@@ -81,10 +100,8 @@ class Slots(object):
         if slot is not None:
             return slot
         # create a new slot object
-        slot_class = BaseSlot
-        if self.parent is not None:
-            slot_class = getattr(self.parent, VAR_SLOT_CLASS, BaseSlot)
-        slot = slot_class(self)
+        sc = self.slot_class
+        slot = sc(self)
         self.slots[sid - 1] = slot
         return slot
 
