@@ -29,7 +29,7 @@
     line-height: calc( var(--header-height) / 2);
     color: #ccc;
     font-size: 12pt;
-    margin-right: 4pt;
+    margin-right: 4pt;  
     vertical-align: middle;
 }
 .device-config-device-reference {

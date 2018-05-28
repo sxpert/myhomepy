@@ -22,14 +22,13 @@ export class Device_Config_Page {
         this.setup_html_controls();
     };
     setup_html_controls() {
+        var p = this;
         this.el_icon = document.createElement('img');
         this.el_icon.classList.add('device-config-icon');
         this.el_icon.src = utilities.gen_image_link(this.device.icon);
 
-        console.log('manufacturer "'+this.device.manufacturer+'"');
         if (this.device.manufacturer === null) {
-            console.log('manufacturer is js::null');
-            this.el_manufacturer_logo = document.createElement('span');
+           this.el_manufacturer_logo = document.createElement('span');
             this.el_manufacturer_logo.textContent = 'Unknown'
         } else {
             this.el_manufacturer_logo = document.createElement('img');
@@ -42,11 +41,12 @@ export class Device_Config_Page {
         this.el_device_reference.textContent = this.device.device_reference;
 
         this.el_name = document.createElement('div');
+        this.el_name.spellcheck = false;    
         this.el_name.classList.add('device-config-name');
         this.el_name.contentEditable = true;
         this.el_name.addEventListener('keydown', this.el_name_keydown, true);
         this.el_name.addEventListener('keypress', this.el_name_keypress, true);
-        this.el_name.addEventListener('blur', this.el_name_blur, true);
+        this.el_name.addEventListener('blur', event => { p.el_name_blur(event)}, true);
 
         this.el_caption = document.createElement('div');
         this.el_caption.classList.add('device-config-caption');
@@ -79,7 +79,6 @@ export class Device_Config_Page {
     };
     set_name() {
         var name = this.device.name;
-        console.log('name "'+name+'"');
         if (name.length == 0) {
             this.name_empty = true;
             name = this.device.id;
@@ -113,7 +112,8 @@ export class Device_Config_Page {
         }
     }
     el_name_blur(event) {
-        console.log(event)
         // blur event, save the contents
+        this.device.name = event.target.textContent;
+        this.set_name();
     }
 }
