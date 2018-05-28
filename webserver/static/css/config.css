@@ -1,20 +1,41 @@
 .device-config {
     font-family: sans-serif;
+    --header-height: 64px;
 }
 .device-config-header {
     margin-bottom: 10pt;
+    margin-top: 4pt;
+    line-height: calc ( var(--header-height) / 2);
+    vertical-align: top;
 }
 .device-config-icon {
-    height: 64px;
-    width: 64px;
+    display: inline-block;
+    height: var(--header-height);
+    width: var(--header-height);
+    margin-right: 4px;
 }
 .device-config-caption {
     display: inline-block;
+    height: var(--header-height);
     vertical-align: top;
+}
+.device-config-manufacturer-logo {
+    display: inline-block;
+    width: var(--header-height);
+    height: calc( var(--header-height) / 2);
+    line-height: calc( var(--header-height) / 2);
+    color: #ccc;
+    font-size: 12pt;
+    margin-right: 4pt;
+    vertical-align: middle;
+}
+.device-config-device-reference {
+    vertical-align: middle;
 }
 .device-config-name {
     font-size: 18pt;
     color: #bbb;
+    height: calc( var(--header-height) / 2);
 }
 .device-config-description {
     width: 800px;

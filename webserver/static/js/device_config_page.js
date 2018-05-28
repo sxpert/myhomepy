@@ -26,9 +26,16 @@ export class Device_Config_Page {
         this.el_icon.classList.add('device-config-icon');
         this.el_icon.src = utilities.gen_image_link(this.device.icon);
 
-        this.el_manufacturer_logo = document.createElement('img');
+        console.log('manufacturer "'+this.device.manufacturer+'"');
+        if (this.device.manufacturer === null) {
+            console.log('manufacturer is js::null');
+            this.el_manufacturer_logo = document.createElement('span');
+            this.el_manufacturer_logo.textContent = 'Unknown'
+        } else {
+            this.el_manufacturer_logo = document.createElement('img');
+            this.el_manufacturer_logo.src = utilities.gen_image_link(this.device.manufacturer);
+        }
         this.el_manufacturer_logo.classList.add('device-config-manufacturer-logo');
-        this.el_manufacturer_logo.src = utilities.gen_image_link(this.device.manufacturer);
 
         this.el_device_reference = document.createElement('span');
         this.el_device_reference.classList.add('device-config-device-reference');
