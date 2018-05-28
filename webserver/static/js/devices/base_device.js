@@ -12,7 +12,7 @@ export class Base_Device {
         this.user_can_set_brand = false;
         this.user_set_brand = null;
         this.product_line = data.product_line;
-        this.user_cam_set_product_line = false;
+        this.user_can_set_product_line = false;
         this.user_set_product_line = null;
         this.subsystem = data.subsystem;
         this.model_id = data.model_id;
@@ -34,10 +34,9 @@ export class Base_Device {
                     if (ref!==undefined) {
                         this.device_reference = ref;
                         return;
-                    } else {
-                        this.user_can_set_product_line = true;
                     }
                 }
+                this.user_can_set_product_line = true;
             }
         }
         this.device_reference = '<unknown>';
