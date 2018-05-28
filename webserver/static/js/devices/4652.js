@@ -9,11 +9,11 @@ let dev_types = {
             },
             'BRAND_BTICINO' : {
                 icon: 'BTicino',
-                3 : 'H4652/2'
+                3 : 'Axolute H4652/2'
             },
             'BRAND_LEGRAND' : {
                 icon: 'Legrand',
-                4 : '067552'
+                4 : 'Céliane 067552'
             }
         }
     }
