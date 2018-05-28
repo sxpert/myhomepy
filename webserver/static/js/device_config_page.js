@@ -43,6 +43,10 @@ export class Device_Config_Page {
 
         this.el_name = document.createElement('div');
         this.el_name.classList.add('device-config-name');
+        this.el_name.contentEditable = true;
+        this.el_name.addEventListener('keydown', this.el_name_keydown, true);
+        this.el_name.addEventListener('keypress', this.el_name_keypress, true);
+        this.el_name.addEventListener('blur', this.el_name_blur, true);
 
         this.el_caption = document.createElement('div');
         this.el_caption.classList.add('device-config-caption');
@@ -92,5 +96,24 @@ export class Device_Config_Page {
         } else
             this.description_empty = false;
         this.el_description.textContent = description;
+    }
+    //
+    // events handling
+    //
+    el_name_keydown(event) {
+        if (event.key == 'Enter') {
+            event.stopImmediatePropagation();
+            event.preventDefault();
+            event.target.blur();
+        }
+    }
+    el_name_keypress(event) {
+        if (event.key == 'Enter') {
+            event.stopImmediatePropagation();
+        }
+    }
+    el_name_blur(event) {
+        console.log(event)
+        // blur event, save the contents
     }
 }
