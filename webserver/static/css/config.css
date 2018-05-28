@@ -1,12 +1,14 @@
 .device-config {
     font-family: sans-serif;
     --header-height: 64px;
+    width: 800px;
 }
 .device-config-header {
     margin-bottom: 10pt;
     margin-top: 4pt;
     line-height: calc ( var(--header-height) / 2);
     vertical-align: top;
+    width: 100%
 }
 .device-config-icon {
     display: inline-block;
@@ -18,6 +20,7 @@
     display: inline-block;
     height: var(--header-height);
     vertical-align: top;
+    width: calc( 100% - var(--header-height) - 4px );
 }
 .device-config-manufacturer-logo {
     display: inline-block;
@@ -36,9 +39,10 @@
     font-size: 18pt;
     color: #bbb;
     height: calc( var(--header-height) / 2);
+    overflow-x: hidden;
 }
 .device-config-description {
-    width: 800px;
+    width: 100%;
     height: 150px;
     border: 1px solid #ccc;
     margin-bottom: 10pt;
