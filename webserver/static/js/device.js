@@ -64,7 +64,7 @@ export class Device {
         if (subsystem===undefined)
             return console.log('unable to find subsystem \''+data.subsystem+'\'');
         let device_class = subsystem[data.model_id];
-        console.log(device_class);
+        // console.log(device_class);
         if (device_class===undefined)
             return console.log('unable to find config page for model '+dev.subsystem+'.'+dev.model_id);
         if (this.config_page===null)

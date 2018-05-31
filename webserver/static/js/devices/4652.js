@@ -19,9 +19,9 @@ let dev_types = {
     }
 }
 
-class Slot_4652 {
-    constructor (data) {
-        console.log(data);
+class Slot_4652 extends base.Base_Slot {
+    constructor (device, data) {
+        super(device, data);
     };
 }
 
@@ -33,16 +33,18 @@ export class Device_4652 extends base.Base_Device {
 
         if (this.model_id == 2) {
             this.slots = new Array(2);
-            
         }
         for(var i=0; i < this.slots.length; i++)
-            this.slots[i] = new Slot_4652(data.slots[i]);
-        console.log(this.slots);
+            this.slots[i] = new Slot_4652(this, data.slots[i]);
         this.setup_config_page();
     };
     slots_elements() {
         var el = document.createElement('div');
-        el.textContent = 'slots';
+        for(var i=0; i<this.slots.length;i++) {
+            var slot_el = this.slots[i].slot_elements();
+            if ((slot_el !== undefined) && (slot_el !== null))
+                el.appendChild(slot_el);
+        }
         return el;
     };
 }

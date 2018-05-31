@@ -1,6 +1,7 @@
 .device-config {
     font-family: sans-serif;
     --header-height: 64px;
+    --default-spacing: 4pt;
     width: 800px;
 }
 .device-config-header {
@@ -46,4 +47,10 @@
     height: 150px;
     border: 1px solid #ccc;
     margin-bottom: 10pt;
+}
+.device-slot {
+    display: inline-block;
+    width: 200pt;
+    border: 1px solid #d7d7d7;
+    margin-right: var( --default-spacing );
 }

@@ -88,7 +88,7 @@ export class Device_Config_Page {
     };
     set_description() {
         var description = this.device.description;
-        console.log('description "'+description+'"');
+        // console.log('description "'+description+'"');
         if (description.length == 0) {
             this.description_empty = true;
             description = 'enter some description';

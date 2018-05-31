@@ -83,8 +83,106 @@ class Device4652_Slot(BaseSlot):
     
     @property
     def slot_options(self):
-        options = {}
-        options['slot_type'] = '4652'
+        options = {
+            'slot_type': '4652',
+            'fields': [
+                {
+                    'name': 'mode',
+                    'order': 1,
+                    'type': 'select',
+                    'options': self.MODE_NAMES
+                },
+                {
+                    'name': 'light_control',
+                    'order': 2,
+                    'type': 'select',
+                    'options': self.LIGHT_CTRL_NAMES,
+                    'display': {
+                        'conditions': {
+                            'field': 'mode',
+                            'op': '==',
+                            'value': self.MODE_LIGHT_CTRL
+                        }
+                    }
+                },
+                {
+                    'name': 'automation_control',
+                    'order': 2,
+                    'type': 'select',
+                    'options': self.AUTOMATION_NAMES,
+                    'display': {
+                        'conditions': {
+                            'field': 'mode',
+                            'op': '==',
+                            'value': self.MODE_AUTOMATION_CTRL
+                        }
+                    }
+                },
+                {   
+                    'name': 'addr_type',
+                    'order': 3,
+                    'type': 'select',
+                    'options': self.ADDR_TYPE_NAMES,
+                    'display': {
+                        'conditions': {
+                            'field': 'mode',
+                            'op': 'in',
+                            'values': [
+                                self.MODE_LIGHT_CTRL,
+                                self.MODE_AUTOMATION_CTRL
+                            ]
+                        }
+                    }
+                },
+                {
+                    'name': 'address',
+                    'order': 4,
+                    'type': 'address'
+                },
+                {   
+                    'name': 'area',
+                    'order': 4,
+                    'type': 'area'
+                },
+                {
+                    'name': 'group',
+                    'order': 4,
+                    'type': 'group'
+                },
+                {
+                    'name': 'ref_addr',
+                    'order': 5,
+                    'type': 'address'
+                },
+                {
+                    'name': 'delay',
+                    'order': 5,
+                    'type': 'select',
+                    'options': self.DELAYS_NAMES
+                },
+                {
+                    'name': 'cen_plus',
+                    'order': 2,
+                    'type': 'integer',
+                    'min': 1,
+                    'max': 2047
+                },
+                {
+                    'name': 'button_up',
+                    'order': 3,
+                    'type': 'integer',
+                    'min': 1,
+                    'max': 32
+                },
+                {
+                    'name': 'button_down',
+                    'order': 4,
+                    'type': 'integer',
+                    'min': 1,
+                    'max': 32
+                }
+            ]
+        }
         return options
 
     # ========================================================================

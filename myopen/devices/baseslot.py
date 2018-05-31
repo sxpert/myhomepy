@@ -41,6 +41,9 @@ class BaseSlot(object):
     @property
     def web_data(self):
         slot = {}
+        options = self.slot_options
+        if len(options) > 0:
+            slot['options'] = options
         values = self._values.copy()
         if '_source' in values.keys():
             del(values['_source'])
