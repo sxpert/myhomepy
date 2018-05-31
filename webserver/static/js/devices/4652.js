@@ -40,6 +40,7 @@ export class Device_4652 extends base.Base_Device {
     };
     slots_elements() {
         var el = document.createElement('div');
+        el.classList.add('device-slots');
         for(var i=0; i<this.slots.length;i++) {
             var slot_el = this.slots[i].slot_elements();
             if ((slot_el !== undefined) && (slot_el !== null))

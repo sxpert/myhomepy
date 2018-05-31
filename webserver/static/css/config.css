@@ -2,7 +2,16 @@
     font-family: sans-serif;
     --header-height: 64px;
     --default-spacing: 4pt;
-    width: 800px;
+    --slot-font-size: 10pt;
+    --default-width: 800px;
+    --border-width: 1px;
+    --slots-per-line: 2;
+    --margins-width: calc( var(--default-spacing) * calc( var(--slots-per-line) - 1 ));
+    --avail-width: calc( var(--default-width) - var(--margins-width) );
+    --width-with-border: calc( var(--avail-width) / var(--slots-per-line) );
+    --borders-width: calc( var(--border-width) * 2 );
+    --slot-width: calc( var(--width-with-border) - var(--borders-width) );
+    width: var( --default-width );
 }
 .device-config-header {
     margin-bottom: 10pt;
@@ -43,14 +52,29 @@
     overflow-x: hidden;
 }
 .device-config-description {
-    width: 100%;
+    width: calc( 100% - var(--borders-width) );
     height: 150px;
     border: 1px solid #ccc;
     margin-bottom: 10pt;
 }
+.device-slots :first-child {
+    margin-left: 0;
+}
 .device-slot {
+    --slot-padding: 4pt;
+    --slot-total-padding: calc( var(--slot-padding) * 2 );
     display: inline-block;
-    width: 200pt;
-    border: 1px solid #d7d7d7;
-    margin-right: var( --default-spacing );
+    --slot-available-width: calc( var(--slot-width) - var(--slot-total-padding) );
+    width: var(--slot-available-width); 
+    border: var(--border-width) solid #d7d7d7;
+    margin-left: var( --default-spacing );
+    padding-left: var(--slot-padding);
+    padding-right: var(--slot-padding);
+}
+.device-slot-label {
+    font-size: var( --slot-font-size );
+    width
+}
+.device-slot-select {
+    font-size: var( --slot-font-size );
 }

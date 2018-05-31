@@ -38,9 +38,18 @@ export class Base_Slot {
         // each field is primed with it's own events
         for(var i=0; i<this.fields.ordered.length; i++){
             var layer = this.fields.ordered[i];
-            console.log(layer);
+            if (layer===undefined)
+                continue;
+            for(var f=0; f<layer.length; f++) {
+                var field = layer[f];
+                if (field.elements!==undefined) {
+                    var el = field.elements();
+                    if (el!==undefined)
+                        sl.appendChild(el);
+                }
+            }
         }
-
+        return sl;
     };
     //------------------------------------------------------------------------
     //
@@ -69,9 +78,20 @@ export class Base_Slot {
         field.elements = function() {
             var ct = document.createElement('div');
             var lb = document.createElement('label');
+            lb.classList.add('device-slot-label');
             lb.textContent = this.name;
             var sl = document.createElement('select');
-            console.log(slot.get_value(this.name));
+            sl.classList.add('device-slot-select');
+            // generate options
+            var current = slot.get_value(this.name)
+            console.log(this.name, this.options);
+            for(var o=0; o<this.options.length; o++) {
+                var opt = new Option(this.options[o], o, false, (o==current))
+                sl.appendChild(opt);
+            }
+            ct.appendChild(lb);
+            ct.appendChild(sl);
+            return ct;
         };
     };
 }
@@ -123,6 +143,7 @@ export class Base_Device {
     };
     slots_elements() {
         var el = document.createElement('div');
+        el.classList.add('device-slots');
         el.textContent = 'slots';
         return el;
     };
