@@ -77,6 +77,7 @@ export class Base_Slot {
         let slot = this;
         field.elements = function() {
             var ct = document.createElement('div');
+            ct.classList.add('device-slot-line');
             var lb = document.createElement('label');
             lb.classList.add('device-slot-label');
             lb.textContent = this.name;

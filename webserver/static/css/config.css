@@ -12,6 +12,8 @@
     --borders-width: calc( var(--border-width) * 2 );
     --slot-width: calc( var(--width-with-border) - var(--borders-width) );
     width: var( --default-width );
+    --hover-background: #eee;
+    --border-color: #d7d7d7;
 }
 .device-config-header {
     margin-bottom: 10pt;
@@ -54,7 +56,7 @@
 .device-config-description {
     width: calc( 100% - var(--borders-width) );
     height: 150px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--border-color);
     margin-bottom: 10pt;
 }
 .device-slots :first-child {
@@ -66,15 +68,30 @@
     display: inline-block;
     --slot-available-width: calc( var(--slot-width) - var(--slot-total-padding) );
     width: var(--slot-available-width); 
-    border: var(--border-width) solid #d7d7d7;
+    border: var(--border-width) solid var(--border-color);
     margin-left: var( --default-spacing );
     padding-left: var(--slot-padding);
     padding-right: var(--slot-padding);
+    --slot-label-width: calc( var(--slot-available-width) / 3 );
+    --slot-input-width: calc( var(--slot-label-width) * 2 );
+}
+.device-slot-line {
+    margin-top: var(--default-spacing);
+    margin-bottom: var(--default-spacing)
+}
+.device-slot-line:hover {
+    background: var(--hover-background);
 }
 .device-slot-label {
+    display: inline-block;
     font-size: var( --slot-font-size );
-    width
+    width: var(--slot-label-width);
 }
 .device-slot-select {
     font-size: var( --slot-font-size );
+    width: var(--slot-input-width);
+    border: var(--border-width) solid var(--border-color);
+}
+.device-slot-select:hover {
+    background: var(--hover-background);
 }
