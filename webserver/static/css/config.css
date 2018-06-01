@@ -63,6 +63,7 @@
     margin-left: 0;
 }
 .device-slot {
+    vertical-align: top;
     --slot-padding: 4pt;
     --slot-total-padding: calc( var(--slot-padding) * 2 );
     display: inline-block;
