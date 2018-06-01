@@ -24,6 +24,7 @@ export class Base_Slot {
                 this.set_behavior(field);
             }
             var fields = {};
+            fields.array = this.fields;
             fields.ordered = ordered;
             fields.dict = dict;
             this.fields = fields;
@@ -49,6 +50,8 @@ export class Base_Slot {
                 }
             }
         }
+        // updates visibility of things
+        this.show();
         return sl;
     };
     //------------------------------------------------------------------------
@@ -61,35 +64,69 @@ export class Base_Slot {
     };
     set_value(fieldname, value) {
         // updates the value for the field
-        // then calls each field to get it to show/hide itself
+        // then, updates the visibility of things
+        this.display();
     };
+    show() {
+        var array = this.fields.array;
+        for(var i=0; i<array.length; i++) {
+            var field = array[i];
+            if (field.show!==undefined) 
+                field.show();
+        }
+    }
     //------------------------------------------------------------------------
     //
     // Major javascript object hacking
     //
     //
     set_behavior(field) {
+        // add behavior for every type
+        field.show_test = function(){
+            // tests if the control should be displayed
+            // if display is not defined, the thing should always be visible
+            if (this.display===undefined)
+                return true;
+            // this gets more complicated ;)
+            
+            return false;
+        };
+        field.show = function(){
+            if (this.container===undefined) {
+                console.log('nothing to change the visibility for '+this.name);
+                return;
+            }
+            console.log(this.container);
+            this.container.hidden = !this.show_test();
+        }
+        // add behavior specific for all types
         switch (field.type) {
             case 'select': this.set_select_behavior(field); break;
         }
     };
     set_select_behavior(field) {
         let slot = this;
+        //-------------------------------------------------------------------- 
+        // add behavior to select element
+        //
+        // the elements generating function
         field.elements = function() {
             var ct = document.createElement('div');
             ct.classList.add('device-slot-line');
+            this.container = ct;
             var lb = document.createElement('label');
             lb.classList.add('device-slot-label');
             lb.textContent = this.name;
+            this.label = lb;
             var sl = document.createElement('select');
             sl.classList.add('device-slot-select');
             // generate options
             var current = slot.get_value(this.name)
-            console.log(this.name, this.options);
             for(var o=0; o<this.options.length; o++) {
                 var opt = new Option(this.options[o], o, false, (o==current))
                 sl.appendChild(opt);
             }
+            this.select = sl;
             ct.appendChild(lb);
             ct.appendChild(sl);
             return ct;
