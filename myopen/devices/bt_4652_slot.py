@@ -158,7 +158,24 @@ class Device4652_Slot(BaseSlot):
                     'name': 'delay',
                     'order': 5,
                     'type': 'select',
-                    'options': self.DELAYS_NAMES
+                    'options': self.DELAYS_NAMES,
+                    'display': {
+                        'conditions': {
+                            'op': 'and',
+                            'conditions': [
+                                {
+                                    'field': 'mode',
+                                    'op': '==',
+                                    'value': self.MODE_LIGHT_CTRL
+                                },
+                                {
+                                    'field': 'light_control',
+                                    'op': '==',
+                                    'value': self.LIGHT_CTRL_TIMED_ON
+                                }
+                            ]
+                        }
+                    } 
                 },
                 {
                     'name': 'cen_plus',
