@@ -19,33 +19,16 @@ let dev_types = {
     }
 }
 
-class Slot_4652 extends base.Base_Slot {
-    constructor (device, data) {
-        super(device, data);
-    };
-}
-
 export class Device_4652 extends base.Base_Device {
     constructor(data, config_page) {
         super(data, config_page);
-        this.dev_types = dev_types;
-        this.set_device_reference();
 
-        if (this.model_id == 2) {
-            this.slots = new Array(2);
+        this.dev_types = dev_types;
+        switch (this.model_id) {
+            case 2: this.nb_slots = 2; break;
         }
-        for(var i=0; i < this.slots.length; i++)
-            this.slots[i] = new Slot_4652(this, data.slots[i]);
+        this.setup_slots(data);        
+        this.set_device_reference();
         this.setup_config_page();
-    };
-    slots_elements() {
-        var el = document.createElement('div');
-        el.classList.add('device-slots');
-        for(var i=0; i<this.slots.length;i++) {
-            var slot_el = this.slots[i].slot_elements();
-            if ((slot_el !== undefined) && (slot_el !== null))
-                el.appendChild(slot_el);
-        }
-        return el;
     };
 }

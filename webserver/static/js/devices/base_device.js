@@ -199,6 +199,18 @@ export class Base_Device {
         this.subsystem = data.subsystem;
         this.model_id = data.model_id;
         this.dev_types = null;
+    }
+    setup_slots(data) {
+        // setup slots
+        var slot_class = Base_Slot;
+        if (this.slot_class!==undefined)
+            slot_class = this.slot_class;
+        var nb_slots = 0;
+        if (this.nb_slots!==undefined) 
+            nb_slots = this.nb_slots;
+        this.slots = new Array(nb_slots);
+        for(var i=0; i < this.slots.length; i++)
+            this.slots[i] = new slot_class(this, data.slots[i]);
     };
     set_device_reference() {
         let model = this.dev_types[this.model_id];
@@ -229,7 +241,11 @@ export class Base_Device {
     slots_elements() {
         var el = document.createElement('div');
         el.classList.add('device-slots');
-        el.textContent = 'slots';
+        for(var i=0; i<this.slots.length;i++) {
+            var slot_el = this.slots[i].slot_elements();
+            if ((slot_el !== undefined) && (slot_el !== null))
+                el.appendChild(slot_el);
+        }
         return el;
     };
 }
