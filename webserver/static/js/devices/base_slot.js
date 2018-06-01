@@ -2,6 +2,7 @@ export class Base_Slot {
     constructor(device, data) {
         console.log('Base_Slot::constructor');
         console.log(data);
+        this.changed = false;
         this.device = device;
         this.number = device.slots.indexOf(this);
         this.data = data;
@@ -63,8 +64,11 @@ export class Base_Slot {
     };
     set_value(fieldname, value) {
         // updates the value for the field
+        console.log('Base_Slot::set_value', fieldname, value);
+        this.changed = true;
+        this.values[fieldname] = value;
         // then, updates the visibility of things
-        this.display();
+        this.show();
     };
     show() {
         var array = this.fields.array;
@@ -124,8 +128,17 @@ export class Base_Slot {
                     }
                     // scanning the array unsuccessful...
                     return false;
+                case 'and':
+                    if ((cond.conditions === undefined) || (! Array.isArray(cond.conditions))) {
+                        console.log('there should be an array of conditions in \'conditions\'', cond);
+                        return true;
+                    }
+                    var result = true;
+                    for(var ic=0; ic<cond.conditions.length; ic++)
+                        result &= this.recurse_conditions(cond.conditions[ic]);
+                    return result;
                 default:
-                    console.log('unknown operator \''+op+'\'');
+                    console.log('unknown operator \''+op+'\'', cond);
             }
             return true;
         };
@@ -166,6 +179,10 @@ export class Base_Slot {
             this.label = lb;
             var sl = document.createElement('select');
             sl.classList.add('device-slot-select');
+            sl.addEventListener('change', ev => {
+                var val = ev.target.value;
+                slot.set_value(field.name, val);
+            });
             // generate options
             var current = slot.get_value(this.name)
             for(var o=0; o<this.options.length; o++) {
