@@ -26,10 +26,19 @@ export class Slot_Address_View extends slot_field.Base_Slot_Field_View {
         let field = this;
         el.addEventListener('change', event => {
             if (field._on_change!==null) {
-                let val = el.value;
+                let a = field._a_input.value;
+                let pl = field._pl_input.value;
+                let val= {a: a, pl: pl};
                 field._on_change(val);
             }
         });
         return el;
     };
+    set value(value) {
+        if (value===undefined) return;
+        if (value.a===undefined) return;
+        if (value.pl===undefined) return;
+        this._a_input.value = value.a;
+        this._pl_input.value = value.pl;
+    }
 }

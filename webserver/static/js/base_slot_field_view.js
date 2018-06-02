@@ -27,6 +27,7 @@ export class Base_Slot_Field_View {
         return this._field;
     };
     set visible(visible) {
+        // console.log('Base_Slot_Field_View::visible', this._label.textContent, visible);
         this._field.hidden = !visible;
     };
 }

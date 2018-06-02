@@ -45,6 +45,7 @@ export class Slot_Controller {
                         field_view.on_change = function(value) {
                             controller.field_changed(name, value);
                         }
+                        field_view.value = current;
                         break;
                     case 'area': 
                         options = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -62,6 +63,7 @@ export class Slot_Controller {
                         field_view.on_change = function(value) {
                             controller.field_changed(name, value);
                         };
+                        field_view.value = current;
                         break;
                     case 'integer':
                         field_view = new integer_view.Slot_Integer_View();
@@ -69,6 +71,7 @@ export class Slot_Controller {
                         field_view.on_change = function(value) {
                             controller.field_changed(name, value);
                         };
+                        field_view.value = current;
                         break;
                     case 'select':
                         options = field.options;
@@ -106,6 +109,7 @@ export class Slot_Controller {
                     console.log('no \'value\' specified');
                     return true;
                 }
+                // console.log(cond.value, '==', cond.field, f, this.slot_model.values);
                 return (f==cond.value);
             case 'in':
                 if (cond.field===undefined) {
@@ -152,6 +156,7 @@ export class Slot_Controller {
             if (field.display!==undefined) {
                 let display = field.display;
                 if (display.conditions!==undefined)
+                    // console.log(display.conditions);
                     can_display = this.recurse_conditions(display.conditions);
             }
             this.slot_view.set_visible(field.name, can_display);

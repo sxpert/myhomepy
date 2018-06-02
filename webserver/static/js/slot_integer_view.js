@@ -19,4 +19,7 @@ export class Slot_Integer_View extends slot_field.Base_Slot_Field_View {
         });
         return el;
     };
+    set value(value) {
+        this._input.value = value;
+    }
 }

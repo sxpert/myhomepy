@@ -86,121 +86,96 @@ class Device4652_Slot(BaseSlot):
         options = {
             'slot_type': '4652',
             'fields': [
-                {
-                    'name': 'mode',
-                    'order': 1,
-                    'type': 'select',
-                    'options': self.MODE_NAMES
-                },
-                {
-                    'name': 'light_control',
-                    'order': 2,
-                    'type': 'select',
-                    'options': self.LIGHT_CTRL_NAMES,
-                    'display': {
-                        'conditions': {
-                            'field': 'mode',
-                            'op': '==',
-                            'value': self.MODE_LIGHT_CTRL
-                        }
-                    }
-                },
-                {
-                    'name': 'automation_control',
-                    'order': 2,
-                    'type': 'select',
-                    'options': self.AUTOMATION_NAMES,
-                    'display': {
-                        'conditions': {
-                            'field': 'mode',
-                            'op': '==',
-                            'value': self.MODE_AUTOMATION_CTRL
-                        }
-                    }
-                },
-                {   
-                    'name': 'addr_type',
-                    'order': 3,
-                    'type': 'select',
-                    'options': self.ADDR_TYPE_NAMES,
-                    'display': {
-                        'conditions': {
-                            'field': 'mode',
-                            'op': 'in',
-                            'values': [
-                                self.MODE_LIGHT_CTRL,
-                                self.MODE_AUTOMATION_CTRL
-                            ]
-                        }
-                    }
-                },
-                {
-                    'name': 'address',
-                    'order': 4,
-                    'type': 'address'
-                },
-                {   
-                    'name': 'area',
-                    'order': 4,
-                    'type': 'area'
-                },
-                {
-                    'name': 'group',
-                    'order': 4,
-                    'type': 'group'
-                },
-                {
-                    'name': 'ref_addr',
-                    'order': 5,
-                    'type': 'address'
-                },
-                {
-                    'name': 'delay',
-                    'order': 5,
-                    'type': 'select',
-                    'options': self.DELAYS_NAMES,
-                    'display': {
-                        'conditions': {
-                            'op': 'and',
-                            'conditions': [
-                                {
-                                    'field': 'mode',
-                                    'op': '==',
-                                    'value': self.MODE_LIGHT_CTRL
-                                },
-                                {
-                                    'field': 'light_control',
-                                    'op': '==',
-                                    'value': self.LIGHT_CTRL_TIMED_ON
-                                }
-                            ]
-                        }
-                    } 
-                },
-                {
-                    'name': 'cen_plus',
-                    'order': 2,
-                    'type': 'integer',
-                    'min': 1,
-                    'max': 2047
-                },
-                {
-                    'name': 'button_up',
-                    'order': 3,
-                    'type': 'integer',
-                    'min': 1,
-                    'max': 32
-                },
-                {
-                    'name': 'button_down',
-                    'order': 4,
-                    'type': 'integer',
-                    'min': 1,
-                    'max': 32
-                }
+                {'name': SLOT_VAR_MODE, 'order': 1, 'type': 'select', 'options': self.MODE_NAMES},
+                {'name': SLOT_VAR_LIGHT_CONTROL, 'order': 2, 'type': 'select', 'options': self.LIGHT_CTRL_NAMES,
+                 'display': {'conditions': {'field': SLOT_VAR_MODE, 'op': '==', 'value': self.MODE_LIGHT_CTRL}}},
+                {'name': SLOT_VAR_AUTOMATION_CONTROL, 'order': 2, 'type': 'select', 'options': self.AUTOMATION_NAMES,
+                 'display': {'conditions': {'field': SLOT_VAR_MODE, 'op': '==', 'value': self.MODE_AUTOMATION_CTRL}}},
+                {'name': SLOT_VAR_ADDRESS_TYPE, 'order': 3, 'type': 'select', 'options': self.ADDR_TYPE_NAMES,
+                 'display': {'conditions': {'field': SLOT_VAR_MODE, 'op': 'in',
+                             'values': [self.MODE_LIGHT_CTRL,self.MODE_AUTOMATION_CTRL]}}},
+                {'name': SLOT_VAR_ADDRESS,'order': 4,'type': 'address',
+                 'display': {'conditions': {'op': 'and', 'conditions': [
+                 {'field': SLOT_VAR_MODE, 'op': 'in', 'values': [self.MODE_LIGHT_CTRL,self.MODE_AUTOMATION_CTRL]},
+                 {'field': SLOT_VAR_ADDRESS_TYPE, 'op': '==', 'value': self.ADDR_TYPE_P2P}]}}},
+                {'name': SLOT_VAR_AREA, 'order': 4, 'type': 'area',
+                 'display': {'conditions': {'op': 'and','conditions': [
+                 {'field': SLOT_VAR_MODE, 'op': 'in', 'values': [self.MODE_LIGHT_CTRL, self.MODE_AUTOMATION_CTRL]},
+                 {'field': SLOT_VAR_ADDRESS_TYPE, 'op': '==', 'value': self.ADDR_TYPE_AREA}]}}},
+                {'name': SLOT_VAR_GROUP, 'order': 4, 'type': 'group',
+                 'display': {'conditions': {'op': 'and','conditions': [
+                 {'field': SLOT_VAR_MODE, 'op': 'in', 'values': [self.MODE_LIGHT_CTRL, self.MODE_AUTOMATION_CTRL]},
+                 {'field': SLOT_VAR_ADDRESS_TYPE, 'op': '==', 'value': self.ADDR_TYPE_GROUP}]}}},
+                {'name': SLOT_VAR_REF_ADDRESS, 'order': 5,'type': 'address',
+                 'display': {'conditions': {'op': 'and','conditions': [
+                 {'field': SLOT_VAR_MODE, 'op': 'in', 'values': [self.MODE_LIGHT_CTRL, self.MODE_AUTOMATION_CTRL]},
+                 {'field': SLOT_VAR_ADDRESS_TYPE, 'op': 'in', 'values': [self.ADDR_TYPE_AREA, self.ADDR_TYPE_GROUP]}]}}},
+                {'name': SLOT_VAR_DELAY, 'order': 5, 'type': 'select', 'options': self.DELAYS_NAMES,
+                 'display': {'conditions': {'op': 'and', 'conditions': [
+                 {'field': SLOT_VAR_MODE, 'op': '==', 'value': self.MODE_LIGHT_CTRL},
+                 {'field': SLOT_VAR_LIGHT_CONTROL, 'op': '==', 'value': self.LIGHT_CTRL_TIMED_ON}]}}},
+                {'name': SLOT_VAR_CEN_PLUS, 'order': 2, 'type': 'integer', 'min': 1, 'max': 2047,
+                 'display': {'conditions': {'field': SLOT_VAR_MODE, 'op': '==', 'value': self.MODE_CEN_PLUS}}},
+                {'name': SLOT_VAR_BUTTON_UP, 'order': 3, 'type': 'integer', 'min': 1, 'max': 32,
+                 'display': {'conditions': {'field': SLOT_VAR_MODE, 'op': '==', 'value': self.MODE_CEN_PLUS}}},
+                {'name': SLOT_VAR_BUTTON_DOWN, 'order': 4, 'type': 'integer', 'min': 1, 'max': 32,
+                 'display': {'conditions': {'field': SLOT_VAR_MODE, 'op': '==', 'value': self.MODE_CEN_PLUS}}}
             ]
         }
         return options
+
+    @property
+    def web_data(self):
+        slot = {}
+        options = self.slot_options
+        if len(options) > 0:
+            slot['options'] = options
+        values = {}
+        mode = self.get_value(SLOT_VAR_MODE, None)
+        if mode is not None:
+            values[SLOT_VAR_MODE] = mode
+        if mode == self.MODE_LIGHT_CTRL:
+            light_control = self.get_value(SLOT_VAR_LIGHT_CONTROL, None)
+            if light_control is not None:
+                values[SLOT_VAR_LIGHT_CONTROL] = light_control
+        if mode == self.MODE_AUTOMATION_CTRL:
+            automation_control = self.get_value(SLOT_VAR_AUTOMATION_CONTROL, None)
+            if automation_control is not None:
+                values[SLOT_VAR_AUTOMATION_CONTROL] = automation_control
+        if mode in (self.MODE_LIGHT_CTRL, self.MODE_AUTOMATION_CTRL):
+            address_type = self.get_value(SLOT_VAR_ADDRESS_TYPE, None)
+            if address_type is not None:
+                values[SLOT_VAR_ADDRESS_TYPE] = address_type
+                if address_type == self.ADDR_TYPE_P2P:
+                    a = self.get_value(SLOT_VAR_A, None)
+                    pl = self.get_value(SLOT_VAR_PL, None)
+                    if a is not None and pl is not None:
+                        values[SLOT_VAR_ADDRESS] = {SLOT_VAR_A: a, SLOT_VAR_PL: pl}
+                if address_type == self.ADDR_TYPE_AREA:
+                    area = self.get_value(SLOT_VAR_AREA, None)
+                    if area is not None:
+                        values[SLOT_VAR_AREA] = area
+                if address_type == self.ADDR_TYPE_GROUP:
+                    group = self.get_value(SLOT_VAR_GROUP, None)
+                    if group is not None:
+                        values[SLOT_VAR_GROUP] = group
+                if address_type in (self.ADDR_TYPE_AREA, self.ADDR_TYPE_GROUP):
+                    ref_a = self.get_value(SLOT_VAR_REF_A, None)
+                    ref_pl = self.get_value(SLOT_VAR_REF_PL, None)
+                    if ref_a is not None and ref_pl is not None:
+                        values[SLOT_VAR_REF_ADDRESS] = {SLOT_VAR_A: ref_a, SLOT_VAR_PL: ref_pl}
+        if mode == self.MODE_CEN_PLUS:
+            cen_plus = self.get_value(SLOT_VAR_CEN_PLUS, None)
+            if cen_plus is not None:
+                values[SLOT_VAR_CEN_PLUS] = cen_plus
+            button_up = self.get_value(SLOT_VAR_BUTTON_UP, None)
+            if button_up is not None:
+                values[SLOT_VAR_BUTTON_UP] = button_up
+            button_down = self.get_value(SLOT_VAR_BUTTON_DOWN, None)
+            if button_down is not None:
+                values[SLOT_VAR_BUTTON_DOWN] = button_down
+        slot['values'] = values
+        return slot
 
     # ========================================================================
     #
