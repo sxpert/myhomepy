@@ -78,6 +78,8 @@ export class Base_Device_Model {
     }
     update(data) {
         console.log('update the model with data', data);
+        // update the device too...
+        
         // normally only the slots should be modified
         for(var s=0; s<this.slots.length; s++) {
             this.slots[s].update(data.slots[s]);

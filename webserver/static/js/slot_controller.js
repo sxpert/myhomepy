@@ -8,6 +8,10 @@ import * as select_view from './slot_select_view.js';
 export class Slot_Controller {
     constructor(slot_model) {
         this.slot_model = slot_model;
+        let controller = this;
+        slot_model.on_value_updated = function(name) {
+            controller.value_updated(name);
+        };
         this.slot_view = new slot_view.Slot_View();
         this.initialize_view();
         this.set_fields_visibility();
@@ -167,6 +171,12 @@ export class Slot_Controller {
             this.slot_view.set_field_valid(name);
         else  
             this.slot_view.set_field_invalid(name);
+        this.set_fields_visibility();
+    };
+    value_updated(name) {
+        var value = this.slot_model.get_value(name)
+        console.log('Slot_Controller::value_updated', name, value);
+        this.slot_view.set_value(name, value);
         this.set_fields_visibility();
     }
 }

@@ -1,5 +1,6 @@
 export class Base_Slot_Model {
     constructor(data) {
+        this._on_value_updated =null
         let options = data.options;
         if (options!==undefined) {
             let fields = options.fields;
@@ -20,6 +21,9 @@ export class Base_Slot_Model {
         else
             this.values = null;
     };
+    set on_value_updated(func) {
+        this._on_value_updated = func;
+    }
     update(data) {
         console.log('updating slot with', data);
         let keys = Object.keys(data.values);
@@ -76,8 +80,11 @@ export class Base_Slot_Model {
                 }
             }
         }
-        if (ok)
+        if (ok) {
             this.values[name] = value;
+            if (this._on_value_updated!==null)
+                this._on_value_updated(name);
+        }
         return ok;
     };
 }

@@ -29,4 +29,9 @@ export class Slot_View {
     set_field_invalid(name) {
         console.log('value for field', name, 'was invalid');
     };
+    set_value(name, value) {
+        let field = this.fields[name];
+        if (field!==undefined)
+            field.value = value;
+    }
 }

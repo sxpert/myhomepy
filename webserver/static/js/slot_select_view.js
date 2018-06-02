@@ -22,4 +22,7 @@ export class Slot_Select_View extends slot_field.Base_Slot_Field_View {
         var opt = new Option(text, value, false, selected);
         this._select.appendChild(opt);
     };
+    set value(value) {
+        this._select.value = value;
+    }
 }

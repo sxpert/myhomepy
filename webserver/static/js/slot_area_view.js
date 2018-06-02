@@ -23,6 +23,6 @@ export class Slot_Area_View  extends slot_field.Base_Slot_Field_View {
         this._area.appendChild(opt);
     };
     set value(value) {
-        console.log('/!\ NOT IMPLEMENTED : Slot_Area_View::set value', value);
+        this._area.value = value;
     }
 }
