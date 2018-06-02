@@ -20,6 +20,14 @@ export class Base_Slot_Model {
         else
             this.values = null;
     };
+    update(data) {
+        console.log('updating slot with', data);
+        let keys = Object.keys(data.values);
+        for(var k=0; k<keys.length; k++) {
+            let key = keys[k];
+            this.set_value(key, data.values[key]);
+        }
+    }
     get_field(field_name) {
 
     };

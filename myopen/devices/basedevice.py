@@ -128,7 +128,7 @@ class BaseDevice(object):
         self._error = not self.update_base_data(params)
         self.slots = Slots(self)
 
-    def queue_for_discovery(self):
+    def queue_for_discovery(self, callback=None):
         """
         Pushes the device to be discovered.
         Makes sure we only push it once
@@ -155,7 +155,7 @@ class BaseDevice(object):
             #          'CmdDiagAid %s'
             #          % (str(params)),
             #          LOG_ERROR)
-            self.devices.system.push_task(CmdDiagAid, params=params)
+            self.devices.system.push_task(CmdDiagAid, params=params, callback=callback)
         else:
             self.log('BaseDevice.queue_for_discovery : '
                      'no main loop, not doing anything')

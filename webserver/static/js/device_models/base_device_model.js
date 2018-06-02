@@ -1,7 +1,11 @@
+import * as ajax from '../ajax.js';
 import * as base_slot_model from './base_slot_model.js';
 
 export class Base_Device_Model {
     constructor(data) {
+        // event related stuff
+        this._system_id = null;
+        this._on_updated = null;
         // status
         this.changed = false;
         // these are not updatable
@@ -43,6 +47,52 @@ export class Base_Device_Model {
             slots[i] = new slot_class(slot_data[i]);
         return slots;
     }
+    /*************************************************************************
+     * 
+     * methods to call in the web api for refreshing data in the model 
+     * 
+     */
+    set system_id(system_id) {
+        this._system_id = system_id
+    }
+    discover_device() {
+        console.log('starting discovery');
+        if ((this._system_id===undefined)||(this._system_id === null)) return false;
+        var url = '/api/do-device-discovery?system_id='+this._system_id+'&device_id='+this.id;
+        console.log(url);
+        var model = this;
+        ajax.get_json(url,
+            function(data) {
+                if (data.ok !== undefined && data.ok === true) {
+                    console.log('success', data);
+                    data = data.device;
+                    if (data!==undefined) 
+                        return model.update(data);
+                    console.log('problem, no \'device\' in ', data);
+                }
+            },
+            function(request){
+                console.log('error', request);
+            }
+        );                
+    }
+    update(data) {
+        console.log('update the model with data', data);
+        // normally only the slots should be modified
+        for(var s=0; s<this.slots.length; s++) {
+            this.slots[s].update(data.slots[s]);
+        }
+        if (this._on_updated!==null) 
+            this._on_updated();
+    }
+    set on_updated(func) {
+        this._on_updated = func;
+    }
+    /*************************************************************************
+     * 
+     * model properties
+     * 
+     */
     get icon() {
         return 'devices/'+this._icon;
     };

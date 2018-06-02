@@ -5,6 +5,7 @@ import * as dev_F411 from './F411.js';
 
 export class Base_Device_Model_Stub {
     constructor(system_id, id, callback) {
+        this.system_id = system_id;
         this.callback = callback;
         this.success = false;
         this.device_model = null;
@@ -36,6 +37,7 @@ export class Base_Device_Model_Stub {
         if (device_class===undefined)
             return console.log('unable to find config page for model '+dev.subsystem+'.'+dev.model_id);
         this.device_model = new device_class(data);
+        this.device_model.system_id = this.system_id;
         this.success = true;
         this.callback(this);
     };

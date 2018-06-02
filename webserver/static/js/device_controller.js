@@ -47,6 +47,12 @@ export class Device {
                     controller.device_model.name = new_name;
                     controller.config_view.name = controller.device_model.name;
                 }
+                this.config_view.on_discover_request = function() {
+                    console.log(controller, 'launching discover request');
+                    // should disable the view
+                    controller.config_view.enabled = false;
+                    controller.device_model.discover_device();
+                }
                 for(var i=0; i<this.slot_controllers.length; i++)
                     this.config_view.set_slot(i, this.slot_controllers[i].element);
             }
@@ -54,8 +60,13 @@ export class Device {
         }
     };
     set_device_model(stub) {
+        let controller = this;
         if (stub.success) {
             this.device_model = stub.device_model;
+            this.device_model.on_updated = function() {
+                controller.update_view();
+                controller.config_view.enabled = true;
+            }
             // this.device_model.set_address_model()
             // create slot controllers
             let nb_slots = this.device_model.nb_slots
@@ -66,4 +77,7 @@ export class Device {
         } else 
             console.log('Unable to obtain device_model from server');
     };
+    update_view() {
+        console.log('updating view');
+    }
 }

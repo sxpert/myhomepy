@@ -2,6 +2,9 @@ import * as utilities from './utilities.js'
 
 export class Device_Config_View {
     constructor() {
+        // buttons
+        this.el_discover = null;
+
         // elements
         this.el_icon = this.create_device_icon_element();
         this.el_manufacturer_logo = this.create_manufacturer_logo_element();
@@ -16,9 +19,16 @@ export class Device_Config_View {
 
         // events callbacks
         this._on_name_change = null;
+        this._on_discover_request = null;
     };
     set on_name_change(func) {
         this._on_name_change = func;
+    }
+    set on_discover_request(func) {
+        this._on_discover_request = func;
+    }
+    set enabled(enabled) {
+        this.el_discover.disabled = !enabled;
     }
     show(element_id) {
         var element = document.getElementById(element_id);
@@ -100,8 +110,21 @@ export class Device_Config_View {
      * 
      */
     create_caption_element() {
+        let view = this;
         let el = document.createElement('div');
         el.classList.add('device-config-caption');
+        let buttons = document.createElement('div');
+        buttons.classList.add('device-config-buttons');
+        this.el_discover = document.createElement('button');
+        this.el_discover.classList.add('device-config-button');
+        this.el_discover.textContent='Device Discover';
+        this.el_discover.addEventListener('click', event => {
+            console.log('discover pressed');
+            if (view._on_discover_request!==null) 
+                view._on_discover_request();
+        }, true);
+        buttons.appendChild(this.el_discover);
+        el.appendChild(buttons);
         el.appendChild(this.el_manufacturer_logo);
         el.appendChild(this.el_device_reference);
         el.appendChild(this.el_name);
