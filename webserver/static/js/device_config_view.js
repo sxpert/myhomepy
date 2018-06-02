@@ -26,15 +26,12 @@ export class Device_Config_View {
         element.appendChild(this.el_view);
     };
     set_slot(position, slot) {
-        console.log('Device_Config_View::set_slot', position, slot);
         var slots = this.el_slots.childNodes;
         while (position>(slots.length-1)) {
             let el=document.createElement('div');
             el.classList.add('device-slot');
             this.el_slots.appendChild(el);
         }
-        console.log(slots.length);
-        console.log(slots[position]);
         slots[position].replaceWith(slot);
     }
     /*************************************************************************
@@ -46,7 +43,6 @@ export class Device_Config_View {
         return el;     
     };
     set device_icon(icon) {
-        console.log('setting icon',icon);
         this.el_icon.src = utilities.gen_image_link(icon);
     }
     /*************************************************************************
@@ -58,7 +54,6 @@ export class Device_Config_View {
         return el;
     };
     set manufacturer_logo(logo) {
-        console.log(logo);
         this.el_manufacturer_logo.src = utilities.gen_image_link(logo);
     };
     /*************************************************************************

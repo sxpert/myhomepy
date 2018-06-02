@@ -6,7 +6,7 @@
     --default-width: 800px;
     --border-width: 1px;
     --slots-per-line: 2;
-    --margins-width: calc( var(--default-spacing) * calc( var(--slots-per-line) - 1 ));
+    --margins-width: calc( var(--default-spacing) * calc( var(--slots-per-line) - 1 ) );
     --avail-width: calc( var(--default-width) - var(--margins-width) );
     --width-with-border: calc( var(--avail-width) / var(--slots-per-line) );
     --borders-width: calc( var(--border-width) * 2 );
@@ -37,8 +37,8 @@
 .device-config-manufacturer-logo {
     display: inline-block;
     width: var(--header-height);
-    height: calc( var(--header-height) / 2);
-    line-height: calc( var(--header-height) / 2);
+    height: calc( var(--header-height) / 2 );
+    line-height: calc( var(--header-height) / 2 );
     color: #ccc;
     font-size: 12pt;
     margin-right: 4pt;  
@@ -50,13 +50,13 @@
 .device-config-name {
     font-size: 18pt;
     color: #bbb;
-    height: calc( var(--header-height) / 2);
+    height: calc( var(--header-height) / 2 );
     overflow-x: hidden;
 }
 .device-config-description {
     width: calc( 100% - var(--borders-width) );
     height: 150px;
-    border: 1px solid var(--border-color);
+    border: var(--border-width) solid var(--border-color);
     margin-bottom: 10pt;
 }
 .device-slots :first-child {
@@ -78,18 +78,51 @@
 }
 .device-slot-line {
     margin-top: var(--default-spacing);
-    margin-bottom: var(--default-spacing)
+    margin-bottom: var(--default-spacing);
+    --slot-address-width: calc( var(--slot-input-width) / 2 );
+    --slot-address-input-label-width: calc( var(--slot-address-width) / 4 );
+    --slot-address-input-width: calc( var(--slot-address-input-label-width) * 3 );
 }
 .device-slot-line:hover {
     background: var(--hover-background);
 }
 .device-slot-label {
     display: inline-block;
-    font-size: var( --slot-font-size );
+    font-size: var(--slot-font-size);
     width: var(--slot-label-width);
 }
+.device-slot-address {
+    font-size: var(--slot-font-size);
+    width: var(--slot-address-input-width);
+    border: var(--border-width) solid var(--border-color);
+    text-align: right;
+}
+.device-slot-address-label {
+    display: inline-block;
+    text-align: right;
+    margin-right: var(--default-spacing);
+    font-size: var(--slot-font-size);
+    width: calc( var(--slot-address-input-label-width) - var(--default-spacing) );
+}
+.device-slot-area {
+    font-size: var(--slot-font-size);
+    width: var(--slot-input-width);
+    border: var(--border-width) solid var(--border-color);
+}
+.device-slot-integer {
+    font-size: var(--slot-font-size);
+    width: var(--slot-input-width);
+    border: var(--border-width) solid var(--border-color);
+    text-align: right;
+}
+.device-slot-group {
+    font-size: var(--slot-font-size);
+    width: var(--slot-input-width);
+    border: var(--border-width) solid var(--border-color);
+    text-align: right;
+}
 .device-slot-select {
-    font-size: var( --slot-font-size );
+    font-size: var(--slot-font-size);
     width: var(--slot-input-width);
     border: var(--border-width) solid var(--border-color);
 }

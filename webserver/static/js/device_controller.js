@@ -36,10 +36,8 @@ export class Device {
                 });
         } else {
             // model is already there, time to setup the view
-            console.log('continue setup the device controller with the device_model set properly');
             if (this.config_view===null) {
                 let controller = this;
-                console.log('creating the config_view')
                 this.config_view = new dev_conf_view.Device_Config_View();
                 this.config_view.device_icon = this.device_model.icon;
                 this.config_view.manufacturer_logo = this.device_model.manufacturer_logo;
@@ -58,6 +56,7 @@ export class Device {
     set_device_model(stub) {
         if (stub.success) {
             this.device_model = stub.device_model;
+            // this.device_model.set_address_model()
             // create slot controllers
             let nb_slots = this.device_model.nb_slots
             this.slot_controllers = new Array(nb_slots);

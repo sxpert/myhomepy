@@ -68,7 +68,7 @@ class System {
         this.app = app;
         this.system_id = system.id;
         this.display_name = system.display_name;
-        this.gateway = new Gateway(this, system.gateway)
+        this.gateway = new Gateway(this, system.gateway);
         this.devices = new Devices(this);
     }
     get_tree_item() {
