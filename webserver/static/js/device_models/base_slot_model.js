@@ -32,11 +32,24 @@ export class Base_Slot_Model {
 
     };
     get_value(name) {
-        if (this.values===null)
-            return undefined;
-        let v = this.values[name]
-        if (v===undefined)
-            return undefined;
+        var v = undefined;
+        if (this.values!==null)
+            v = this.values[name]
+        if (v===undefined) {
+            // time to return some sensible default, depending on type, if possible
+            if (this.fields_dict!==null) {
+                let f = this.fields_dict[name];
+                if (f!==undefined) {
+                    switch(f.type) {
+                        case 'address': v = {a:0, pl:1}; break;
+                        case 'area': v = 0; break;
+                        case 'group': v = 1; break;
+                        case 'integer': v = f.min; break;
+                        case 'select': v = 0; break;
+                    }
+                }
+            }
+        }
         return v;
     };
     set_value(name, value) {
