@@ -1,6 +1,6 @@
 import * as ajax from './ajax.js';
 import * as tree from './tree_control.js';
-import * as mod_device from './device.js';
+import * as device_controller from './device_controller.js';
 
 class Gateway {
     constructor(system, gateway) {
@@ -11,7 +11,7 @@ class Gateway {
     };
     get_tree_item() {
         if (this.tree_item === null) {
-            var item = new tree.TreeItem(this.display_name, this.model);
+            var item = new tree.TreeItem(this.display_name, 'devices/'+this.model);
             var gateway = this;
             var click_func = function() {
                 gateway.click();
@@ -52,7 +52,7 @@ class Devices {
             this.devices = [];
             this.tree_item.empty()
             devices.forEach(data => {
-                var device = new mod_device.Device(this, data);
+                var device = new device_controller.Device(this, data);
                 this.devices.push(device);
                 var elem = device.get_tree_item();
                 this.tree_item.append_item(elem);

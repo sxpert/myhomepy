@@ -198,6 +198,19 @@ class BaseDevice(object):
     # ========================================================================
 
     @property
+    def valid(self):
+        return self.subsystem is not None and \
+               self._hw_addr is not None
+
+    @property
+    def hw_addr(self):
+        return self._hw_addr
+
+    @property
+    def hw_addr_hex(self):
+        return '%08X' % (self._hw_addr)
+
+    @property
     def icon(self):
         icon = getattr(self, VAR_ICON, None)
         if icon is None:
@@ -256,6 +269,7 @@ class BaseDevice(object):
         to show the device configuration page
         """
         data = {}
+        data['id'] = self.hw_addr_hex
         data['name'] = self.name
         data['description'] = self.description
         data['brand_id'] = self.brand_id
@@ -473,15 +487,6 @@ class BaseDevice(object):
 
         data[VAR_SLOTS] = self.slots
         return data
-
-    @property
-    def valid(self):
-        return self.subsystem is not None and \
-               self._hw_addr is not None
-
-    @property
-    def hw_addr(self):
-        return self._hw_addr
 
     # ========================================================================
     #
