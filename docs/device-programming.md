@@ -2,18 +2,36 @@
 
 There exists a part of OpenWebNet that is currently undocumented by BTicino, that is, the part of the protocol that allows programming of devices.
 
+## Undocumented frames
+
+You all know the standard `ACK` and `NACK` sentences
+
+* `*#*0##` : `NACK` Command not executed
+* `*#*1##` : `ACK` All lights are green !
+
+In some old code, found on the remnants of Microsoft's `archive.codeplex.com` (mirrored here in the `docs/openwebnet.zip` directory) we find the following: 
+
+* `*#*2##` : `NACK_NOP` Invalid command
+* `*#*3##` : `NACK_RET` This command exists, but the target device is not present on the bus (wrong address ?)
+* `*#*4##` : `NACK_COLL` Impossible to execute this command because of a collision on the bus.
+* `*#*5##` : `NACK_NOBUS` Impossible to execute the command because the bus is not available / accessible.
+* `*#*6##` : `NACK_BUSY` Multiframe procedure active, but not done yet...
+* `*#*7##` : `NACK_PROC` \[ the documentation is mum on that one \]
+
+Never seen those in the wild for now.
+
 ## Diagnostic frames ??
 
 If you read the documentation, it states there are diagnostic frames, with special WHO values, but there is no info about those.
 Some network sniffing later we have the following table :
 
-* 1000 : generic diagnostic (never seen those yet)
-* 1001 : Lighting and automation system
-* 1004 : heating / cooling system
-* 1008 : video door entry system
-* 1013 : gateway
-* 1018 : energy management
-* 1023 : access control
+* `1000` : generic diagnostic (never seen those yet)
+* `1001` : Lighting and automation system
+* `1004` : heating / cooling system
+* `1008` : video door entry system
+* `1013` : gateway
+* `1018` : energy management
+* `1023` : access control
 
 For most of those, the traffic is more or less copied to the monitor session. Not so with 1023, where only the client doing the diagnostics can see the frames.
 
@@ -24,10 +42,10 @@ This "Mac Address" is a 32 bit number, represented in hex on the sticker.
 
 In MyHomeSuite, the following subsystems can be scanned :
 
-* 1001
-* 1004
-* 1018
-* 1023
+* `1001`
+* `1004`
+* `1018`
+* `1023`
 
 ### step 1: clear the cache
 
@@ -80,6 +98,11 @@ Where `who` is the system, and `id` is the mac address of the device.
 The gateway responds with an `ACK` frame.
 
 *Note:* there are other modes, such as by pressing a button, which I haven't looked at yet.
+
+*Note 2:* you may see many `CMD_CONF_ABORT` during this process. it looks like those are used as a way of telling that something is busy.
+I have no idea why they didn't use the `NACK_BUSY` sentence instead, which would have made much more sense...
+
+`*[who]*6*0##`
 
 ### Step 2: First pass at getting data back
 
@@ -201,6 +224,53 @@ When the gateway is done with all the submodules, it sends the `RES_TRANS_END` s
 
 But you're not done yet...
 
-#### Step 3: Getting details about the configuration
+### Step 3: Getting details about the configuration
 
+Well, technically, you could just go ahead and skip to _Step 4_, but that's not what we're here for, are we...
 
+So, lets start the next phase, requesting detailed configuration for each slot.
+
+#### 3.1: Requesting the lot
+
+To start the flow of goodies, you have to send the `CMD_PARAM_ALL_KO` sentence.
+
+`*#[who]*0*38#0##`
+
+_Note_: there is a more specific version of this sentence, `CMD_PARAM_KO`.
+
+`*#[who]*0*38#[slot]##`
+
+Where `slot` is the slot number.
+
+As you can infer, _0_ means _all_ :-)
+
+#### 3.2: Getting all parameters
+
+You are then flooded with the parameters, in a series of `RES_PARAM_KO` sentences.
+
+Note that, contrarily to the previous step, this part is also sent on the command connection... 
+(another developper perhaps ? previous step is a bug or a missing line of code ? mysteries and illogical things abound in this gateway firmware...)
+
+`*#[who]*[where]*35#[index]#[slot]*[val_par]##`
+
+* `index` is the parameter number
+* `slot` is the slot number
+* `val_par` is the value for this parameter
+
+These are all specific depending on the data model for the slot. A series of documentation files will be required at this point :-)
+
+#### 3.3: End of transmission
+
+When the list of parameters is done, the gateway sends an `ACK` frame.
+
+### Step 4: End of the diagnostic session
+
+This is perhaps the most important part of the procedure. Not doing this will leave the device under scrutiny in limbo (is there a timeout ? no idea).
+
+You *MUST* send the `CMD_DIAG_ABORT` sentence.
+
+`*[who]*6*0##`
+
+At which point, the gateway will answer with an `ACK` sentence, and you'll be done.
+
+You can reuse the command connection, or you can close it and open a new one. Remember, there's a 30s timeout on that one.
