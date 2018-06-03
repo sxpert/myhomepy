@@ -577,6 +577,10 @@ class BaseDevice(object):
                 self.log('Unable to set configurator %d to value %d' % (i, v))
         return True
 
+    def res_conf_7_12(self, virt_id, conf_7_12):
+        # not implemented yet
+        return False
+
     def res_ko_value(self, virt_id, slot, keyo, state):
         if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_STRICT):
             return False

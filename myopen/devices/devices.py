@@ -203,6 +203,12 @@ class Devices(object):
         self.log('Devices.res_conf_1_6 : no active device', LOG_INFO)
         return False
 
+    def res_conf_7_12(self, virt_id, conf_7_12):
+        if self._active_device is not None:
+            return self._active_device.res_conf_7_12(virt_id, conf_7_12)
+        self.log('Devices.res_conf_7_12 : no active device', LOG_INFO)
+        return False
+
     def res_ko_value(self, virt_id, slot, keyo, state):
         if self._active_device is not None:
             return self._active_device.res_ko_value(virt_id, slot, keyo, state)

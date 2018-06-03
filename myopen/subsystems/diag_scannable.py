@@ -68,6 +68,13 @@ class DiagScannable(OWNSubSystem):
              r'(?P<c3>\d{1,3})\*(?P<c4>\d{1,3})\*(?P<c5>\d{1,3})\*'
              r'(?P<c6>\d{1,3})##$', '_diag_res_conf_1_6', ),
 
+            # res_conf_7_12
+            # device answers with hardware configurators 7 through 12
+            # *#[who]*[where]*5*[c7]*[c8]*[c9]*[c10]*[c11]*[c12]##
+            (r'^\*(?P<virt_id>\d{1,4})\*5\*(?P<c7>\d{1,3})\*(?P<c8>\d{1,3})\*'
+             r'(?P<c9>\d{1,3})\*(?P<c10>\d{1,3})\*(?P<c11>\d{1,3})\*'
+             r'(?P<c12>\d{1,3})##$', '_diag_res_conf_7_12', ),
+
             # res_diag_a
             # device answers with diagnostic bit set A
             # *#[who]*[where]*7*[bitmask_dia_a]##
@@ -255,6 +262,20 @@ class DiagScannable(OWNSubSystem):
         res = self.system.devices.res_conf_1_6(_virt_id, _c_1_6)
         if not res:
             self.log('res_conf_1_6 %s' % (str(matches)))
+        return res
+
+    def _diag_res_conf_7_12(self, matches):
+        _virt_id = matches['virt_id']
+        _c7 = int(matches['c7'])
+        _c8 = int(matches['c8'])
+        _c9 = int(matches['c9'])
+        _c10 = int(matches['c10'])
+        _c11 = int(matches['c11'])
+        _c12 = int(matches['c12'])
+        _c_7_12 = (_c7, _c8, _c9, _c10, _c11, _c12, )
+        res = self.system.devices.res_conf_7_12(_virt_id, _c_7_12)
+        if not res:
+            self.log('res_conf_7_12 %s' % (str(matches)))
         return res
 
     def _diag_res_diag_a(self, matches):
