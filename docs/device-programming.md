@@ -190,7 +190,8 @@ In certain cases, you may get `RES_KO_SYS`, indicating the bus address this subm
 
 For now, I have only seen actuators (_F411\[something\]_) sending this.
 
-_Note:_ It looks like there is a bug in the _F454_
+_Note:_ It looks like there is a bug in the _F454_, when a _H4652_ slot is configured in `CEN` mode, the programming tool sends this information 
+(the address is used as the `CEN` command number), however, this is not given back when reading the configuration again
 
 #### 2.8: End of transmission
 
