@@ -102,7 +102,7 @@ The gateway responds with an `ACK` frame.
 *Note 2:* you may see many `CMD_CONF_ABORT` during this process. it looks like those are used as a way of telling that something is busy.
 I have no idea why they didn't use the `NACK_BUSY` sentence instead, which would have made much more sense...
 
-`*[who]*6*0##`
+`*[who]*3*0##`
 
 ### Step 2: First pass at getting data back
 
@@ -274,3 +274,4 @@ You *MUST* send the `CMD_DIAG_ABORT` sentence.
 At which point, the gateway will answer with an `ACK` sentence, and you'll be done.
 
 You can reuse the command connection, or you can close it and open a new one. Remember, there's a 30s timeout on that one.
+

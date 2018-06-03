@@ -17,7 +17,10 @@ class DiagScannable(OWNSubSystem):
 
     SCAN_REGEXPS = {
         'COMMAND': [
-            # system is busy
+            # cmd_conf_abort
+            # device abort configuration
+            # *[who]*3*0##
+            # in reality : the gateway is busy doing stuff on the bus, probably...
             (r'^\*3\*0##$', '_diag_busy', ),
 
             # res_trans_end
