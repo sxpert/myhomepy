@@ -175,7 +175,6 @@ export class Slot_Controller {
     };
     value_updated(name) {
         var value = this.slot_model.get_value(name)
-        console.log('Slot_Controller::value_updated', name, value);
         this.slot_view.set_value(name, value);
         this.set_fields_visibility();
     }

@@ -10,12 +10,10 @@ export class Base_Device_Model_Stub {
         this.success = false;
         this.device_model = null;
         var url = '/api/get-device-data?system_id='+system_id+'&device_id='+id;
-        console.log(url);
         var bdms = this;
         ajax.get_json(url,
             function(data) {
                 if (data.ok !== undefined && data.ok === true) {
-                    console.log('success', data);
                     data = data.device;
                     if (data!==undefined) 
                         return bdms.set_device_model(data);

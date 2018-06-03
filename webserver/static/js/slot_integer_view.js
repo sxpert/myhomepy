@@ -20,7 +20,6 @@ export class Slot_Integer_View extends slot_field.Base_Slot_Field_View {
         return el;
     };
     set value(value) {
-        console.log(this._label.textContent, 'setting value', value);
         this._input.value = value;
     }
 }

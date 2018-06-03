@@ -25,7 +25,6 @@ export class Base_Slot_Model {
         this._on_value_updated = func;
     }
     update(data) {
-        console.log('updating slot with', data);
         let keys = Object.keys(data.values);
         for(var k=0; k<keys.length; k++) {
             let key = keys[k];

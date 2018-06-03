@@ -48,8 +48,6 @@ export class Device {
                     controller.config_view.name = controller.device_model.name;
                 }
                 this.config_view.on_discover_request = function() {
-                    console.log(controller, 'launching discover request');
-                    // should disable the view
                     controller.config_view.enabled = false;
                     controller.device_model.discover_device();
                 }

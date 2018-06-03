@@ -56,15 +56,12 @@ export class Base_Device_Model {
         this._system_id = system_id
     }
     discover_device() {
-        console.log('starting discovery');
         if ((this._system_id===undefined)||(this._system_id === null)) return false;
         var url = '/api/do-device-discovery?system_id='+this._system_id+'&device_id='+this.id;
-        console.log(url);
         var model = this;
         ajax.get_json(url,
             function(data) {
                 if (data.ok !== undefined && data.ok === true) {
-                    console.log('success', data);
                     data = data.device;
                     if (data!==undefined) 
                         return model.update(data);
@@ -79,7 +76,7 @@ export class Base_Device_Model {
     update(data) {
         console.log('update the model with data', data);
         // update the device too...
-        
+
         // normally only the slots should be modified
         for(var s=0; s<this.slots.length; s++) {
             this.slots[s].update(data.slots[s]);
