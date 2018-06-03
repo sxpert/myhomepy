@@ -134,6 +134,12 @@ class System(object):
                          % (str(self._task)))
                 self._task = None
 
+    def websocket_dispatch(self, data):
+        from myopen.message import Message
+        m = Message(data, self)
+        m.parse()
+        self.systems.config.websocket_dispatch(m)
+
     def dispatch_message(self, msg):
         if self.is_cmd_busy:
             if msg is not None and self._task is not None:

@@ -19,6 +19,9 @@ class Config(object):
         self.log = get_logger(LOG_INFO, '[CONF]', COLOR_YELLOW)
         self.log('Initializing configuration')
 
+        # queue for websocket listeners
+        self._websocket_queues = []
+
         self.app = app
         if config_file is None:
             self.config_file = CONFIG_FILE_NAME
@@ -73,7 +76,7 @@ class Config(object):
 
     # ========================================================================
     #
-    # loading the configuration from file
+    # saving the configuration from file
     #
     # ========================================================================
 
@@ -89,6 +92,33 @@ class Config(object):
         f = open(self.config_file, 'w')
         f.write(json_data)
         f.close()
+
+    # ========================================================================
+    #
+    # manage websocket handlers
+    #
+    # ========================================================================
+    
+    def websocket_dispatch(self, msg):
+        """
+        Dispatches messages to all registered websocket queues
+        """
+        self.log('Config.websocket_dispatch %s %s' % (str(msg.system.id), str(msg)))
+        for queue in self._websocket_queues:
+            self.log('pushing to %s' % (str(queue)))
+            queue.put_nowait(msg)
+
+    def websocket_register(self, queue):
+        """
+        Registers a queue for a websocket connection to receive messages on
+        """
+        self._websocket_queues.append(queue)
+
+    def websocket_unregister(self, queue):
+        """
+        Removes the given queue from the list of queues
+        """
+        pass
 
     # ========================================================================
     #
