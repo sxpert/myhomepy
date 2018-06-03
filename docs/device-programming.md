@@ -1,6 +1,6 @@
 # Undocumented OpenWebNet
 
-There exists a part of OpenWebNet that is currently undocumented by BTicino, that is, the part of the protocol that allows programming of devices
+There exists a part of OpenWebNet that is currently undocumented by BTicino, that is, the part of the protocol that allows programming of devices.
 
 ## Diagnostic frames ??
 
@@ -15,7 +15,7 @@ Some network sniffing later we have the following table :
 * 1018 : energy management
 * 1023 : access control
 
-For most of those, the traffic is more or less copied to the monitor session. Not so with 1023, where only the client doing the diagnostics can see the frames
+For most of those, the traffic is more or less copied to the monitor session. Not so with 1023, where only the client doing the diagnostics can see the frames.
 
 ## Scanning the system
 
@@ -46,23 +46,133 @@ The `CMD_SCAN_SYSTEM` sentence will make the gateway scan the bus for the variou
 
 `*#[who]*0*13##`
 
-The gateway then responds with a series of `DIAG_RES_ID` sentences, one per device on the bus:
+The gateway then responds with a series of `RES_ID` sentences, one per device on the bus:
 
 `*#[who]*[where]*13*[id]##`
 
-* `where` is probably unimportant, it is 0 for buttons, and the configured address of the leftmost relay in a F411 device
-* `id` is the device mac address in decimal
+* `where` is probably unimportant, it is 0 for buttons, and the configured address of the leftmost relay in a F411 device.
+* `id` is the device mac address in decimal.
 
 The list ends with an `ACK` frame.
 
-### step 3: more scanning
+### Step 3: More scanning
 
-If you have more systems to scan, you can go back to step 1 with a different `who` 
+If you have more systems to scan, you can go back to step 1 with a different `who`.
 
-### step 4: done scanning
+### Step 4: Done scanning
 
-If you are done scanning, you need to send the CMD_RESET again, otherwise, wierd things happen, you should receive an `ACK` frame for your troubles
+If you are done scanning, you need to send the CMD_RESET again, otherwise, wierd things happen, you should receive an `ACK` frame for your troubles.
 
-## 
+## Reading a device configuration
+
+This gets more interesting...
+
+Once you have all your devices' mac addresses, you can start poking at them to get their configuration parameters.
+
+### Step 1: Starting the device diagnostic
+
+The process is started by sending the `CMD_DIAG_ID` sentence.
+
+`*[who]*10#[id]*0##`
+
+Where `who` is the system, and `id` is the mac address of the device.
+
+The gateway responds with an `ACK` frame.
+
+*Note:* there are other modes, such as by pressing a button, which I haven't looked at yet.
+
+### Step 2: First pass at getting data back
+
+This is where it gets wierd, you'd imagine getting all the answers in the command session, which would make things more logical... 
+Well, no, doesn't work that way, you get that first salvo of answers on the monitor session...
+
+Thus... in the monitor sessions you get the following :
+
+#### 2.1: A reminder that a device is being looked at
+
+You get that frame you send back from the gateway.
+
+`*[who]*10#[id]*0##`
+
+Note that this may be useful if you're listening in and another machine launches a device diagnostic.
+
+#### 2.2: Generic information about the device
+
+The `RES_OBJECT_MODEL` sentence gives several bits of information about the device.
+
+`*#[who]*[where]*1*[object_model]*[n_conf]*[brand]*[line]##`
+
+* `who` and `object_model` gives the exact device type, for instance, `(1001, 2)` is a 2 button, Basic Command device (for instance an H4652), `(1001, 129)` is a F411/2
+* `n_conf` gives the number of physical configuration spots on the device
+* `brand` gives the device brand, it may be `0` for older devices
+* `line` gives the product line, which may also be `0` for older devices
+
+#### 2.3: Firmware version numbers
+
+The `RES_FW_VERSION` sentence gives the device's firmware version, as `[major]*[minor]*[build]`.
+
+`*#[who]*[where]*2*[fw_version]##`
+
+#### 2.4: Hardware version
+
+You may receive `RES_HW_VERSION` with the version number of the hardware.
+
+`*#[who]*[where]*3*[hw_version]##`
+
+#### 2.5: Configurators
+
+The next sentence, `RES_CONF_1_6` gives the value of physical configurators on the device.
+
+`*#[who]*[where]*4*[c1]*[c2]*[c3]*[c4]*[c5]*[c6]##`
+
+You may also get the `RES_CONF_7_12` sentence, if there are more than 6 physical configurators slots (see the `n_conf` in `RES_OBJECT_MODEL`).
+
+`*#[who]*[where]*5*[c7]*[c8]*[c9]*[c10]*[c11]*[c12]##`
+
+#### 2.6: Micro version
+
+On more advanced devices you may have a larger processor, and smaller microcontrollers to connect the device to the bus.
+
+This `RES_MICRO_VERSION` sentences gives the firmware of the helper microcontroller.
+
+`*#[who]*[where]*6*[micro_version]##`
+
+#### 2.5: Diagnostic bits
+
+There are two series of diagnostic bits, A, and B, respectively given by the `RES_DIAG_A` and `RES_DIAG_B` sentences.
+
+`*#[who]*[where]*7*[bitmask_dia_a]##`
+
+`*#[who]*[where]*8*[bitmask_dia_b]##`
+
+#### 2.6: Device mac address (again !)
+
+You then get the `RES_ID` sentence that you got from scanning the system. this is probably in case you're using one of the other scanning modes.
+
+`*#[who]*[where]*13*[id]##`
+
+#### 2.7: Submodules configuration
+
+A device is composed of submodules, called _slots_. For instance, on the 4652/2 type device, there is one slot for each rocker button.
+
+Each slot can be set to a series of data models, which is specific for each device.
+
+One of the data model is the _unconfigured_ mode, where the portion of the device doesn't do anything.
+
+There are multiple sentences related to this part of the configuration, so let's start...
+
+##### 2.7.1: Slot data model
+
+
+
+#### 2.8: End of transmission
+
+When the gateway is done with all the submodules, it sends the `RES_TRANS_END` sentence.
+
+`*1001*4*0##`
+
+But you're not done yet...
+
+
 
 
