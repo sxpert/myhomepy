@@ -20,7 +20,7 @@ class Config(object):
         self.log('Initializing configuration')
 
         # queue for websocket listeners
-        self._websocket_queues = []
+        self._websockets = []
 
         self.app = app
         if config_file is None:
@@ -99,26 +99,37 @@ class Config(object):
     #
     # ========================================================================
     
-    def websocket_dispatch(self, msg):
+    async def websocket_dispatch(self, msg):
         """
         Dispatches messages to all registered websocket queues
         """
         self.log('Config.websocket_dispatch %s %s' % (str(msg.system.id), str(msg)))
-        for queue in self._websocket_queues:
-            self.log('pushing to %s' % (str(queue)))
-            queue.put_nowait(msg)
+        for ws in self._websockets:
+            self.log('pushing to %s' % (str(ws)))
+            if hasattr(msg, 'web_data'):
+                msg = msg.web_data
+            try:
+                await ws.send_json(msg)
+            except TypeError:
+                self.log('ERROR: %s can\'t be converted to json' % (str(msg)))
 
-    def websocket_register(self, queue):
+    def websocket_register(self, ws):
         """
         Registers a queue for a websocket connection to receive messages on
         """
-        self._websocket_queues.append(queue)
+        self.log('websocket %s registered' % (str(ws)))
+        self._websockets.append(ws)
 
-    def websocket_unregister(self, queue):
+    def websocket_unregister(self, ws):
         """
         Removes the given queue from the list of queues
         """
-        pass
+        self.log('unregister websocket %s' % (str(ws)))
+
+    async def websocket_close_all(self):
+        for ws in self._websockets:
+            self.log('closing websocket %s' % (str(ws)))
+            await ws.close()
 
     # ========================================================================
     #

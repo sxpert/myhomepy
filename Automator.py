@@ -37,6 +37,9 @@ class Automator(object):
         try:
             self.loop.run_forever()
         except KeyboardInterrupt:
+            print('closing all websockets')
+            self.loop.run_until_complete(self.config.websocket_close_all())
+            print('websockets closed')
             tasks = asyncio.gather(
                         *asyncio.Task.all_tasks(loop=self.loop),
                         loop=self.loop,

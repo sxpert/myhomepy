@@ -114,17 +114,20 @@ class WebServer(object):
         #
         # API for the website
         #
+        self.app.router.add_view('/api/websocket',
+                                 views.api.WebSocket,
+                                 name='websocket')
         self.app.router.add_view('/api/get-systems-list', 
-                                 views.api.get_systems_list.GetSystemList,
+                                 views.api.GetSystemList,
                                  name='get-systems-list')
         self.app.router.add_view('/api/get-system-devices', 
-                                 views.api.get_system_devices.GetSystemDevices,
+                                 views.api.GetSystemDevices,
                                  name='get-system-devices')
         self.app.router.add_view('/api/do-device-discovery', 
-                                 views.api.do_device_discovery.DoDeviceDiscovery,
+                                 views.api.DoDeviceDiscovery,
                                  name='do-device-discovery')
         self.app.router.add_view('/api/get-device-data', 
-                                 views.api.get_device_data.GetDeviceData,
+                                 views.api.GetDeviceData,
                                  name='get-device-data')
         #
         # web-accessible actions

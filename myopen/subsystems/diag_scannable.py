@@ -21,7 +21,11 @@ class DiagScannable(OWNSubSystem):
             # device abort configuration
             # *[who]*3*0##
             # in reality : the gateway is busy doing stuff on the bus, probably...
-            (r'^\*3\*0##$', '_diag_busy', ),
+            {
+                'name': 'CMD_CONF_ABORT',
+                're': r'^\*3\*0##$', 
+                'func': '_diag_busy'
+            },
 
             # res_trans_end
             # end of transmission from device
@@ -35,18 +39,34 @@ class DiagScannable(OWNSubSystem):
             # cmd_diag_abort
             # programmer abort diagnostic
             # *[who]*6*0##
-            (r'^\*6\*0##$', '_diag_cmd_diag_abort', ),
+            {
+                'name': 'CMD_DIAG_ABORT',
+                're': r'^\*6\*0##$', 
+                'func': '_diag_cmd_diag_abort'
+            },
 
             # cmd_diag_id
             # programmer starts a diagnostic session wth ID
             # *[who]*10#[id]*0##
-            (r'^\*10#(?P<hw_addr>\d{1,10})\*0##$', '_diag_cmd_diag_id', ),
+            {
+                'name': 'CMD_DIAG_ID',
+                're': r'^\*10#(?P<hw_addr>\d{1,10})\*0##$', 
+                'func': '_diag_cmd_diag_id'
+            },
 
             # cmd_scan_check
-            (r'^\*11#(?P<hw_addr>\d{1,10})\*0##$', '_cmd_scan_check', ),
+            {
+                'name': 'CMD_SCAN_CHECK',
+                're': r'^\*11#(?P<hw_addr>\d{1,10})\*0##$', 
+                'func': '_cmd_scan_check'
+            },
 
             # scanning subsystem reset
-            (r'^\*12\*0##$', '_subsystem_scan_reset', ),
+            {
+                'name': 'CMD_RESET',
+                're': r'^\*12\*0##$', 
+                'func': '_subsystem_scan_reset'
+            },
 
         ],
         'STATUS': [
@@ -54,40 +74,64 @@ class DiagScannable(OWNSubSystem):
             # device answers with it's object model and number of physical
             # configurators
             # *#[who]*[where]*1*[object_model]*[n_conf]*[brand]*[line]##
-            (r'^\*(?P<virt_id>\d{1,4})\*1\*(?P<model_id>\d{1,3})\*'
-             r'(?P<nb_conf>\d{1,2})\*(?P<brand_id>\d)\*(?P<prod_line>\d)##$',
-             '_diag_res_object_model', ),
+            {
+                'name': 'RES_OBJECT_MODEL',
+                're': r'^\*(?P<virt_id>\d{1,4})\*1\*(?P<model_id>\d{1,3})\*(?P<nb_conf>\d{1,2})\*(?P<brand_id>\d)\*(?P<prod_line>\d)##$',
+                'func': '_diag_res_object_model'
+            },
 
             # res_fw_version
             # device answers with it's firmware version
             # *#[who]*[where]*2*[fw_version]##
-            (r'^\*(?P<virt_id>\d{1,4})\*2\*(?P<fw_version>.*)##$',
-             '_diag_res_fw_version', ),
+            {   
+                'name': 'RES_FW_VERSION',
+                're': r'^\*(?P<virt_id>\d{1,4})\*2\*(?P<fw_version>.*)##$',
+                'func': '_diag_res_fw_version'
+            },
 
             # res_conf_1_6
             # device answers with hardware configurators 1 through 6
             # *#[who]*[where]*4*[c1]*[c2]*[c3]*[c4]*[c5]*[c6]##
-            (r'^\*(?P<virt_id>\d{1,4})\*4\*(?P<c1>\d{1,3})\*(?P<c2>\d{1,3})\*'
-             r'(?P<c3>\d{1,3})\*(?P<c4>\d{1,3})\*(?P<c5>\d{1,3})\*'
-             r'(?P<c6>\d{1,3})##$', '_diag_res_conf_1_6', ),
+            {
+                'name': 'RES_CONF_1_6',
+                're': r'^\*(?P<virt_id>\d{1,4})\*4\*(?P<c1>\d{1,3})\*(?P<c2>\d{1,3})\*(?P<c3>\d{1,3})\*(?P<c4>\d{1,3})\*(?P<c5>\d{1,3})\*(?P<c6>\d{1,3})##$',
+                'func': '_diag_res_conf_1_6'
+            },
 
             # res_conf_7_12
             # device answers with hardware configurators 7 through 12
             # *#[who]*[where]*5*[c7]*[c8]*[c9]*[c10]*[c11]*[c12]##
-            (r'^\*(?P<virt_id>\d{1,4})\*5\*(?P<c7>\d{1,3})\*(?P<c8>\d{1,3})\*'
-             r'(?P<c9>\d{1,3})\*(?P<c10>\d{1,3})\*(?P<c11>\d{1,3})\*'
-             r'(?P<c12>\d{1,3})##$', '_diag_res_conf_7_12', ),
+            {
+                'name': 'RES_CONF_7_12',
+                're': r'^\*(?P<virt_id>\d{1,4})\*5\*(?P<c7>\d{1,3})\*(?P<c8>\d{1,3})\*(?P<c9>\d{1,3})\*(?P<c10>\d{1,3})\*(?P<c11>\d{1,3})\*(?P<c12>\d{1,3})##$', 
+                'func': '_diag_res_conf_7_12'
+            },
 
             # res_diag_a
             # device answers with diagnostic bit set A
             # *#[who]*[where]*7*[bitmask_dia_a]##
-            (r'^\*(?P<virt_id>\d{1,4})\*7\*(?P<diag_bits>[01]{24})##$',
-             '_diag_res_diag_a', ),
+            {
+                'name': 'RES_DIAG_A',
+                're': r'^\*(?P<virt_id>\d{1,4})\*7\*(?P<diag_bits>[01]{24})##$',
+                'func': '_diag_res_diag_a'
+            },
+
+            # res_diag_b
+            # device answers with diagnostic bit set B
+            # *#[who]*[where]*8*[bitmask_dia_a]##
+            {
+                'name': 'RES_DIAG_B',
+                're': r'^\*(?P<virt_id>\d{1,4})\*8\*(?P<diag_bits>[01]{24})##$',
+                'func': '_diag_res_diag_b'
+            },
 
             # device diagnostics
             # see notes.txt
-            (r'^\*(?P<virt_id>\d{1,4})\*11\*(?P<diag_bits>[01]{24})##$',
-             '_analyze_diagnostics', ),
+            {
+                'name': 'WARN_DEVICE_DIAG',
+                're': r'^\*(?P<virt_id>\d{1,4})\*11\*(?P<diag_bits>[01]{24})##$',
+                'func': '_analyze_diagnostics'
+            },
 
             # res_id
             # device answers with it's ID
@@ -102,8 +146,7 @@ class DiagScannable(OWNSubSystem):
             # *#[who]*[where]*30*[slot]*[keyo]*[state]##
             {
                 'name': 'RES_KO_VALUE',
-                're': r'^\*(?P<virt_id>\d{1,4})\*30\*(?P<slot>\d{1,3})\*'
-                      r'(?P<keyo>\d{1,5})\*(?P<state>[01])##$',
+                're': r'^\*(?P<virt_id>\d{1,4})\*30\*(?P<slot>\d{1,3})\*(?P<keyo>\d{1,5})\*(?P<state>[01])##$',
                 'func': '_diag_res_ko_value'
             },
 
@@ -112,17 +155,16 @@ class DiagScannable(OWNSubSystem):
             # *#[who]*[where]*32#[slot]*[sys]*[addr]##
             {
                 'name': 'RES_KO_SYS',
-                're': r'^\*(?P<virt_id>\d{1,4})\*32#(?P<slot>\d{1,3})'
-                      r'\*(?P<sys>\d{1,3})\*(?P<addr>\d{1,5})##$',
+                're': r'^\*(?P<virt_id>\d{1,4})\*32#(?P<slot>\d{1,3})\*(?P<sys>\d{1,3})\*(?P<addr>\d{1,5})##$',
                 'func': '_diag_res_ko_sys'
             },
 
+            # res_param_ko
             # device answers with the key/value of key/object
             # *#[who]*[where]*35#[index]#[slot]*[val_par]##
             {
                 'name': 'RES_PARAM_KO',
-                're': r'\*(?P<virt_id>\d{1,4})\*35#(?P<index>\d{1,3})#'
-                      r'(?P<slot>\d{1,3})\*(?P<val_par>\d{1,5})##',
+                're': r'\*(?P<virt_id>\d{1,4})\*35#(?P<index>\d{1,3})#(?P<slot>\d{1,3})\*(?P<val_par>\d{1,5})##',
                 'func': '_diag_res_param_ko'
             },
         ]

@@ -42,6 +42,28 @@ class Message(object):
         self._msg = None
         self._identify_type()
 
+    @property
+    def web_data(self):
+        data = {}
+        data['msg'] = self._str
+        if self.system is not None:
+            data['system_id'] = self.system.id
+        if self._conn is not None:
+            data['connection'] = self.CNX_NAMES[self._conn]
+        if self._who is not None:
+            data['who'] = self._who
+        if self._type is not None:
+            data['type'] = self.MSG_TYPES[self._type]
+        if self._name is not None:
+            data['name'] = self._name
+        if self._fi is not None:
+            self.log(self._fi)
+            data['fields'] = self._fi[1]
+        obj = {}
+        obj['type'] = self.__class__.__name__
+        obj['data'] = data
+        return obj
+
     def _default_logger(self, msg):
         print(msg)
 

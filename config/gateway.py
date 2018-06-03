@@ -180,7 +180,7 @@ class Gateway(object):
 
             if data is not None:
                 # send the message to websocket listeners
-                self.system.websocket_dispatch(data)
+                await self.system.websocket_dispatch(data)
                 handled = False
                 if self.system.is_cmd_busy:
                     handled = self.system.dispatch_message(data)

@@ -87,6 +87,7 @@ class System {
 
 class App {
     constructor () {
+        this._ws = null;
         this.main_tree = new tree.TreeControl("object-tree");
         this.content_pane = "main-content";
         this.systems = new Array();
@@ -94,6 +95,7 @@ class App {
     start(){
         let app = this;
         let systems = this.systems;
+        this.websocket();
         ajax.get_json('/api/get-systems-list', function (data) {
             data.forEach(sys_data => {
                 var system = new System(app, sys_data);
@@ -108,6 +110,23 @@ class App {
             this.main_tree.add_item(item);
         }
     };
+    websocket() {
+        var app = this;
+        this._ws = new WebSocket('ws://'+window.location.host+'/api/websocket');
+        this._ws.onopen = function() {
+            console.log('ws opened');
+        };
+        this._ws.onmessage = function(event) {
+            app.ws_message(event.data)
+        };
+        this._ws.onclose = function(event) {
+            app.websocket();
+        }
+    }
+    ws_message(data) {
+        let js = JSON.parse(data)
+        console.log(js);
+    }
 }
 
 let Application = new App();
