@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import re
+from datetime import datetime, timezone
+
 from core.logger import LOG_ERROR
-from .subsystems import find_subsystem
+
 from .asyncio_connection import MODE_COMMAND, MODE_MONITOR
+from .subsystems import find_subsystem
 
 
 class Message(object):
@@ -31,6 +34,7 @@ class Message(object):
         if isinstance(msg, str):
             self._str = msg
 
+        self._timestamp = datetime.now(timezone.utc)
         # initialize other variables
         self._parsed = False
         self._type = None
@@ -46,6 +50,7 @@ class Message(object):
     def web_data(self):
         data = {}
         data['msg'] = self._str
+        data['timestamp'] = self._timestamp.isoformat()
         if self.system is not None:
             data['system_id'] = self.system.id
         if self._conn is not None:
