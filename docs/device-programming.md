@@ -267,7 +267,7 @@ When the list of parameters is done, the gateway sends an `ACK` frame.
 
 This is perhaps the most important part of the procedure. Not doing this will leave the device under scrutiny in limbo (is there a timeout ? no idea).
 
-You *MUST* send the `CMD_DIAG_ABORT` sentence.
+You **MUST** send the `CMD_DIAG_ABORT` sentence.
 
 `*[who]*6*0##`
 
