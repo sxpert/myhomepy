@@ -73,6 +73,19 @@ export class Base_Device_Model {
             }
         );                
     }
+    get data(){
+        var data = {};
+        var slots = [];
+        for(var s=0; s<this.slots.length; s++)
+            slots[s] = this.slots[s].data;
+        data.slots = slots;
+        return data;
+    }
+    program_device() {
+        console.log('Base_Device_Model::program_device');
+        // this is too much, need some filtering ;-)
+        console.log(JSON.stringify(this.data));
+    }
     update(data) {
         console.log('update the model with data', data);
         // update the device too...

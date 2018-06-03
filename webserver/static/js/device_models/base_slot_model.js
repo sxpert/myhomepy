@@ -24,6 +24,9 @@ export class Base_Slot_Model {
     set on_value_updated(func) {
         this._on_value_updated = func;
     }
+    get data() {
+        return this.values;
+    }
     update(data) {
         let keys = Object.keys(data.values);
         for(var k=0; k<keys.length; k++) {

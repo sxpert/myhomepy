@@ -51,6 +51,11 @@ export class Device {
                     controller.config_view.enabled = false;
                     controller.device_model.discover_device();
                 }
+                this.config_view.on_program_request = function() {
+                    console.log('programming requested');
+                    controller.config_view.enabled = false;
+                    controller.device_model.program_device();
+                }
                 for(var i=0; i<this.slot_controllers.length; i++)
                     this.config_view.set_slot(i, this.slot_controllers[i].element);
             }

@@ -4,6 +4,7 @@ export class Device_Config_View {
     constructor() {
         // buttons
         this.el_discover = null;
+        this.el_discover = null;
 
         // elements
         this.el_icon = this.create_device_icon_element();
@@ -20,12 +21,16 @@ export class Device_Config_View {
         // events callbacks
         this._on_name_change = null;
         this._on_discover_request = null;
+        this._on_program_request = null;
     };
     set on_name_change(func) {
         this._on_name_change = func;
     }
     set on_discover_request(func) {
         this._on_discover_request = func;
+    }
+    set on_program_request(func) {
+        this._on_program_request = func;
     }
     set enabled(enabled) {
         this.el_discover.disabled = !enabled;
@@ -123,7 +128,16 @@ export class Device_Config_View {
             if (view._on_discover_request!==null) 
                 view._on_discover_request();
         }, true);
+        this.el_program = document.createElement('button');
+        this.el_program.classList.add('device-config-button');
+        this.el_program.textContent='Program Device';
+        this.el_program.addEventListener('click', event => {
+            console.log('program pressed');
+            if (view._on_program_request!==null) 
+                view._on_program_request();
+        }, true);
         buttons.appendChild(this.el_discover);
+        buttons.appendChild(this.el_program);
         el.appendChild(buttons);
         el.appendChild(this.el_manufacturer_logo);
         el.appendChild(this.el_device_reference);
