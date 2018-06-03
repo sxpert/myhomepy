@@ -163,7 +163,31 @@ There are multiple sentences related to this part of the configuration, so let's
 
 ##### 2.7.1: Slot data model
 
+Ths slot data model is given by the `RES_KO_VALUE` sentence.
 
+`*#[who]*[where]*30*[slot]*[keyo]*[state]##`
+
+* `slot` is the slot number, this can be between 1 and 32
+* `keyo` is the data model identifier (an integer)
+* `state` indicates if the slot is configured. Note that this may be somewhat duplicated with the _unconfigured_ `keyo` number for each device
+
+##### 2.7.2: Slot is somehow busy
+
+This needs an example...
+
+When a F411/2 is configured with slot 1 set as _Automation Control_, this takes 2 adjacent relays. In that case, you will get the info with the `` sentence.
+
+
+##### 2.7.3: Address and System
+
+In certain cases, you may get `RES_KO_SYS`, indicating the bus address this submodule answers to, and the System.
+
+`*#[who]*[where]*32#[slot]*[sys]*[addr]##`
+
+* `sys` is the subsystem this device is in, typically `1` for lighting.
+* `addr` is the address the device will respond to.
+
+For now, I have only seen actuators (F411*) sending this.
 
 #### 2.8: End of transmission
 
