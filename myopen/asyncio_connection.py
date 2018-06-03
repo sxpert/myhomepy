@@ -5,7 +5,7 @@ import re
 from asyncio.streams import StreamReader, StreamWriter
 from socket import gaierror
 
-from core.logger import COLOR_LT_BLUE, COLOR_LT_GREEN, LOG_DEBUG, get_logger
+from core.logger import COLOR_LT_BLUE, COLOR_LT_GREEN, COLOR_LT_CYAN, LOG_DEBUG, get_logger
 from myopen.asyncio_protocol import OWNProtocol
 from myopen.openpass import ownCalcPass
 
@@ -16,12 +16,13 @@ __all__ = [
 
 MODE_COMMAND = 0
 MODE_MONITOR = 1
+MODE_SUPER_COMMAND = 2
 
 
 class AsyncIOOWNConnection(object):
-    SOCKET_MODES = ('*99*0##', '*99*1##', )
-    MODE_COLORS = (COLOR_LT_BLUE, COLOR_LT_GREEN)
-    MODE_NAMES = ('CMD', 'MON', )
+    SOCKET_MODES = ('*99*0##', '*99*1##', '*99*9##')
+    MODE_COLORS = (COLOR_LT_BLUE, COLOR_LT_GREEN, COLOR_LT_CYAN)
+    MODE_NAMES = ('CMD', 'MON', 'SCMD')
 
     ACK = '*#*1##'
 
