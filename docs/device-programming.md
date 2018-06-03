@@ -61,7 +61,7 @@ If you have more systems to scan, you can go back to step 1 with a different `wh
 
 ### Step 4: Done scanning
 
-If you are done scanning, you need to send the CMD_RESET again, otherwise, wierd things happen, you should receive an `ACK` frame for your troubles.
+If you are done scanning, you need to send the `CMD_RESET` again, otherwise, wierd things happen, you should receive an `ACK` frame for your troubles.
 
 ## Reading a device configuration
 
@@ -102,7 +102,7 @@ The `RES_OBJECT_MODEL` sentence gives several bits of information about the devi
 
 `*#[who]*[where]*1*[object_model]*[n_conf]*[brand]*[line]##`
 
-* `who` and `object_model` gives the exact device type, for instance, `(1001, 2)` is a 2 button, Basic Command device (for instance an H4652), `(1001, 129)` is a F411/2
+* `who` and `object_model` gives the exact device type, for instance, `(1001, 2)` is a 2 button, Basic Command device (for instance an _H4652_), `(1001, 129)` is a _F411/2_
 * `n_conf` gives the number of physical configuration spots on the device
 * `brand` gives the device brand, it may be `0` for older devices
 * `line` gives the product line, which may also be `0` for older devices
@@ -177,6 +177,7 @@ This needs an example...
 
 When a F411/2 is configured with slot 1 set as _Automation Control_, this takes 2 adjacent relays. In that case, you will get the info with the `` sentence.
 
+_TODO: find which sentence is actually sent here_
 
 ##### 2.7.3: Address and System
 
@@ -187,7 +188,9 @@ In certain cases, you may get `RES_KO_SYS`, indicating the bus address this subm
 * `sys` is the subsystem this device is in, typically `1` for lighting.
 * `addr` is the address the device will respond to.
 
-For now, I have only seen actuators (F411*) sending this.
+For now, I have only seen actuators (_F411\[something\]_) sending this.
+
+_Note:_ It looks like there is a bug in the _F454_
 
 #### 2.8: End of transmission
 
@@ -197,6 +200,6 @@ When the gateway is done with all the submodules, it sends the `RES_TRANS_END` s
 
 But you're not done yet...
 
-
+#### Step 3: Getting details about the configuration
 
 
