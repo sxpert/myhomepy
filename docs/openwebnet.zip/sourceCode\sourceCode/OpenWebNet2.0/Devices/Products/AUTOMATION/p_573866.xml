@@ -1,0 +1,58 @@
+<!-- integration module dimmer 0-10V 1000W-->
+<root xmlType="product" name="prod_573866" versionXML="1.1">
+   <cod brand="0" code="0">573866</cod>
+   <modobj>198</modobj>
+   <typeobj>1</typeobj>
+   <desc G_name="" P_name="description"/>
+   <configTY>1</configTY>
+   <SWvs>1.0.0</SWvs>
+   <conf>
+      <conf num="1" pos="1">
+         <desc G_name="c_ambient" P_name=""/>
+         <name>A</name>
+         <val value="0">0</val>
+         <val value="1">1</val>
+         <val value="2">2</val>
+         <val value="3">3</val>
+         <val value="4">4</val>
+         <val value="5">5</val>
+         <val value="6">6</val>
+         <val value="7">7</val>
+         <val value="8">8</val>
+         <val value="9">9</val>
+      </conf>
+      <conf num="2" pos="2">
+         <desc G_name="c_pl" P_name=""/>
+         <name>PL</name>
+         <val value="0">0</val>
+         <val value="1">1</val>
+         <val value="2">2</val>
+         <val value="3">3</val>
+         <val value="4">4</val>
+         <val value="5">5</val>
+         <val value="6">6</val>
+         <val value="7">7</val>
+         <val value="8">8</val>
+         <val value="9">9</val>
+      </conf>
+	  <conf num="3" pos="3">
+         <desc G_name="c_function" P_name=""/>
+         <name>G</name>
+         <val value="0">0</val>
+         <val value="1">1</val>
+         <val value="2">2</val>
+         <val value="3">3</val>
+         <val value="4">4</val>
+         <val value="5">5</val>
+         <val value="6">6</val>
+         <val value="7">7</val>
+         <val value="8">8</val>
+         <val value="9">9</val>
+      </conf>
+   </conf>
+   <dia type="A">
+      <!--		<bit num="1" name="HD" />-->
+      <bit num="4" name="configuratori"/>
+      <bit num="20" name="E2i"/>
+   </dia>
+</root>

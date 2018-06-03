@@ -1,0 +1,3 @@
+﻿CTRL + 1 --> command 1 --> it sends command 1
+
+CTRL + ALT + 1 --> command 2 --> it sends command 1 

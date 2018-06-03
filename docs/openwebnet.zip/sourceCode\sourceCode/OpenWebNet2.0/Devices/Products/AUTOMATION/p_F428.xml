@@ -1,0 +1,113 @@
+<root xmlType="product" name="prod_F428" versionXML="1.1">
+   <cod brand="0" code="0">F428</cod>
+   <cod brand="1" code="0">F428</cod>
+   <cod brand="2" code="0">003553</cod>
+   <modobj>149</modobj>
+   <typeobj>2</typeobj>
+   <desc G_name="" P_name="description"/>
+   <configTY>1</configTY>
+   <SWvs>1.0.0</SWvs>
+   <conf>
+      <conf num="1" pos="1">
+         <desc G_name="c_ambient" P_name=""/>
+         <name>A</name>
+         <val value="0">0</val>
+         <val value="1">1</val>
+         <val value="2">2</val>
+         <val value="3">3</val>
+         <val value="4">4</val>
+         <val value="5">5</val>
+         <val value="6">6</val>
+         <val value="7">7</val>
+         <val value="8">8</val>
+         <val value="9">9</val>
+         <val value="12">GEN</val>
+         <val value="13">GR</val>
+         <val value="14">AMB</val>
+         <val value="15">AUX</val>
+      </conf>
+      <conf num="2" pos="3">
+         <desc G_name="c_pl" P_name=""/>
+         <name>PL1</name>
+         <val value="0">0</val>
+         <val value="1">1</val>
+         <val value="2">2</val>
+         <val value="3">3</val>
+         <val value="4">4</val>
+         <val value="5">5</val>
+         <val value="6">6</val>
+         <val value="7">7</val>
+         <val value="8">8</val>
+         <val value="9">9</val>
+      </conf>
+      <conf num="3" pos="5">
+         <desc G_name="c_pl" P_name=""/>
+         <name>PL2</name>
+         <val value="0">0</val>
+         <val value="1">1</val>
+         <val value="2">2</val>
+         <val value="3">3</val>
+         <val value="4">4</val>
+         <val value="5">5</val>
+         <val value="6">6</val>
+         <val value="7">7</val>
+         <val value="8">8</val>
+         <val value="9">9</val>
+      </conf>
+      <conf num="4" pos="2">
+         <desc G_name="c_function" P_name=""/>
+         <name>M</name>
+         <val value="0">0</val>
+         <val value="1">1</val>
+         <val value="2">2</val>
+         <val value="3">3</val>
+         <val value="4">4</val>
+         <val value="5">5</val>
+         <val value="6">6</val>
+         <val value="7">7</val>
+         <val value="8">8</val>
+         <val value="9">9</val>
+         <val value="9">O/I</val>
+         <val value="10">OFF</val>
+         <val value="11">ON</val>
+         <val value="12">=</val>
+         <val value="13">=M</val>
+         <val value="14">CEN</val>
+         <val value="15">PUL</val>
+      </conf>
+      <conf num="5" pos="4">
+         <desc G_name="c_function" P_name=""/>
+         <name>SPE</name>
+         <val value="0">0</val>
+         <val value="1">1</val>
+         <val value="2">2</val>
+         <val value="3">3</val>
+         <val value="4">4</val>
+         <val value="5">5</val>
+         <val value="6">6</val>
+         <val value="7">7</val>
+         <val value="8">8</val>
+      </conf>
+   </conf>
+   <dia type="A">
+      <!--		<bit num="1" name="HD" />-->
+      <bit num="4" name="configuratori"/>
+      <bit num="20" name="E2i"/>
+   </dia>
+   <KeyObject_list>
+		<KO slot="2" default="512">
+			<val value="181" />
+			<val value="410" />
+			<val value="411" />
+			<val value="412" />
+			<val value="413" />
+			<val value="414" />
+			<val value="415" />
+			<val value="416" />
+			<val value="417" />
+			<val value="419" />
+			<val value="503" />
+			<val value="512" />
+		</KO>
+   </KeyObject_list>
+</root>

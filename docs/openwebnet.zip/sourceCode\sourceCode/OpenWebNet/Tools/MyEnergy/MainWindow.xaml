@@ -1,0 +1,84 @@
+﻿<Window x:Class="MyEnergy.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Height="170" Width="280" Title="MyEnergy"
+    ResizeMode="NoResize" Loaded="Window_Loaded" SizeToContent="WidthAndHeight" Style="{DynamicResource WindowStyle}"
+    WindowStartupLocation="CenterScreen" ShowInTaskbar="False">
+    
+    <Window.Resources>
+        <ResourceDictionary Source="Resources.xaml"/>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="130"/>
+            <ColumnDefinition Width="130"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Grid.Row="0" BorderThickness="3" CornerRadius="10" Margin="5" BorderBrush="#696969">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                
+                <Label Grid.Column="0" Margin="3,0,0,0" Content="Tension:" VerticalAlignment="Center" HorizontalAlignment="Left" FontSize="13"/>
+                <Label Grid.Column="1" Name="tensionLbl" Margin="0,0,3,0" Content="0" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="18"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Column="1" Grid.Row="0" BorderThickness="3" CornerRadius="10" Margin="5" BorderBrush="#696969">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                
+                <Label Grid.Column="0" Margin="3,0,0,0" Content="Current:" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="13"/>
+                <Label Grid.Column="1" Name="currentLbl" Margin="0,0,3,0" HorizontalAlignment="Right" Content="0" VerticalAlignment="Center" FontSize="18"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Column="0" Grid.Row="1" BorderThickness="3" CornerRadius="10" Margin="5" BorderBrush="#696969">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                
+                <Label Grid.Column="0" Margin="3,0,0,0" Content="Power:" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="13"/>
+                <Label Grid.Column="1" Name="powerLbl" Margin="0,0,3,0" Content="0" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="18"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Column="1" Grid.Row="1" BorderThickness="3" CornerRadius="10" Margin="5" BorderBrush="#696969">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Column="0" Margin="3,0,0,0" Content="Energy:" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="13"/>
+                <Label Grid.Column="1" Name="energyLbl" Margin="0,0,3,0" Content="0" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="18"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.ColumnSpan="2" Grid.Row="3" BorderThickness="3" CornerRadius="10" Margin="5" BorderBrush="#696969">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+
+                <Image Grid.Column="0" Margin="5" Name="start" Source="/Resources/player_play.png" Height="32" Width="32" MouseDown="start_MouseDown" HorizontalAlignment="Left"/>
+                <Image Grid.Column="1" Margin="5" Name="settings" Source="/Resources/advancedsettings.png" Height="32" Width="32" MouseDown="settings_MouseDown" HorizontalAlignment="Right"/>
+            </Grid>
+        </Border>
+
+    </Grid>
+</Window>

@@ -1,0 +1,358 @@
+﻿public class Definitions
+{
+    // Methods
+    public Definitions();
+
+    // Nested Types
+    public enum DeviceCatalogEthOPEN
+    {
+        Antitheft_control_panel = 9,
+        F451 = 0,
+        F451V = 1,
+        F452 = 6,
+        F452V = 7,
+        F453 = 0x10,
+        F453AV = 12,
+        Gateway_KNX = 15,
+        GSM_Antitheft_control_panel = 10,
+        H_L_N_NT4684 = 13,
+        INTERF2FIP = 0x11,
+        LGRF452 = 0x12,
+        LGRH4684 = 20,
+        LGRMH200 = 0x13,
+        MH200 = 4,
+        MHGSM = 3,
+        MHPOWERTV = 14,
+        MHSERVER = 2,
+        MHSERVER2 = 11,
+        Porter_graphic_display = 8,
+        Telephone_communicator = 5,
+        undefined = -1
+    }
+
+    public enum DeviceCatalogSerialUSB
+    {
+        F451 = 0,
+        F451V = 1,
+        F452 = 4,
+        F452V = 5,
+        F453 = 8,
+        F453AV = 9,
+        F457_WAPSERVER = 3,
+        H4684 = 7,
+        INTERF2FIP = 10,
+        LGRF452 = 11,
+        LGRH4684 = 13,
+        LGRMH200 = 12,
+        MH200 = 6,
+        MHSERVER = 2,
+        undefined = -1
+    }
+}
+
+ 
+
+public class OpenParser
+{
+    // Fields
+    private VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_KIND _kind = VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_KIND.undefined;
+    private VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_MMTYPE _mmtype = VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_MMTYPE.undefined;
+    private static EXTERNAL_INTERFACE_DEVICES_NRDIMENSIONS _nrOfDimensions = EXTERNAL_INTERFACE_DEVICES_NRDIMENSIONS.undefined;
+    private OpenType _openType;
+    private string _peAddr = string.Empty;
+    private string _piAddr = string.Empty;
+    private List<string> _values = new List<string>();
+    private string _what = string.Empty;
+    private string _when = string.Empty;
+    private string _where = string.Empty;
+    private WHO _who = WHO.UNDEFINED;
+
+    // Methods
+    public static string BuildOPEN(string open, string[] args)
+    {
+        return string.Format(open, (object[]) args);
+    }
+
+    public VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_KIND GetKind()
+    {
+        return this._kind;
+    }
+
+    public VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_MMTYPE GetMMType()
+    {
+        return this._mmtype;
+    }
+
+    public EXTERNAL_INTERFACE_DEVICES_NRDIMENSIONS GetNrOfDimensions()
+    {
+        return _nrOfDimensions;
+    }
+
+    public OpenType GetOpenType()
+    {
+        return this._openType;
+    }
+
+    public string GetPEAddr()
+    {
+        return this._peAddr;
+    }
+
+    public string GetPIAddr()
+    {
+        return this._piAddr;
+    }
+
+    public List<string> GetValues()
+    {
+        return this._values;
+    }
+
+    public string GetWHAT()
+    {
+        return this._what;
+    }
+
+    public string GetWHEN()
+    {
+        return this._when;
+    }
+
+    public string GetWHERE()
+    {
+        return this._where;
+    }
+
+    public WHO GetWHO()
+    {
+        return this._who;
+    }
+
+    public bool Parse(string open)
+    {
+        this._openType = OpenType.UNDEFINED;
+        this._who = WHO.UNDEFINED;
+        this._what = string.Empty;
+        this._where = string.Empty;
+        this._when = string.Empty;
+        this._values = new List<string>();
+        try
+        {
+            string[] splittedWhat;
+            if (open.StartsWith("*#"))
+            {
+                open = open.TrimStart(new char[] { '*' });
+                open = open.TrimStart(new char[] { '#' });
+            }
+            else
+            {
+                this._openType = OpenType.BASIC;
+                open = open.TrimStart(new char[] { '*' });
+            }
+            open = open.TrimEnd(new char[] { '#' });
+            string[] splittedOpen = open.Split(new char[] { '*' });
+            this._who = (WHO) Enum.Parse(typeof(WHO), splittedOpen[0]);
+            this._what = splittedOpen[1];
+            switch (this._who)
+            {
+                case WHO.VIDEO_DOOR_ENTRY_SYSTEM:
+                {
+                    VIDEO_DOOR_ENTRY_SYSTEM_WHAT tmpWhat = (VIDEO_DOOR_ENTRY_SYSTEM_WHAT) Enum.Parse(typeof(VIDEO_DOOR_ENTRY_SYSTEM_WHAT), this._what);
+                    switch (tmpWhat)
+                    {
+                        case VIDEO_DOOR_ENTRY_SYSTEM_WHAT.internalUse:
+                            goto Label_0312;
+                    }
+                    return true;
+                }
+                case WHO.VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP:
+                    splittedWhat = this._what.Split(new char[] { '#' });
+                    switch (((VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_WHAT) Enum.Parse(typeof(VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_WHAT), splittedWhat[0])))
+                    {
+                        case VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_WHAT.Emitted_when_answering_to_a_call:
+                        case VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_WHAT.Autoswitching_request:
+                            goto Label_0312;
+
+                        case VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_WHAT.Closing_an_existing_call:
+                            goto Label_01F7;
+
+                        case VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_WHAT.The_device_is_busy:
+                            goto Label_0248;
+                    }
+                    goto Label_0312;
+
+                case WHO.EXTERNAL_INTERFACE_DEVICES:
+                    _nrOfDimensions = (EXTERNAL_INTERFACE_DEVICES_NRDIMENSIONS) Enum.Parse(typeof(EXTERNAL_INTERFACE_DEVICES_NRDIMENSIONS), splittedOpen[2]);
+                    if (splittedOpen.Length > 3)
+                    {
+                        this._openType = OpenType.DIMENSIONS_REQUEST_RX;
+                    }
+                    else
+                    {
+                        this._openType = OpenType.DIMENSIONS_REQUEST_TX;
+                    }
+                    if ((_nrOfDimensions == EXTERNAL_INTERFACE_DEVICES_NRDIMENSIONS.requestIntMMAddress) && (this._openType == OpenType.DIMENSIONS_REQUEST_RX))
+                    {
+                        this._piAddr = splittedOpen[3];
+                    }
+                    goto Label_0312;
+
+                default:
+                    goto Label_0312;
+            }
+            this._what = splittedWhat[0];
+            this._kind = (VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_KIND) Enum.Parse(typeof(VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_KIND), splittedWhat[1]);
+            this._mmtype = (VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_MMTYPE) Enum.Parse(typeof(VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_MMTYPE), splittedWhat[2]);
+            this._peAddr = splittedWhat[3];
+            this._piAddr = splittedOpen[2];
+            if (!(this._piAddr == "4"))
+            {
+                this._piAddr = this._piAddr.Substring(1);
+            }
+            goto Label_0312;
+        Label_01F7:
+            this._what = splittedWhat[0];
+            this._kind = (VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_KIND) Enum.Parse(typeof(VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_KIND), splittedWhat[1]);
+            this._mmtype = (VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_MMTYPE) Enum.Parse(typeof(VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_MMTYPE), splittedWhat[2]);
+            this._peAddr = splittedOpen[2];
+            goto Label_0312;
+        Label_0248:
+            this._what = splittedWhat[0];
+            this._kind = (VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_KIND) Enum.Parse(typeof(VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_KIND), splittedWhat[1]);
+            this._mmtype = (VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_MMTYPE) Enum.Parse(typeof(VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_MMTYPE), splittedWhat[2]);
+            this._peAddr = splittedOpen[2];
+        Label_0312:
+            this._where = splittedOpen[2];
+            if (splittedOpen.Length > 3)
+            {
+                this._where = splittedOpen[3];
+            }
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+        return true;
+    }
+
+    // Nested Types
+    public enum EXTERNAL_INTERFACE_DEVICES_NRDIMENSIONS
+    {
+        requestIntMMAddress = 0x24,
+        undefined = -1
+    }
+
+    public enum OpenType
+    {
+        UNDEFINED,
+        BASIC,
+        STATUS_REQUEST,
+        DIMENSIONS_REQUEST_TX,
+        DIMENSIONS_REQUEST_RX,
+        WRITE_DIMENSIONS
+    }
+
+    public enum VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_KIND
+    {
+        undefined = -1,
+        VideoDoorEntrySystem_AutoSwitching_Call = 5,
+        VideoDoorEntrySystem_Call_with_ringing_n1 = 1,
+        VideoDoorEntrySystem_Call_with_ringing_n2 = 2,
+        VideoDoorEntrySystem_Call_with_ringing_n3 = 3,
+        VideoDoorEntrySystem_Call_with_ringing_n4 = 4
+    }
+
+    public enum VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_MMTYPE
+    {
+        Audio_but_not_Video = 2,
+        No_Video_and_no_Audio = 1,
+        undefined = -1,
+        Video_and_Audio = 4,
+        Video_but_not_Audio = 3
+    }
+
+    public enum VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP_WHAT
+    {
+        Activate_a_lock_actuator = 0x13,
+        Activate_a_staicase_light_actuator = 0x15,
+        An_external_unit_is_in_DAY_state_set_an_external_unit_in_DAY_state = 0x1d,
+        An_external_unit_is_in_NIGHT_state_set_an_external_unit_in_NIGHT_state = 30,
+        Autoswitching_request = 4,
+        Call_from_External_Unit = 9,
+        Call_incoming_outgoing = 1,
+        Cancel_a_previos_call_request = 0x11,
+        Closing_an_existing_call = 3,
+        Closing_an_existing_call_because_a_call_was_cancelled = 0x1b,
+        Closing_an_existing_call_because_a_device_hungs_up = 0x1c,
+        Closing_an_existing_call_because_another_device_answered_to_the_call = 0x1a,
+        Closing_an_existing_call_dued_to_a_time_out_but_another_device_will_queue = 0x26,
+        Closing_an_existing_call_dued_to_a_timeout = 0x19,
+        Confirmation_between_bt_av_server_and_bt_video = 0x2a,
+        Confirmation_between_bt_avserver_and_bt_video = 0x29,
+        Confirmation_that_a_programming_session_has_begun = 11,
+        Confirmation_to_a_previous_call = 0x2b,
+        Confirmation_to_a_previous_call_end = 0x27,
+        Confirmation_to_a_previous_call_transfer = 0x2c,
+        Confirmation_to_a_previous_holdon = 0x2d,
+        Confirmation_to_a_previous_resume = 0x2e,
+        Delete_the_complete_list = 13,
+        Emitted_when_answering_to_a_call = 2,
+        External_Unit_Activation = 0x31,
+        For_internal_use_only = 0x20,
+        Hold_an_out_in_going_session = 0x18,
+        Initiating_a_call_transfer = 7,
+        Let_two_devices_pending_to_speak_together = 8,
+        List_deletion_completed = 14,
+        OK_to_procede_with_call = 0x21,
+        Panic_alarm_message = 0x17,
+        Rearm_the_timeout_session_of_devices_on_the_bus = 40,
+        Register_an_external_unit_2_wire_interface_to_a_switchboard_for_DAY_NIGHT_notifications = 0x1f,
+        Release_a_lock_actuator = 20,
+        Release_a_staicase_light_actuator = 0x16,
+        Request_external_units_presence = 0x25,
+        Request_of_a_complete_list = 0x10,
+        Request_of_a_switchboard_call = 5,
+        Resume_a_session_previously_hold = 0x12,
+        Signal_of_an_incoming_call_transfer = 0x30,
+        Signal_of_transfer_an_outgoing_session = 0x2f,
+        Start_of_programming_session = 10,
+        Stop_a_programming_session = 12,
+        Stop_video_trasmission_reception = 0x24,
+        Switching_from_an_External_unit_to_another = 6,
+        The_device_is_busy = 15,
+        undefined = -1
+    }
+
+    public enum VIDEO_DOOR_ENTRY_SYSTEM_WHAT
+    {
+        internalUse = 20,
+        undefined = -1
+    }
+
+    public enum WHO
+    {
+        ALARMS = 5,
+        APPLIANCES = 3,
+        AUTOMATION_SYSTEMS = 2,
+        AUXILIARIES = 9,
+        DIAGNOSTIC_OF_DEVICE_SYSTEM = 0x3f5,
+        DIAGNOSTIC_OF_HEATING_SYSTEM = 0x3ec,
+        DIAGNOSTIC_OF_LIGHTING_SYSTEM = 0x3e9,
+        ENERGY_DISTRIBUTION = 11,
+        EXTERNAL_INTERFACE_DEVICES = 13,
+        HEATING_ADJUSTMENT = 4,
+        HOME_AUTOMATION_MAIN_UNIT_COMMAND = 15,
+        HOME_AUTOMATION_MAIN_UNIT_MANAGEMENT = 0x11,
+        LIGHTING = 1,
+        MULTIMEDIA = 7,
+        NAVIGATION = 10,
+        SCENARIOS = 0,
+        SERVICE_IDENTIFICATION = 0x63,
+        SOUND_SYSTEM = 0x10,
+        SPECIAL_COMMANDS = 14,
+        UNDEFINED = -1,
+        VIDEO_DOOR_ENTRY_SYSTEM = 6,
+        VIDEO_DOOR_ENTRY_SYSTEM_OVER_IP = 8
+    }
+}
+

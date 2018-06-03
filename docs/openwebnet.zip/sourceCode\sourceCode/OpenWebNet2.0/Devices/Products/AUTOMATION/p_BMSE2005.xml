@@ -1,0 +1,108 @@
+<root xmlType="product" name="prod_BMSE2005" versionXML="1.0.0">
+   <cod brand="0" code="0">BMSE2005</cod>
+   <cod brand="1" code="0">BMSE2005</cod>
+   <cod brand="2" code="0">048823</cod>
+   <modobj>35</modobj>
+   <typeobj>4</typeobj>
+   <desc G_name="" P_name="description"/>
+   <configTY>1</configTY>
+   <SWvs>1.0.0</SWvs>
+   <conf>
+      <conf num="1" pos="1">
+         <desc G_name="c_ambient" P_name=""/>
+         <name>A</name>
+         <val value="1">1</val>
+         <val value="2">2</val>
+         <val value="3">3</val>
+         <val value="4">4</val>
+         <val value="5">5</val>
+         <val value="6">6</val>
+         <val value="7">7</val>
+         <val value="8">8</val>
+         <val value="9">9</val>
+      </conf>
+      <conf num="2" pos="2">
+         <desc G_name="c_pl" P_name=""/>
+         <name>PL</name>
+         <val value="0">0</val>
+         <val value="1">1</val>
+         <val value="2">2</val>
+         <val value="3">3</val>
+         <val value="4">4</val>
+         <val value="5">5</val>
+         <val value="6">6</val>
+         <val value="7">7</val>
+         <val value="8">8</val>
+         <val value="9">9</val>
+      </conf>
+      <conf num="3" pos="3">
+         <desc G_name="c_function" P_name=""/>
+         <name>M</name>
+         <val value="0">0</val>
+         <val value="1">1</val>
+         <val value="2">2</val>
+         <val value="3">3</val>
+         <val value="4">4</val>
+      </conf>
+      <conf num="4" pos="4">
+         <desc G_name="c_group" P_name=""/>
+         <name>S</name>
+         <val value="0">0</val>
+         <val value="1">1</val>
+         <val value="2">2</val>
+         <val value="3">3</val>
+      </conf>
+      <conf num="5" pos="5">
+         <desc G_name="c_group" P_name=""/>
+         <name>T</name>
+         <val value="0">0</val>
+         <val value="1">1</val>
+         <val value="2">2</val>
+         <val value="3">3</val>
+         <val value="4">4</val>
+         <val value="5">5</val>
+         <val value="6">6</val>
+         <val value="7">7</val>
+         <val value="8">8</val>
+         <val value="9">9</val>
+      </conf>
+	   <conf num="6" pos="6">
+         <desc G_name="c_group" P_name=""/>
+         <name>D</name>
+         <val value="0">0</val>
+         <val value="1">1</val>
+         <val value="2">2</val>
+         <val value="3">3</val>
+         <val value="4">4</val>
+         <val value="5">5</val>
+      </conf>
+   </conf>
+   <dia type="A">
+		<bit num="0" name="occupato" />
+		<bit num="1" name="HD" />
+		<bit num="2" name="wrongConfig" />
+		<bit num="3" name="sistema" />
+		<bit num="4" name="configuratori" />
+		<bit num="5" name="d_abilitato" />
+		<bit num="16" name="E2e" />
+		<bit num="17" name="pp" />
+		<bit num="18" name="carico" />
+		<bit num="19" name="Dali" />
+		<bit num="20" name="E2i" />
+		<bit num="21" name="Memory" />
+	</dia>
+   <KeyObject_list>
+		<KO slot="1" default="515">
+			<val value="168" />
+			<val value="166" />
+			<val value="119" />
+			<val value="128" />
+			<val value="164" />
+			<val value="165" />
+            <val value="515" />
+		</KO>
+		<KO slot="16">
+			<val value="431" />
+		</KO>
+   </KeyObject_list>
+</root>

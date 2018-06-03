@@ -1,0 +1,18 @@
+[
+  {
+    "Id": "265301",
+    "ThreadId": "77595",
+    "Html": "<p>I noticed that the &quot;heating&quot; section of Open WebNet protocol is only partially implemented. Is it a choice made for some reason or just for lacking time?</p>\r\n<p>I'd like to participate in the project and implement it by myself if you agree. let me know</p>\r\n<p>cheers</p>",
+    "PostedDate": "2009-12-09T05:49:42.703-08:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  },
+  {
+    "Id": "265882",
+    "ThreadId": "77595",
+    "Html": "<p>Hi siroman :) The heating section is only partially implemented for lacking time.<br>I've just given you the access to the project!</p>\r\n<p>Cheers!<br>Federico</p>",
+    "PostedDate": "2009-12-10T12:39:33.64-08:00",
+    "UserRole": null,
+    "MarkedAsAnswerDate": null
+  }
+]

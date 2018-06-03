@@ -1,0 +1,109 @@
+<!--  il codice oggetto e' legato al sistema selezionato -->
+<root xmlType="register" name="prodSource" versionXML="1.1">
+   <!-- AUTOMATION -->
+   <param name="1001">
+      <!-- products file-->
+      <param item_code="L/H4651/2,L4651/2,AM 5831/2,H4651/2,687376,067242" name="1">PRODUCTS/AUTOMATION/p_4651.xml</param>
+	  <param item_code="L/H4652/2,L4652/2,AM 5832/2,H4652/2,687377,078463,573974,087473,079263,079262,078462" name="2">PRODUCTS/AUTOMATION/p_4652_2.xml</param>						 
+	  <param item_code="L/H4652/3,L4652/3,H4652/3,657378,573975" name="3">PRODUCTS/AUTOMATION/p_4652_3.xml</param>
+	  <param item_code="HC/HS4657,HC4657,HS4657,HC4657/3,HS4657/4" name="4">PRODUCTS/AUTOMATION/p_4657.xml</param>
+	  <param item_code="HC4680,HS4680,HC/HS4680,L4680,N4680,NT4680,L/N/NT4680,573902,573903,067217,067218,078478,079178" name="6">PRODUCTS/AUTOMATION/p_4680.xml</param>
+	  <param item_code="F413,003656" name="7">PRODUCTS/AUTOMATION/p_F413.xml</param>
+	  <param item_code="L/H4653/2,HC4653/2,HS4653/2,HC/HS4653/2,L/H4653,LH4653,H4653,78466" name="8">PRODUCTS/AUTOMATION/p_4653_2.xml</param>
+      <param item_code="L/H4655,L4655,H4655,078466,078467,078469,079266,079267,079269" name="9">PRODUCTS/AUTOMATION/p_4655.xml</param>
+	  <param item_code="L/H4656,L4656,H4656" name="10">PRODUCTS/AUTOMATION/p_4656.xml</param>
+	  <param item_code="4563" name="11">PRODUCTS/AUTOMATION/p_4563.xml</param>
+	  <param item_code="573908,573909,573910,573911" name="14">PRODUCTS/AUTOMATION/p_573908.xml</param>
+	  <param item_code="573904,573905,573906,573907" name="15">PRODUCTS/AUTOMATION/p_573904.xml</param>
+	  <param item_code="L/H4651M2,L4651M2,AM 5831M2,H4651M2,573987" name="16">PRODUCTS/AUTOMATION/p_4651M2.xml</param>
+	  <param item_code="BMSE1001" name="18">PRODUCTS/AUTOMATION/p_BMSE1001.xml</param>
+	  <param item_code="4575,4575N,L4575N,N4575N,NT4575N,L/N/NT4575N,HC4575,HS4575,HC/HS4575" name="20">PRODUCTS/AUTOMATION/p_4575.xml</param>
+	  <param item_code="4576,4576N,L4576N,N4576N,NT4576N,L/N/NT4576N,HC4576,HS4576,HC/HS4576" name="21">PRODUCTS/AUTOMATION/p_4576.xml</param>
+	  <param item_code="4654N,L4654N,N4654N,NT4654N,L/N/NT4654N,HC4654,HS4654,HC/HS4654,AM 5834,683075,078465" name="22">PRODUCTS/AUTOMATION/p_4654N.xml</param>
+	  <param item_code="4575SB,L4575SB,N4575SB,NT4575SB,L/N/NT4575SB,HC4575SB,HS4575SB,HC/HS4575SB,573900,573901" name="23">PRODUCTS/AUTOMATION/p_4575SB.xml</param>
+	  <param item_code="BMSE3001,048820" name="32">PRODUCTS/AUTOMATION/p_BMSE3001.xml</param>
+	  <param item_code="BMSE3002,048821" name="33">PRODUCTS/AUTOMATION/p_BMSE3002.xml</param>
+	  <param item_code="BMSE3003,048822" name="34">PRODUCTS/AUTOMATION/p_BMSE3003.xml</param>
+	  <param item_code="BMSE2005,048823" name="35">PRODUCTS/AUTOMATION/p_BMSE2005.xml</param>
+	  <param item_code="BMSE2001,048824" name="36">PRODUCTS/AUTOMATION/p_BMSE2001.xml</param>
+	  <param item_code="BMSE2002,048825" name="37">PRODUCTS/AUTOMATION/p_BMSE2002.xml</param>
+	  <param item_code="BMSE2003,048826" name="38">PRODUCTS/AUTOMATION/p_BMSE2003.xml</param>
+	  <param item_code="BMSE2004,048829" name="39">PRODUCTS/AUTOMATION/p_BMSE2004.xml</param>
+	  <param item_code="BMSE3005,048828" name="40">PRODUCTS/AUTOMATION/p_BMSE3005.xml</param>
+	  <param item_code="BMSE2006,048830" name="42">PRODUCTS/AUTOMATION/p_BMSE2006.xml</param>
+      <param item_code="F425,003552" name="54">PRODUCTS/AUTOMATION/p_F425.xml</param>
+	  <param item_code="F420,003551" name="55">PRODUCTS/AUTOMATION/p_F420.xml</param>
+	  <param item_code="4685,573916,573617" name="64">PRODUCTS/TEMP_CONTROLE/p_4685.xml</param>
+	  <param item_code="F422,003562" name="69">PRODUCTS/AUTOMATION/p_F422.xml</param>
+	  <param item_code="L4671/1,AM 5851/1,H4671/1,687379" name="101">PRODUCTS/AUTOMATION/p_4671_1.xml</param>
+	  <param item_code="L4671/2,AM 5851/2,H4671/2,687380" name="102">PRODUCTS/AUTOMATION/p_4671_2.xml</param>
+	  <param item_code="3475" name="104">PRODUCTS/AUTOMATION/p_3475.xml</param>
+	  <param item_code="3476" name="105">PRODUCTS/AUTOMATION/p_3476.xml</param>
+      <param item_code="L/H4678,L4678,H4678" name="106">PRODUCTS/AUTOMATION/p_4678.xml</param>
+	  <param item_code="F411/1" name="128">PRODUCTS/AUTOMATION/p_F411_1.xml</param>
+	  <param item_code="F411/2,003842" name="129">PRODUCTS/AUTOMATION/p_F411_2.xml</param>
+	  <param item_code="F411/4,003844" name="130">PRODUCTS/AUTOMATION/p_F411_4.xml</param>
+	  <param item_code="F414,003652" name="133">PRODUCTS/AUTOMATION/p_F414.xml</param>
+	  <param item_code="F415,003653" name="135">PRODUCTS/AUTOMATION/p_F415.xml</param>
+	  <param item_code="F411/1N,003841" name="137">PRODUCTS/AUTOMATION/p_F411_1N.xml</param>
+	  <param item_code="F429" name="138">PRODUCTS/AUTOMATION/p_F429.xml</param>
+      <param item_code="F411/1NC,003845" name="139">PRODUCTS/AUTOMATION/p_F411_1NC.xml</param>
+	  <param item_code="F411/2NC, 003843" name="140">PRODUCTS/AUTOMATION/p_F411_2NC.xml</param>
+	  <param item_code="F413N,003656" name="141">PRODUCTS/AUTOMATION/p_F413N.xml</param>
+	  <param item_code="F428,003553" name="149">PRODUCTS/AUTOMATION/p_F428.xml</param>
+	  <param item_code="F422,003562" name="151">PRODUCTS/AUTOMATION/p_F422.xml</param>
+	  <param item_code="3477,573996" name="152">PRODUCTS/AUTOMATION/p_3477.xml</param>
+	  <param item_code="BMSW1001,002600" name="160">PRODUCTS/AUTOMATION/p_BMSW1001.xml</param>
+	  <param item_code="BMSW1002,002601" name="161">PRODUCTS/AUTOMATION/p_BMSW1002.xml</param>
+	  <param item_code="BMSW1003,002602" name="162">PRODUCTS/AUTOMATION/p_BMSW1003.xml</param>
+	  <param item_code="BMDI1001,002611" name="163">PRODUCTS/AUTOMATION/p_BMDI1001.xml</param>
+	  <param item_code="F416U1,002621" name="164">PRODUCTS/AUTOMATION/p_F416U1.xml</param>
+	  <param item_code="F417U2,002622" name="165">PRODUCTS/AUTOMATION/p_F417U2.xml</param>
+	  <param item_code="BMSW3001,048840" name="166">PRODUCTS/AUTOMATION/p_BMSW3001.xml</param>
+	  <param item_code="BMSW3002,048841" name="167">PRODUCTS/AUTOMATION/p_BMSW3002.xml</param>
+	  <param item_code="BMDI3001,048842" name="168">PRODUCTS/AUTOMATION/p_BMDI3001.xml</param>
+	  <param item_code="BMDI3002,048843" name="169">PRODUCTS/AUTOMATION/p_BMDI3002.xml</param>
+	  <param item_code="BMDI3201,048844" name="170">PRODUCTS/AUTOMATION/p_BMDI3201.xml</param>
+	  <param item_code="BMDI3301,048845" name="171">PRODUCTS/AUTOMATION/p_BMDI3301.xml</param>
+	  <param item_code="BMSW3003,048847" name="173">PRODUCTS/AUTOMATION/p_BMSW3003.xml</param>
+	  <param item_code="BMDI1002,002612" name="174">PRODUCTS/AUTOMATION/p_BMDI1002.xml</param>
+	  <param item_code="573812,573813" name="176">PRODUCTS/AUTOMATION/p_573812.xml</param>
+	  <param item_code="573814,573815" name="177">PRODUCTS/AUTOMATION/p_573814.xml</param>
+	  <param item_code="573816,573817" name="178">PRODUCTS/AUTOMATION/p_573816.xml</param>
+	  <param item_code="573818,573819" name="179">PRODUCTS/AUTOMATION/p_573818.xml</param>
+	  <param item_code="573820,573821" name="180">PRODUCTS/AUTOMATION/p_573820.xml</param>
+	  <param item_code="573822,573823" name="181">PRODUCTS/AUTOMATION/p_573822.xml</param>
+	  <param item_code="573824,573825" name="182">PRODUCTS/AUTOMATION/p_573824.xml</param>
+	  <param item_code="573826,573827" name="183">PRODUCTS/AUTOMATION/p_573826.xml</param>
+	  <param item_code="573828,573829" name="184">PRODUCTS/AUTOMATION/p_573828.xml</param>
+	  <param item_code="573830,573831" name="185">PRODUCTS/AUTOMATION/p_573830.xml</param>
+	  <param item_code="573832,573833" name="186">PRODUCTS/AUTOMATION/p_573832.xml</param>
+	  <param item_code="573834,573835" name="187">PRODUCTS/AUTOMATION/p_573834.xml</param>
+	  <param item_code="573836,573837" name="188">PRODUCTS/AUTOMATION/p_573836.xml</param>
+	  <param item_code="573838,573839" name="189">PRODUCTS/AUTOMATION/p_573838.xml</param>
+	  <param item_code="573840,573841" name="190">PRODUCTS/AUTOMATION/p_573840.xml</param>
+	  <param item_code="573842,573843" name="191">PRODUCTS/AUTOMATION/p_573842.xml</param>
+	  <param item_code="573848,573849" name="192">PRODUCTS/AUTOMATION/p_573848.xml</param>
+	  <param item_code="573856,573857" name="193">PRODUCTS/AUTOMATION/p_573856.xml</param>
+	  <param item_code="573858" name="194">PRODUCTS/AUTOMATION/p_573858.xml</param>
+	  <param item_code="573860" name="195">PRODUCTS/AUTOMATION/p_573860.xml</param>
+	  <param item_code="573862" name="196">PRODUCTS/AUTOMATION/p_573862.xml</param>
+	  <param item_code="573864" name="197">PRODUCTS/AUTOMATION/p_573864.xml</param>
+	  <param item_code="573866" name="198">PRODUCTS/AUTOMATION/p_573866.xml</param>
+	  <param item_code="573870" name="200">PRODUCTS/AUTOMATION/p_573870.xml</param>
+	  <param item_code="573846,573847" name="201">PRODUCTS/AUTOMATION/p_573846.xml</param>
+	  <param item_code="F422,003562" name="251">PRODUCTS/AUTOMATION/p_F422.xml</param>
+	  </param>
+   <!-- TEMPERATURE CONTROLE -->
+   <param name="1004">
+      <!-- products file-->
+      <param item_code="3550,573918,573919" name="2">PRODUCTS/TEMP_CONTROLE/p_3550.xml</param>
+	  <param item_code="L4692FAN,N4692FAN,NT4692FAN,L/N/NT4692FAN,573924,573925" name="19">PRODUCTS/TEMP_CONTROLE/p_4692_FAN.xml</param>
+      <param item_code="L4692,N4692,NT4692,L/N/NT4692,573922,573923" name="20">PRODUCTS/TEMP_CONTROLE/p_4692.xml</param>
+      <param item_code="L4693,N4693,NT4693,L/N/NT4693,573920,573921" name="21">PRODUCTS/TEMP_CONTROLE/p_4693.xml</param>
+      <param item_code="4695,687390,687890,683090" name="48">PRODUCTS/TEMP_CONTROLE/p_4695.xml</param>
+	  <param item_code="4685,573916,573617" name="64">PRODUCTS/TEMP_CONTROLE/p_4685.xml</param>
+      <param item_code="F430/2,03579" name="144">PRODUCTS/TEMP_CONTROLE/p_F430_2.xml</param>
+      <param item_code="F430/4,03580" name="145">PRODUCTS/TEMP_CONTROLE/p_F430_4.xml</param>
+   </param>
+</root>

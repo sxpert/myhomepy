@@ -1,0 +1,36 @@
+[
+  {
+    "Id": "0",
+    "Name": "OpenWebNet 1.0",
+    "DevelopmentStatus": "Stable",
+    "Description": "First OpenWebNet library release",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2009-09-30T07:56:32.92-07:00",
+    "Files": [
+      {
+        "Id": "587e7dfc-4dbb-4a6a-9017-f705bf30a0ba",
+        "FileName": "OpenWebNet 1.0.zip",
+        "Url": "./0/587e7dfc-4dbb-4a6a-9017-f705bf30a0ba",
+        "Type": "Application",
+        "UploadDate": "2009-01-12T02:44:54.987-08:00"
+      }
+    ]
+  },
+  {
+    "Id": "1",
+    "Name": "OpenWebNet 1.1",
+    "DevelopmentStatus": "Stable",
+    "Description": "OpenWebNet 1.1",
+    "ReleasedDatge": "0001-01-01T00:00:00",
+    "ModifiedDate": "2009-04-16T14:35:23.02-07:00",
+    "Files": [
+      {
+        "Id": "1d5b0fb7-924b-4925-b9f2-a5fd0bc68a69",
+        "FileName": "OpenWebNet 1.1.zip",
+        "Url": "./1/1d5b0fb7-924b-4925-b9f2-a5fd0bc68a69",
+        "Type": "Application",
+        "UploadDate": "2009-04-16T12:55:17.11-07:00"
+      }
+    ]
+  }
+]

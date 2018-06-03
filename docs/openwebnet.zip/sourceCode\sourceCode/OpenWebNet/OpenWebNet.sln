@@ -1,0 +1,56 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenWebNet", "OpenWebNet\OpenWebNet.csproj", "{265EADA8-4A1B-4C96-B187-D4967ADD2F59}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenWebNet.Test", "OpenWebNet.Test\OpenWebNet.Test.csproj", "{755C9E98-BD17-4981-A1D8-90902907A848}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{052A6BA3-345E-4EEE-93EA-2A124D40DAB2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyEnergy", "Tools\MyEnergy\MyEnergy.csproj", "{82B1BC32-3DBA-4532-9ABB-6514C3002256}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyCamera", "Tools\MyCamera\MyCamera.csproj", "{4E24B842-0EEC-4EBC-A03A-C2354C5D53BE}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 3
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://tfs07.codeplex.com/
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = OpenWebNet.Test\\OpenWebNet.Test.csproj
+		SccProjectName1 = OpenWebNet.Test
+		SccLocalPath1 = OpenWebNet.Test
+		SccProjectUniqueName2 = OpenWebNet\\OpenWebNet.csproj
+		SccProjectName2 = OpenWebNet
+		SccLocalPath2 = OpenWebNet
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{265EADA8-4A1B-4C96-B187-D4967ADD2F59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{265EADA8-4A1B-4C96-B187-D4967ADD2F59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{265EADA8-4A1B-4C96-B187-D4967ADD2F59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{265EADA8-4A1B-4C96-B187-D4967ADD2F59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{755C9E98-BD17-4981-A1D8-90902907A848}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{755C9E98-BD17-4981-A1D8-90902907A848}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{755C9E98-BD17-4981-A1D8-90902907A848}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{755C9E98-BD17-4981-A1D8-90902907A848}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82B1BC32-3DBA-4532-9ABB-6514C3002256}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82B1BC32-3DBA-4532-9ABB-6514C3002256}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82B1BC32-3DBA-4532-9ABB-6514C3002256}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82B1BC32-3DBA-4532-9ABB-6514C3002256}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E24B842-0EEC-4EBC-A03A-C2354C5D53BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E24B842-0EEC-4EBC-A03A-C2354C5D53BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E24B842-0EEC-4EBC-A03A-C2354C5D53BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E24B842-0EEC-4EBC-A03A-C2354C5D53BE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{82B1BC32-3DBA-4532-9ABB-6514C3002256} = {052A6BA3-345E-4EEE-93EA-2A124D40DAB2}
+		{4E24B842-0EEC-4EBC-A03A-C2354C5D53BE} = {052A6BA3-345E-4EEE-93EA-2A124D40DAB2}
+	EndGlobalSection
+EndGlobal

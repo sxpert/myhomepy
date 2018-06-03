@@ -1,0 +1,323 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{052A6BA3-345E-4EEE-93EA-2A124D40DAB2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1377316C-3842-4CC5-BECB-050077928A2A}"
+	ProjectSection(SolutionItems) = preProject
+		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
+		OpenWebNet1.vsmdi = OpenWebNet1.vsmdi
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Devices", "Devices", "{9A4CB3B9-26C7-405F-888F-BEA912421B4A}"
+	ProjectSection(SolutionItems) = preProject
+		Devices\productsFile.xml = Devices\productsFile.xml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Products", "Products", "{85784692-BAC7-4A43-AC6A-93006B4403BE}"
+	ProjectSection(SolutionItems) = preProject
+		Devices\Products\p_generic.xml = Devices\Products\p_generic.xml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AUTOMATION", "AUTOMATION", "{F1C78E6A-9901-4E2C-8463-5676267AD730}"
+	ProjectSection(SolutionItems) = preProject
+		Devices\Products\AUTOMATION\p_3475.xml = Devices\Products\AUTOMATION\p_3475.xml
+		Devices\Products\AUTOMATION\p_3476.xml = Devices\Products\AUTOMATION\p_3476.xml
+		Devices\Products\AUTOMATION\p_3477.xml = Devices\Products\AUTOMATION\p_3477.xml
+		Devices\Products\AUTOMATION\p_4563.xml = Devices\Products\AUTOMATION\p_4563.xml
+		Devices\Products\AUTOMATION\p_4575.xml = Devices\Products\AUTOMATION\p_4575.xml
+		Devices\Products\AUTOMATION\p_4575SB.xml = Devices\Products\AUTOMATION\p_4575SB.xml
+		Devices\Products\AUTOMATION\p_4576.xml = Devices\Products\AUTOMATION\p_4576.xml
+		Devices\Products\AUTOMATION\p_4651.xml = Devices\Products\AUTOMATION\p_4651.xml
+		Devices\Products\AUTOMATION\p_4651M2.xml = Devices\Products\AUTOMATION\p_4651M2.xml
+		Devices\Products\AUTOMATION\p_4652_2.xml = Devices\Products\AUTOMATION\p_4652_2.xml
+		Devices\Products\AUTOMATION\p_4652_3.xml = Devices\Products\AUTOMATION\p_4652_3.xml
+		Devices\Products\AUTOMATION\p_4653_2.xml = Devices\Products\AUTOMATION\p_4653_2.xml
+		Devices\Products\AUTOMATION\p_4654.xml = Devices\Products\AUTOMATION\p_4654.xml
+		Devices\Products\AUTOMATION\p_4654N.xml = Devices\Products\AUTOMATION\p_4654N.xml
+		Devices\Products\AUTOMATION\p_4655.xml = Devices\Products\AUTOMATION\p_4655.xml
+		Devices\Products\AUTOMATION\p_4656.xml = Devices\Products\AUTOMATION\p_4656.xml
+		Devices\Products\AUTOMATION\p_4657.xml = Devices\Products\AUTOMATION\p_4657.xml
+		Devices\Products\AUTOMATION\p_4671_1.xml = Devices\Products\AUTOMATION\p_4671_1.xml
+		Devices\Products\AUTOMATION\p_4671_2.xml = Devices\Products\AUTOMATION\p_4671_2.xml
+		Devices\Products\AUTOMATION\p_4678.xml = Devices\Products\AUTOMATION\p_4678.xml
+		Devices\Products\AUTOMATION\p_4680.xml = Devices\Products\AUTOMATION\p_4680.xml
+		Devices\Products\AUTOMATION\p_573812.xml = Devices\Products\AUTOMATION\p_573812.xml
+		Devices\Products\AUTOMATION\p_573814.xml = Devices\Products\AUTOMATION\p_573814.xml
+		Devices\Products\AUTOMATION\p_573816.xml = Devices\Products\AUTOMATION\p_573816.xml
+		Devices\Products\AUTOMATION\p_573818.xml = Devices\Products\AUTOMATION\p_573818.xml
+		Devices\Products\AUTOMATION\p_573820.xml = Devices\Products\AUTOMATION\p_573820.xml
+		Devices\Products\AUTOMATION\p_573822.xml = Devices\Products\AUTOMATION\p_573822.xml
+		Devices\Products\AUTOMATION\p_573824.xml = Devices\Products\AUTOMATION\p_573824.xml
+		Devices\Products\AUTOMATION\p_573826.xml = Devices\Products\AUTOMATION\p_573826.xml
+		Devices\Products\AUTOMATION\p_573828.xml = Devices\Products\AUTOMATION\p_573828.xml
+		Devices\Products\AUTOMATION\p_573830.xml = Devices\Products\AUTOMATION\p_573830.xml
+		Devices\Products\AUTOMATION\p_573832.xml = Devices\Products\AUTOMATION\p_573832.xml
+		Devices\Products\AUTOMATION\p_573834.xml = Devices\Products\AUTOMATION\p_573834.xml
+		Devices\Products\AUTOMATION\p_573836.xml = Devices\Products\AUTOMATION\p_573836.xml
+		Devices\Products\AUTOMATION\p_573838.xml = Devices\Products\AUTOMATION\p_573838.xml
+		Devices\Products\AUTOMATION\p_573840.xml = Devices\Products\AUTOMATION\p_573840.xml
+		Devices\Products\AUTOMATION\p_573842.xml = Devices\Products\AUTOMATION\p_573842.xml
+		Devices\Products\AUTOMATION\p_573846.xml = Devices\Products\AUTOMATION\p_573846.xml
+		Devices\Products\AUTOMATION\p_573848.xml = Devices\Products\AUTOMATION\p_573848.xml
+		Devices\Products\AUTOMATION\p_573856.xml = Devices\Products\AUTOMATION\p_573856.xml
+		Devices\Products\AUTOMATION\p_573858.xml = Devices\Products\AUTOMATION\p_573858.xml
+		Devices\Products\AUTOMATION\p_573860.xml = Devices\Products\AUTOMATION\p_573860.xml
+		Devices\Products\AUTOMATION\p_573862.xml = Devices\Products\AUTOMATION\p_573862.xml
+		Devices\Products\AUTOMATION\p_573864.xml = Devices\Products\AUTOMATION\p_573864.xml
+		Devices\Products\AUTOMATION\p_573866.xml = Devices\Products\AUTOMATION\p_573866.xml
+		Devices\Products\AUTOMATION\p_573870.xml = Devices\Products\AUTOMATION\p_573870.xml
+		Devices\Products\AUTOMATION\p_573904.xml = Devices\Products\AUTOMATION\p_573904.xml
+		Devices\Products\AUTOMATION\p_573908.xml = Devices\Products\AUTOMATION\p_573908.xml
+		Devices\Products\AUTOMATION\p_BMDI1001.xml = Devices\Products\AUTOMATION\p_BMDI1001.xml
+		Devices\Products\AUTOMATION\p_BMDI1002.xml = Devices\Products\AUTOMATION\p_BMDI1002.xml
+		Devices\Products\AUTOMATION\p_BMDI3001.xml = Devices\Products\AUTOMATION\p_BMDI3001.xml
+		Devices\Products\AUTOMATION\p_BMDI3002.xml = Devices\Products\AUTOMATION\p_BMDI3002.xml
+		Devices\Products\AUTOMATION\p_BMDI3201.xml = Devices\Products\AUTOMATION\p_BMDI3201.xml
+		Devices\Products\AUTOMATION\p_BMDI3301.xml = Devices\Products\AUTOMATION\p_BMDI3301.xml
+		Devices\Products\AUTOMATION\p_BMSE1001.xml = Devices\Products\AUTOMATION\p_BMSE1001.xml
+		Devices\Products\AUTOMATION\p_BMSE2001.xml = Devices\Products\AUTOMATION\p_BMSE2001.xml
+		Devices\Products\AUTOMATION\p_BMSE2002.xml = Devices\Products\AUTOMATION\p_BMSE2002.xml
+		Devices\Products\AUTOMATION\p_BMSE2003.xml = Devices\Products\AUTOMATION\p_BMSE2003.xml
+		Devices\Products\AUTOMATION\p_BMSE2004.xml = Devices\Products\AUTOMATION\p_BMSE2004.xml
+		Devices\Products\AUTOMATION\p_BMSE2005.xml = Devices\Products\AUTOMATION\p_BMSE2005.xml
+		Devices\Products\AUTOMATION\p_BMSE2006.xml = Devices\Products\AUTOMATION\p_BMSE2006.xml
+		Devices\Products\AUTOMATION\p_BMSE3001.xml = Devices\Products\AUTOMATION\p_BMSE3001.xml
+		Devices\Products\AUTOMATION\p_BMSE3002.xml = Devices\Products\AUTOMATION\p_BMSE3002.xml
+		Devices\Products\AUTOMATION\p_BMSE3003.xml = Devices\Products\AUTOMATION\p_BMSE3003.xml
+		Devices\Products\AUTOMATION\p_BMSE3005.xml = Devices\Products\AUTOMATION\p_BMSE3005.xml
+		Devices\Products\AUTOMATION\p_BMSW1001.xml = Devices\Products\AUTOMATION\p_BMSW1001.xml
+		Devices\Products\AUTOMATION\p_BMSW1002.xml = Devices\Products\AUTOMATION\p_BMSW1002.xml
+		Devices\Products\AUTOMATION\p_BMSW1003.xml = Devices\Products\AUTOMATION\p_BMSW1003.xml
+		Devices\Products\AUTOMATION\p_BMSW3001.xml = Devices\Products\AUTOMATION\p_BMSW3001.xml
+		Devices\Products\AUTOMATION\p_BMSW3002.xml = Devices\Products\AUTOMATION\p_BMSW3002.xml
+		Devices\Products\AUTOMATION\p_BMSW3003.xml = Devices\Products\AUTOMATION\p_BMSW3003.xml
+		Devices\Products\AUTOMATION\p_F411_1.xml = Devices\Products\AUTOMATION\p_F411_1.xml
+		Devices\Products\AUTOMATION\p_F411_1N.xml = Devices\Products\AUTOMATION\p_F411_1N.xml
+		Devices\Products\AUTOMATION\p_F411_1NC.xml = Devices\Products\AUTOMATION\p_F411_1NC.xml
+		Devices\Products\AUTOMATION\p_F411_2.xml = Devices\Products\AUTOMATION\p_F411_2.xml
+		Devices\Products\AUTOMATION\p_F411_2NC.xml = Devices\Products\AUTOMATION\p_F411_2NC.xml
+		Devices\Products\AUTOMATION\p_F411_4.xml = Devices\Products\AUTOMATION\p_F411_4.xml
+		Devices\Products\AUTOMATION\p_F413.xml = Devices\Products\AUTOMATION\p_F413.xml
+		Devices\Products\AUTOMATION\p_F413N.xml = Devices\Products\AUTOMATION\p_F413N.xml
+		Devices\Products\AUTOMATION\p_F414.xml = Devices\Products\AUTOMATION\p_F414.xml
+		Devices\Products\AUTOMATION\p_F415.xml = Devices\Products\AUTOMATION\p_F415.xml
+		Devices\Products\AUTOMATION\p_F416U1.xml = Devices\Products\AUTOMATION\p_F416U1.xml
+		Devices\Products\AUTOMATION\p_F417U2.xml = Devices\Products\AUTOMATION\p_F417U2.xml
+		Devices\Products\AUTOMATION\p_F420.xml = Devices\Products\AUTOMATION\p_F420.xml
+		Devices\Products\AUTOMATION\p_F422.xml = Devices\Products\AUTOMATION\p_F422.xml
+		Devices\Products\AUTOMATION\p_F425.xml = Devices\Products\AUTOMATION\p_F425.xml
+		Devices\Products\AUTOMATION\p_F428.xml = Devices\Products\AUTOMATION\p_F428.xml
+		Devices\Products\AUTOMATION\p_F429.xml = Devices\Products\AUTOMATION\p_F429.xml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TEMP_CONTROLE", "TEMP_CONTROLE", "{23315B79-746C-46D5-912C-79063D0AA9F4}"
+	ProjectSection(SolutionItems) = preProject
+		Devices\Products\TEMP_CONTROLE\p_3550.xml = Devices\Products\TEMP_CONTROLE\p_3550.xml
+		Devices\Products\TEMP_CONTROLE\p_4685.xml = Devices\Products\TEMP_CONTROLE\p_4685.xml
+		Devices\Products\TEMP_CONTROLE\p_4692.xml = Devices\Products\TEMP_CONTROLE\p_4692.xml
+		Devices\Products\TEMP_CONTROLE\P_4692_FAN.xml = Devices\Products\TEMP_CONTROLE\P_4692_FAN.xml
+		Devices\Products\TEMP_CONTROLE\p_4693.xml = Devices\Products\TEMP_CONTROLE\p_4693.xml
+		Devices\Products\TEMP_CONTROLE\p_4695.xml = Devices\Products\TEMP_CONTROLE\p_4695.xml
+		Devices\Products\TEMP_CONTROLE\p_F430_2.xml = Devices\Products\TEMP_CONTROLE\p_F430_2.xml
+		Devices\Products\TEMP_CONTROLE\p_F430_4.xml = Devices\Products\TEMP_CONTROLE\p_F430_4.xml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libs", "Libs", "{63D123C2-3667-4F31-9718-3C3557E6266D}"
+	ProjectSection(SolutionItems) = preProject
+		Libs\UPnP.dll = Libs\UPnP.dll
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OWNFS", "OWNFS", "{19E84637-F054-4187-8025-0BBFA1F27EE4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{CCCFDA81-6D20-49A2-ADAE-12AFFBEA170F}"
+	ProjectSection(SolutionItems) = preProject
+		Docs\OpenWebNet TODO.docx = Docs\OpenWebNet TODO.docx
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenWebNet", "OpenWebNet\OpenWebNet.csproj", "{265EADA8-4A1B-4C96-B187-D4967ADD2F59}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenWebNet.Test", "OpenWebNet.Test\OpenWebNet.Test.csproj", "{755C9E98-BD17-4981-A1D8-90902907A848}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyEnergy", "Tools\MyEnergy\MyEnergy.csproj", "{82B1BC32-3DBA-4532-9ABB-6514C3002256}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyCamera", "Tools\MyCamera\MyCamera.csproj", "{4E24B842-0EEC-4EBC-A03A-C2354C5D53BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenWebNet.Tests", "OpenWebNet.Tests\OpenWebNet.Tests.csproj", "{929A2AAA-4053-4314-9B37-6B5D8646C4E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyHomeShortcut", "..\..\MyHomeShortcut\MyHomeShortcut\MyHomeShortcut.csproj", "{B3D9969B-6D09-4BB9-8DFE-1878B755A9D6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OWNFS.EthernetGateway", "OWNFS\OWNFS.EthernetGateway\OWNFS.EthernetGateway.csproj", "{425199B6-B5E2-44FA-8BD3-33C09B1BC6F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OWNFS", "OWNFS\OWNFS\OWNFS.csproj", "{F7471878-FF8A-420D-AA6C-45A082058A44}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OWNFS.Core", "OWNFS\OWNFS.Core\OWNFS.Core.csproj", "{F3C2C087-B5D0-46BB-A952-B755EDE0D4AD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OWNFS.MyHomeSystem", "OWNFS\OWNFS.MyHomeSystem\OWNFS.MyHomeSystem.csproj", "{4570FF79-A0EF-464B-9635-DC1D7E72BF72}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenWebNet.Common", "OpenWebNet.Common\OpenWebNet.Common.csproj", "{0D90F04D-DB4E-4BB8-8DAB-5DB2136BF2F3}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 8
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs07
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = OpenWebNet.Tests\\OpenWebNet.Tests.csproj
+		SccProjectName1 = OpenWebNet.Tests
+		SccLocalPath1 = OpenWebNet.Tests
+		SccProjectUniqueName2 = OpenWebNet\\OpenWebNet.csproj
+		SccProjectName2 = OpenWebNet
+		SccLocalPath2 = OpenWebNet
+		SccProjectUniqueName3 = ..\\..\\MyHomeShortcut\\MyHomeShortcut\\MyHomeShortcut.csproj
+		SccProjectTopLevelParentUniqueName3 = OpenWebNet.sln
+		SccProjectName3 = Tools/MyHomeShortcut
+		SccLocalPath3 = ..\\..\\MyHomeShortcut\\MyHomeShortcut
+		SccProjectUniqueName4 = OpenWebNet.Test\\OpenWebNet.Test.csproj
+		SccProjectName4 = OpenWebNet.Test
+		SccLocalPath4 = OpenWebNet.Test
+		SccProjectUniqueName5 = Tools\\MyCamera\\MyCamera.csproj
+		SccProjectTopLevelParentUniqueName5 = OpenWebNet.sln
+		SccProjectName5 = Tools/MyCamera
+		SccLocalPath5 = Tools\\MyCamera
+		SccProjectUniqueName6 = OpenWebNet.Common\\OpenWebNet.Common.csproj
+		SccProjectName6 = OpenWebNet.Common
+		SccLocalPath6 = OpenWebNet.Common
+		SccProjectUniqueName7 = OWNFS\\OWNFS\\OWNFS.csproj
+		SccProjectTopLevelParentUniqueName7 = OpenWebNet.sln
+		SccProjectName7 = OWNFS/OWNFS
+		SccLocalPath7 = OWNFS\\OWNFS
+	EndGlobalSection
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = OpenWebNet1.vsmdi
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{265EADA8-4A1B-4C96-B187-D4967ADD2F59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{265EADA8-4A1B-4C96-B187-D4967ADD2F59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{265EADA8-4A1B-4C96-B187-D4967ADD2F59}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{265EADA8-4A1B-4C96-B187-D4967ADD2F59}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{265EADA8-4A1B-4C96-B187-D4967ADD2F59}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{265EADA8-4A1B-4C96-B187-D4967ADD2F59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{265EADA8-4A1B-4C96-B187-D4967ADD2F59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{265EADA8-4A1B-4C96-B187-D4967ADD2F59}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{265EADA8-4A1B-4C96-B187-D4967ADD2F59}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{265EADA8-4A1B-4C96-B187-D4967ADD2F59}.Release|x86.ActiveCfg = Release|Any CPU
+		{755C9E98-BD17-4981-A1D8-90902907A848}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{755C9E98-BD17-4981-A1D8-90902907A848}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{755C9E98-BD17-4981-A1D8-90902907A848}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{755C9E98-BD17-4981-A1D8-90902907A848}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{755C9E98-BD17-4981-A1D8-90902907A848}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{755C9E98-BD17-4981-A1D8-90902907A848}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{755C9E98-BD17-4981-A1D8-90902907A848}.Release|Any CPU.Build.0 = Release|Any CPU
+		{755C9E98-BD17-4981-A1D8-90902907A848}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{755C9E98-BD17-4981-A1D8-90902907A848}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{755C9E98-BD17-4981-A1D8-90902907A848}.Release|x86.ActiveCfg = Release|Any CPU
+		{82B1BC32-3DBA-4532-9ABB-6514C3002256}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82B1BC32-3DBA-4532-9ABB-6514C3002256}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82B1BC32-3DBA-4532-9ABB-6514C3002256}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{82B1BC32-3DBA-4532-9ABB-6514C3002256}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{82B1BC32-3DBA-4532-9ABB-6514C3002256}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82B1BC32-3DBA-4532-9ABB-6514C3002256}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82B1BC32-3DBA-4532-9ABB-6514C3002256}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{82B1BC32-3DBA-4532-9ABB-6514C3002256}.Release|x86.ActiveCfg = Release|Any CPU
+		{4E24B842-0EEC-4EBC-A03A-C2354C5D53BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E24B842-0EEC-4EBC-A03A-C2354C5D53BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E24B842-0EEC-4EBC-A03A-C2354C5D53BE}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{4E24B842-0EEC-4EBC-A03A-C2354C5D53BE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4E24B842-0EEC-4EBC-A03A-C2354C5D53BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E24B842-0EEC-4EBC-A03A-C2354C5D53BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E24B842-0EEC-4EBC-A03A-C2354C5D53BE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{4E24B842-0EEC-4EBC-A03A-C2354C5D53BE}.Release|x86.ActiveCfg = Release|Any CPU
+		{929A2AAA-4053-4314-9B37-6B5D8646C4E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{929A2AAA-4053-4314-9B37-6B5D8646C4E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{929A2AAA-4053-4314-9B37-6B5D8646C4E2}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{929A2AAA-4053-4314-9B37-6B5D8646C4E2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{929A2AAA-4053-4314-9B37-6B5D8646C4E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{929A2AAA-4053-4314-9B37-6B5D8646C4E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{929A2AAA-4053-4314-9B37-6B5D8646C4E2}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{929A2AAA-4053-4314-9B37-6B5D8646C4E2}.Release|x86.ActiveCfg = Release|Any CPU
+		{B3D9969B-6D09-4BB9-8DFE-1878B755A9D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3D9969B-6D09-4BB9-8DFE-1878B755A9D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3D9969B-6D09-4BB9-8DFE-1878B755A9D6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{B3D9969B-6D09-4BB9-8DFE-1878B755A9D6}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{B3D9969B-6D09-4BB9-8DFE-1878B755A9D6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B3D9969B-6D09-4BB9-8DFE-1878B755A9D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3D9969B-6D09-4BB9-8DFE-1878B755A9D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3D9969B-6D09-4BB9-8DFE-1878B755A9D6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B3D9969B-6D09-4BB9-8DFE-1878B755A9D6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{B3D9969B-6D09-4BB9-8DFE-1878B755A9D6}.Release|x86.ActiveCfg = Release|Any CPU
+		{425199B6-B5E2-44FA-8BD3-33C09B1BC6F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{425199B6-B5E2-44FA-8BD3-33C09B1BC6F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{425199B6-B5E2-44FA-8BD3-33C09B1BC6F7}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{425199B6-B5E2-44FA-8BD3-33C09B1BC6F7}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{425199B6-B5E2-44FA-8BD3-33C09B1BC6F7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{425199B6-B5E2-44FA-8BD3-33C09B1BC6F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{425199B6-B5E2-44FA-8BD3-33C09B1BC6F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{425199B6-B5E2-44FA-8BD3-33C09B1BC6F7}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{425199B6-B5E2-44FA-8BD3-33C09B1BC6F7}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{425199B6-B5E2-44FA-8BD3-33C09B1BC6F7}.Release|x86.ActiveCfg = Release|Any CPU
+		{F7471878-FF8A-420D-AA6C-45A082058A44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7471878-FF8A-420D-AA6C-45A082058A44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7471878-FF8A-420D-AA6C-45A082058A44}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F7471878-FF8A-420D-AA6C-45A082058A44}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F7471878-FF8A-420D-AA6C-45A082058A44}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F7471878-FF8A-420D-AA6C-45A082058A44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7471878-FF8A-420D-AA6C-45A082058A44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7471878-FF8A-420D-AA6C-45A082058A44}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{F7471878-FF8A-420D-AA6C-45A082058A44}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{F7471878-FF8A-420D-AA6C-45A082058A44}.Release|x86.ActiveCfg = Release|Any CPU
+		{F3C2C087-B5D0-46BB-A952-B755EDE0D4AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3C2C087-B5D0-46BB-A952-B755EDE0D4AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3C2C087-B5D0-46BB-A952-B755EDE0D4AD}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F3C2C087-B5D0-46BB-A952-B755EDE0D4AD}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F3C2C087-B5D0-46BB-A952-B755EDE0D4AD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F3C2C087-B5D0-46BB-A952-B755EDE0D4AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3C2C087-B5D0-46BB-A952-B755EDE0D4AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3C2C087-B5D0-46BB-A952-B755EDE0D4AD}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{F3C2C087-B5D0-46BB-A952-B755EDE0D4AD}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{F3C2C087-B5D0-46BB-A952-B755EDE0D4AD}.Release|x86.ActiveCfg = Release|Any CPU
+		{4570FF79-A0EF-464B-9635-DC1D7E72BF72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4570FF79-A0EF-464B-9635-DC1D7E72BF72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4570FF79-A0EF-464B-9635-DC1D7E72BF72}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{4570FF79-A0EF-464B-9635-DC1D7E72BF72}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{4570FF79-A0EF-464B-9635-DC1D7E72BF72}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4570FF79-A0EF-464B-9635-DC1D7E72BF72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4570FF79-A0EF-464B-9635-DC1D7E72BF72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4570FF79-A0EF-464B-9635-DC1D7E72BF72}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{4570FF79-A0EF-464B-9635-DC1D7E72BF72}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{4570FF79-A0EF-464B-9635-DC1D7E72BF72}.Release|x86.ActiveCfg = Release|Any CPU
+		{0D90F04D-DB4E-4BB8-8DAB-5DB2136BF2F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D90F04D-DB4E-4BB8-8DAB-5DB2136BF2F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D90F04D-DB4E-4BB8-8DAB-5DB2136BF2F3}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{0D90F04D-DB4E-4BB8-8DAB-5DB2136BF2F3}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{0D90F04D-DB4E-4BB8-8DAB-5DB2136BF2F3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0D90F04D-DB4E-4BB8-8DAB-5DB2136BF2F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D90F04D-DB4E-4BB8-8DAB-5DB2136BF2F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D90F04D-DB4E-4BB8-8DAB-5DB2136BF2F3}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{0D90F04D-DB4E-4BB8-8DAB-5DB2136BF2F3}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{0D90F04D-DB4E-4BB8-8DAB-5DB2136BF2F3}.Release|x86.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{82B1BC32-3DBA-4532-9ABB-6514C3002256} = {052A6BA3-345E-4EEE-93EA-2A124D40DAB2}
+		{4E24B842-0EEC-4EBC-A03A-C2354C5D53BE} = {052A6BA3-345E-4EEE-93EA-2A124D40DAB2}
+		{B3D9969B-6D09-4BB9-8DFE-1878B755A9D6} = {052A6BA3-345E-4EEE-93EA-2A124D40DAB2}
+		{85784692-BAC7-4A43-AC6A-93006B4403BE} = {9A4CB3B9-26C7-405F-888F-BEA912421B4A}
+		{F1C78E6A-9901-4E2C-8463-5676267AD730} = {85784692-BAC7-4A43-AC6A-93006B4403BE}
+		{23315B79-746C-46D5-912C-79063D0AA9F4} = {85784692-BAC7-4A43-AC6A-93006B4403BE}
+		{425199B6-B5E2-44FA-8BD3-33C09B1BC6F7} = {19E84637-F054-4187-8025-0BBFA1F27EE4}
+		{F7471878-FF8A-420D-AA6C-45A082058A44} = {19E84637-F054-4187-8025-0BBFA1F27EE4}
+		{F3C2C087-B5D0-46BB-A952-B755EDE0D4AD} = {19E84637-F054-4187-8025-0BBFA1F27EE4}
+		{4570FF79-A0EF-464B-9635-DC1D7E72BF72} = {19E84637-F054-4187-8025-0BBFA1F27EE4}
+	EndGlobalSection
+EndGlobal
