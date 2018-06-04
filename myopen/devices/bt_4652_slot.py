@@ -19,8 +19,8 @@ KO_CEN = 404
 KO_CEN_PLUS = 406
 
 KOS = {
-    'values': (KO_UNCONFIGURED, KO_LIGHT_CONTROL, KO_AUTOMATION_CONTROL, KO_CEN, MODE_CEN_PLUS),
-    'ids': ('UNCONFIGURED', 'LIGHT_CONTROL', 'AUTOMATION_CONTROL', 'CEN', 'CEN_PLUS')
+    'values': (KO_UNCONFIGURED, KO_LIGHT_CONTROL, KO_AUTOMATION_CONTROL, KO_CEN, KO_CEN_PLUS),
+    'ids': ('UNCONFIGURED', 'LIGHT_CONTROL', 'AUTOMATION_CONTROL', 'CEN', 'CEN_PLUS'),
     'names': ('Unconfigured', 'Light control', 'Automation control', 'CEN', 'CEN+')
 }
 
@@ -54,9 +54,9 @@ AT_AREA = 1
 AT_GROUP = 2
 AT_GENERAL = 3
 ADDRESS_TYPE = {
-    'values' = (AT_P2P, AT_AREA, AT_GROUP, AT_GENERAL),
-    'ids' = ('P2P', 'AREA', 'GROUP', 'GENERAL'),
-    'names' = ('Point to Point', 'Area', 'Group', 'General')
+    'values': (AT_P2P, AT_AREA, AT_GROUP, AT_GENERAL),
+    'ids': ('P2P', 'AREA', 'GROUP', 'GENERAL'),
+    'names': ('Point to Point', 'Area', 'Group', 'General')
 }
 
 DELAY_1_M = 1
@@ -70,10 +70,12 @@ DELAY_0_5_S = 8
 DELAY_2_S = 9
 DELAY_10_M = 10
 DELAYS = {
-    'values': (DELAY_1_M, DELAY_2_M, DELAY_3_M, DELAY_4_M, DELAY_5_M, DELAY_15_M, DELAY_30_S, DELAY_0_5_S, DELAY_2_S, DELAY_10_M)
+    'values': (DELAY_1_M, DELAY_2_M, DELAY_3_M, DELAY_4_M, DELAY_5_M, DELAY_15_M, DELAY_30_S, DELAY_0_5_S, DELAY_2_S, DELAY_10_M),
     'ids': ('1_M', '2_M', '3_M', '4_M', '5_M', '15_M', '30_S', '0_5_S', '2_S', '10_M'),
     'names': ('1 mn', '2 mn', '3 mn', '4 mn', '5 mn', '15 mn', '30 s', '0.5 s', '2 s', '10 mn')
 }
+
+CEN = None
 
 CEN_PLUS_MIN = 1
 CEN_PLUS_MAX = 2047
@@ -93,7 +95,7 @@ F_ADDRESS = 'address'
 F_AREA = 'area'
 F_GROUP = 'group'
 F_BUTTON_DOWN = 'button_down'
-F_REF_ADDR = 'ref_address'
+F_REF_ADDRESS = 'ref_address'
 F_DELAY = 'delay'
 
 FIELDS = {
@@ -104,14 +106,14 @@ FIELDS = {
     },
     F_LIGHT_CONTROL: {
         'param': 0,
-        'values': ('list', LIGHT_CTRL),
-        'cond': ('==', F_KO, KO_LIGHT_CTRL),
+        'values': ('list', LIGHT_CONTROL),
+        'cond': ('==', F_KO, KO_LIGHT_CONTROL),
         'disp': {'label': 'Light op. mode', 'order': 1}
     },
     F_AUTOMATION_CONTROL: {
         'param': 0,
         'values': ('list', AUTOMATION_CONTROL),
-        'cond': ('==', F_KO, KO_AUTOMATION_CTRL),
+        'cond': ('==', F_KO, KO_AUTOMATION_CONTROL),
         'disp': {'label': 'Automation op. mode', 'order': 1}
     },
     F_CEN: {
@@ -136,7 +138,7 @@ FIELDS = {
         'param': 2,
         'values': ('int', CEN_PLUS_BUTTON_MIN, CEN_PLUS_BUTTON_MAX),
         'cond': ('==', F_KO, KO_CEN_PLUS),
-        'disp': {'label', 'Top button', 'order': 2}
+        'disp': {'label': 'Top button', 'order': 2}
     },
     F_ADDRESS: {
         'param': 2,
@@ -183,7 +185,7 @@ class Device4652_Slot(BaseSlot):
     MODE_CEN_PLUS = 4
 
     # KOS = (500, 400, 401, 404, 406)
-    KOS = MODES['values']
+    KOS = KOS['values']
     MODE_IDS = ('UNCONFIGURED', 'LIGHT_CONTROL', 'AUTOMATION_CONTROL', 'CEN', 'CEN_PLUS')
     MODE_NAMES = ('Unconfigured', 'Light control', 'Automation control', 'CEN', 'CEN+')
     LIGHT_CTRL_TOGGLE = 0
