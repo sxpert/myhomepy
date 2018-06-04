@@ -80,8 +80,8 @@
     border: var(--border-width) solid var(--border-color);
     margin-bottom: 10pt;
 }
-.device-slots :first-child {
-    margin-left: 0;
+.device-slots :nth-child(even) {
+    margin-right: 0;
 }
 .device-slot {
     vertical-align: top;
@@ -91,7 +91,8 @@
     --slot-available-width: calc( var(--slot-width) - var(--slot-total-padding) );
     width: var(--slot-available-width); 
     border: var(--border-width) solid var(--border-color);
-    margin-left: var( --default-spacing );
+    margin-right: var(--default-spacing);
+    margin-bottom: var(--default-spacing);
     padding-left: var(--slot-padding);
     padding-right: var(--slot-padding);
     --slot-label-width: calc( var(--slot-available-width) / 3 );
