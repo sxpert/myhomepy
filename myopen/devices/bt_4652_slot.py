@@ -143,25 +143,25 @@ FIELDS = {
     F_ADDRESS: {
         'param': 2,
         'values': ('address', '8_bit'),
-        'cond': ('and', ('in', F_KO, (KO_LIGHT_CONTROL, KO_AUTOMATION_CONTROL)), ('==', F_ADDRESS_TYPE, AT_P2P)),
+        'cond': ('and', (('in', F_KO, (KO_LIGHT_CONTROL, KO_AUTOMATION_CONTROL)), ('==', F_ADDRESS_TYPE, AT_P2P))),
         'disp': {'label': 'Address', 'order': 3}
     },
     F_AREA: {
         'param': 2,
         'values': ('area'),
-        'cond': ('and', ('in', F_KO, (KO_LIGHT_CONTROL, KO_AUTOMATION_CONTROL)), ('==', F_ADDRESS_TYPE, AT_AREA)),
+        'cond': ('and', (('in', F_KO, (KO_LIGHT_CONTROL, KO_AUTOMATION_CONTROL)), ('==', F_ADDRESS_TYPE, AT_AREA))),
         'disp': {'label': 'Area', 'order': 3}
     },
     F_GROUP: {
         'param': 2,
         'values': ('group'),
-        'cond': ('and', ('in', F_KO, (KO_LIGHT_CONTROL, KO_AUTOMATION_CONTROL)), ('==', F_ADDRESS_TYPE, AT_GROUP)),
+        'cond': ('and', (('in', F_KO, (KO_LIGHT_CONTROL, KO_AUTOMATION_CONTROL)), ('==', F_ADDRESS_TYPE, AT_GROUP))),
         'disp': {'label': 'Group', 'order': 3}
     },
     F_REF_ADDRESS: {
         'param': 5,
         'values': ('address', '8_bit'),
-        'cond': ('and', ('in', F_KO, (KO_LIGHT_CONTROL, KO_AUTOMATION_CONTROL)), ('in', F_ADDRESS_TYPE, (AT_AREA, AT_GROUP)))
+        'cond': ('and', (('in', F_KO, (KO_LIGHT_CONTROL, KO_AUTOMATION_CONTROL)), ('in', F_ADDRESS_TYPE, (AT_AREA, AT_GROUP))))
     },
     F_BUTTON_DOWN: {
         'param': 3,
@@ -172,7 +172,7 @@ FIELDS = {
     F_DELAY: {
         'param': 17,
         'values': ('list', DELAYS),
-        'cond': ('and', (('==', F_KO, KO_LIGHT_CONTROL), ('==', LIGHT_CONTROL, LC_TIMED_ON))),
+        'cond': ('and', (('==', F_KO, KO_LIGHT_CONTROL), ('==', F_LIGHT_CONTROL, LC_TIMED_ON))),
         'disp': {'label': 'Duration', 'order': 4}
     }
 }
@@ -239,6 +239,71 @@ class Device4652_Slot(BaseSlot):
     CEN_PLUS_MAX = 2047
     CEN_PLUS_BUTTON_MIN = 1
     CEN_PLUS_BUTTON_MAX = 32
+
+    FIELDS = FIELDS
+
+    # ========================================================================
+    #
+    # values checking function
+    #
+    # ========================================================================
+
+    def recurse_conditions(self, cond):
+        op = cond[0]
+        result = False
+        if op == '==':
+            field = cond[1]
+            value = cond[2]
+            field_value = self.get_value(field, None)
+            if field_value is None:
+                return False
+            result = (field_value == value)
+        elif op == 'in':
+            field = cond[1]
+            values = cond[2]
+            field_value = self.get_value(field, None)
+            if field_value is None:
+                return False
+            result = field_value in values
+        elif op == 'and':
+            result = True
+            conds = cond[1]
+            for cond in conds:
+                result = result and self.recurse_conditions(cond)
+        else:
+            self.log('unknown operator %s' % (str(op)))
+        return result
+
+    def field_conditions_test(self, field_name):
+        """
+        Tests if field conditions are met with the data currently available
+        """
+        field = self.FIELDS[field_name]
+        cond = field['cond']
+        return self.recurse_conditions(cond)
+
+    def find_field(self, param_id):
+        """
+        Finds which field corresponds to the param_id, 
+        depending on data already there in the slot
+        """
+        for f in self.FIELDS.keys():
+            field = self.FIELDS[f]
+            param = field['param']
+            ok = False
+            if isinstance(param, dict):
+                for p in param.keys():
+                    if p == param_id:
+                        ok = self.field_conditions_test(f)  
+            elif isinstance(param, int):
+                if param == param_id:
+                    ok = self.field_conditions_test(f)
+            # else skip field...
+            if ok:
+                # at this point we should have the right field name
+                return f
+        # should not happen ;-)
+        return None
 
     # ========================================================================
     #
@@ -566,6 +631,9 @@ class Device4652_Slot(BaseSlot):
     # ========================================================================
 
     def res_ko_value(self, keyo, state):
+        # parallel code
+        self.set_value(F_KO, keyo)
+        # original code
         mode = self.get_mode_from_keyo(keyo)
         self.set_value(SLOT_VAR_MODE, mode)
         if mode != self.MODE_UNCONFIGURED and state == 1 or \
@@ -578,6 +646,11 @@ class Device4652_Slot(BaseSlot):
         return True
 
     def res_param_ko(self, index, val_par):
+        # parallel code
+        field_name = self.find_field(index)
+        self.log('PARAM %s %s => %s' % (str(index), str(field_name), str(val_par)))
+
+        # original code
         mode = self.get_value(SLOT_VAR_MODE, None)
         if mode is not None:
             if mode == self.MODE_LIGHT_CTRL:
