@@ -60,7 +60,8 @@ export class Base_Slot_Model {
     };
     set_value(name, value) {
         // we expect the value to be a string... make an int of it...
-        value = parseInt(value);
+        if (typeof(value) === 'string')
+            value = parseInt(value);
         // check the value
         var ok = false;
         if (this.fields!==null) {
@@ -69,6 +70,7 @@ export class Base_Slot_Model {
                 var type = f.values[0];
                 switch(type) {
                     case 'address': 
+                        console.log(type, value);
                         let not_0_0 = !((value.a==0)&&(value.pl==0));
                         let a_valid = ((value.a>=0)&&(value.a<=10));
                         let pl_valid = ((value.pl>=0)&&(value.pl<=15));
