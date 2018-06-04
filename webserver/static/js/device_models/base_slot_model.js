@@ -5,12 +5,10 @@ export class Base_Slot_Model {
         if (options!==undefined) {
             let fields = options.fields;
             if (fields!==undefined) {
-                // turn the array unto a dict
-                let dict = {};
-                for(var f=0; f<fields.length; f++)
-                    dict[fields[f].name] = fields[f];
                 this.fields = fields;
-                this.fields_dict = dict;
+                this.names = Object.keys(fields);
+                for(var n=0; n<this.names.length; n++)
+                    fields[this.names[n]].name = this.names[n];
             } else    
                 this.fields = null;
         } else
@@ -43,15 +41,17 @@ export class Base_Slot_Model {
             v = this.values[name]
         if (v===undefined) {
             // time to return some sensible default, depending on type, if possible
-            if (this.fields_dict!==null) {
-                let f = this.fields_dict[name];
+            if (this.fields!==null) {
+                let f = this.fields[name];
                 if (f!==undefined) {
-                    switch(f.type) {
+                    let values = f.values
+                    let type = values[0];
+                    switch(type) {
                         case 'address': v = {a:0, pl:1}; break;
                         case 'area': v = 0; break;
                         case 'group': v = 1; break;
-                        case 'integer': v = f.min; break;
-                        case 'select': v = 0; break;
+                        case 'int': v = values[1]; break;
+                        case 'list': v = (values[1]!==null) ? values[1].values[0] : null; break;
                     }
                 }
             }
@@ -59,12 +59,15 @@ export class Base_Slot_Model {
         return v;
     };
     set_value(name, value) {
+        // we expect the value to be a string... make an int of it...
+        value = parseInt(value);
         // check the value
         var ok = false;
-        if (this.fields_dict!==null) {
-            let f = this.fields_dict[name];
+        if (this.fields!==null) {
+            let f = this.fields[name];
             if (f!==undefined) {
-                switch(f.type) {
+                var type = f.values[0];
+                switch(type) {
                     case 'address': 
                         let not_0_0 = !((value.a==0)&&(value.pl==0));
                         let a_valid = ((value.a>=0)&&(value.a<=10));
@@ -73,8 +76,14 @@ export class Base_Slot_Model {
                         break;
                     case 'area': ok = ((value.area>=0)&&(value.area<=10)); break;
                     case 'group': ok = ((value.group>=1)&&(value.group<=255)); break;
-                    case 'integer': ok = ((value>=f.min)&&(value<=f.max)); break;
-                    case 'select': ok = ((value>=0)&&(value<f.options.length)); break;
+                    case 'int': ok = ((value>=f.values[1])&&(value<=f.values[2])); break;
+                    case 'list':      
+                        if (f.values[1] !== undefined) {
+                            let values = f.values[1]
+                            let options = values.values;
+                            ok = options.indexOf(value)!=-1;
+                        }
+                        break;
                     default:
                         console.log('Base_Slot_Model::set_value', name, value, 'ERROR')
                         console.log('unhandled field type', f);

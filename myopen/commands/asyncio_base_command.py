@@ -19,25 +19,25 @@ class BaseCommand(object):
         return self._ended
 
     def start(self):
-        self.log('%s does nothing' % self.__class__.__name__)
+        # self.log('%s does nothing' % self.__class__.__name__)
+        pass
 
     def send(self, msg):
         self.system.gateway.send(msg)
 
     def dispatch(self, pkt):
-        self.log('BaseCommand.dispatch %s' % (str(pkt)))
+        # self.log('BaseCommand.dispatch %s' % (str(pkt)))
         msg = Message(pkt, self.system)
         msg.parse()
-        self.log('BaseCommand.dispatch : message parsed')
+        # self.log('BaseCommand.dispatch : message parsed')
         if self.msg_handler is not None:
-            self.log('BaseCommand.dispatch : calling handler')
+            # self.log('BaseCommand.dispatch : calling handler')
             return self.msg_handler(msg)  # pylint: disable=E1102
-        self.log('BaseCommand.dispatch : default system handler')
+        # self.log('BaseCommand.dispatch : default system handler')
         return self.default_msg_handler(msg)
 
     def default_msg_handler(self, msg):
-        self.log('BaseCommand.default_msg_handler : %s'
-                 % (str(msg)))
+        self.log('BaseCommand.default_msg_handler : %s' % (str(msg)))
         return False
 
     def end(self):

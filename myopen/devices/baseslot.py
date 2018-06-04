@@ -28,6 +28,12 @@ class BaseSlot(object):
         s += '}>'
         return s
 
+    @property
+    def number(self):
+        if self._slots is not None:
+            return self._slots.slots.index(self)
+        return None
+
     # ========================================================================
     #
     # front-end related

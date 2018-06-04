@@ -112,16 +112,20 @@ class App {
     };
     websocket() {
         var app = this;
-        this._ws = new WebSocket('ws://'+window.location.host+'/api/websocket');
-        this._ws.onopen = function() {
-            console.log('ws opened');
-        };
-        this._ws.onmessage = function(event) {
+        if (this._ws == null)
+            this._ws = new WebSocket('ws://'+window.location.host+'/api/websocket');
+        this._ws.addEventListener('open', event => {
+            console.log('ws opened', event);
+        });
+        this._ws.addEventListener('message', event => {
             app.ws_message(event.data)
-        };
-        this._ws.onclose = function(event) {
+        });
+        this._ws.addEventListener('close', event => {
+            console.log('ws closed', event.code, event.reason);
+            app._ws.close()
+            app._ws = null;
             app.websocket();
-        }
+        });
     }
     ws_message(data) {
         let js = JSON.parse(data)

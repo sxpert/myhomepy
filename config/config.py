@@ -105,13 +105,15 @@ class Config(object):
         """
         self.log('Config.websocket_dispatch %s %s' % (str(msg.system.id), str(msg)))
         for ws in self._websockets:
-            self.log('pushing to %s' % (str(ws)))
-            if hasattr(msg, 'web_data'):
-                msg = msg.web_data
-            try:
-                await ws.send_json(msg)
-            except TypeError:
-                self.log('ERROR: %s can\'t be converted to json' % (str(msg)))
+            # don't send if the websocket is closing...
+            if not ws.closed:
+                self.log('pushing to %s' % (str(ws)))
+                if hasattr(msg, 'web_data'):
+                    msg = msg.web_data
+                try:
+                    await ws.send_json(msg)
+                except TypeError:
+                    self.log('ERROR: %s can\'t be converted to json' % (str(msg)))
 
     def websocket_register(self, ws):
         """

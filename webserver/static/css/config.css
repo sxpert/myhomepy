@@ -3,7 +3,7 @@
     --header-height: 64px;
     --default-spacing: 4pt;
     --caption-width: calc( 100% - var(--header-height) - var(--default-spacing));
-    --button-width: calc( var(--header-height) * 1.5 );
+    --button-width: calc( var(--header-height) * 2 );
     --name-width: calc( var(--caption-width) - var(--default-spacing) - var(--button-width));
     --slot-font-size: 10pt;
     --default-width: 800px;
@@ -64,6 +64,8 @@
 .device-config-button {
     display: block;
     border-radius: 3px;
+    font-size: calc( var(--slot-font-size) - 2pt );
+    width: var(--button-width);
     border: var(--border-width) solid #777;
     color: black;
     background-color: #ddd;
