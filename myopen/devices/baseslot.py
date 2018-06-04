@@ -9,6 +9,13 @@ from core.logger import LOG_ERROR
 __all__ = ['F_KO', 'MissingFieldsDefinitionError', 'BaseSlot', ]
 
 F_KO = 'KO'
+F_STATE = 'state'
+F_SYS_ADDRESS = 'sys_address'
+F_SYSTEM = 'system'
+
+
+BASE_FIELDS = {
+}
 
 
 class MissingFieldsDefinitionError(Exception):
@@ -16,15 +23,21 @@ class MissingFieldsDefinitionError(Exception):
 
 
 class BaseSlot(object):
-    FIELDS = {}
+    _FIELDS = None
     log = None
 
     def __init__(self, slots):
-        FIELDS = getattr(self, 'FIELDS', None)
-        if FIELDS is None:
-            raise MissingFieldsDefinitionError('BaseSlot.__init__ ERROR: no FIELDS member')
-        self._slots = slots
         self.log = slots.log
+
+        FIELDS = getattr(self, 'FIELDS', None)
+        # don't complain for BaseSlot instances ...
+        if (self.__class__.__name__ != BaseSlot.__name__) and (FIELDS is None):
+            raise MissingFieldsDefinitionError('BaseSlot.__init__ ERROR: no FIELDS member')
+        bf = BASE_FIELDS.copy()
+        if FIELDS is not None:
+            bf.update(FIELDS)
+        self._FIELDS = bf
+        self._slots = slots
         self._values = {}
         self._params = {}
 
@@ -80,10 +93,7 @@ class BaseSlot(object):
         """
         Tests if field conditions are met with the data currently available
         """
-        FIELDS = getattr(self, 'FIELDS', None)
-        if FIELDS is None:
-            raise MissingFieldsDefinitionError('BaseSlot.field_conditions_test ERROR: no FIELDS member')
-        field = FIELDS[field_name]
+        field = self._FIELDS[field_name]
         cond = field.get('cond', None)
         # no conditions, always ok
         if cond is None:
@@ -95,12 +105,11 @@ class BaseSlot(object):
         Finds which field corresponds to the param_id, 
         depending on data already there in the slot
         """
-        FIELDS = getattr(self, 'FIELDS', None)
         found = False
         fields = []
         ok = False
-        for f in FIELDS.keys():
-            field = FIELDS[f]
+        for f in self._FIELDS.keys():
+            field = self._FIELDS[f]
             param = field['param']
             ok = False
             if isinstance(param, dict):
@@ -123,8 +132,7 @@ class BaseSlot(object):
         return (found, ok, fields)
 
     def set_check_value(self, field_name, value, loads=False):
-        FIELDS = getattr(self, 'FIELDS', None)
-        field = FIELDS[field_name]
+        field = self._FIELDS[field_name]
         values = field['values']
         if isinstance(values, tuple) or isinstance(values, list):
             v_type = values[0]
@@ -155,6 +163,25 @@ class BaseSlot(object):
                     else:
                         self.log('%s : address %d invalid (should be in (1..175)' % (field_name, value))
                         return False
+                elif v_parse == 'string':
+                    # we have either 2 of 4 chars
+                    a = None
+                    pl = None
+                    if len(value) == 2:
+                        a = int(value[0])
+                        pl = int(value[1])
+                    elif len(value) == 4:
+                        a = int(value[0:2])
+                        pl = int(value[2:4])
+                ok = True
+                ok = ok and ((a is not None) and (pl is not None))
+                ok = ok and (not ((a == 0) and (pl == 0)))
+                ok = ok and ((a >=0 ) and (a <= 10))
+                ok = ok and ((pl >= 0) and (pl <= 15))
+                if not ok:
+                    self.log('%s : address \'%s\' invalid' % (field_name, value))
+                    return False
+                value = {'a': a, 'pl': pl}
         elif v_type == 'area':
             if value < 0 or value > 10:
                 self.log('%s : area %d invalid (should be in (0..10)' % (field_name, value))
@@ -195,15 +222,11 @@ class BaseSlot(object):
     #
     # ========================================================================
 
-    # @property
-    # def slot_options(self):
-    #     return {}
 
     @property
     def slot_options(self):
-        FIELDS = getattr(self, 'FIELDS', None)
         options = {
-            'fields': FIELDS
+            'fields': self._FIELDS
         }
         return options
 
@@ -217,101 +240,6 @@ class BaseSlot(object):
         slot['values'] = values
         return slot
 
-    # @property
-    # def web_data(self):
-    #     slot = {}
-    #     options = self.slot_options
-    #     if len(options) > 0:
-    #         slot['options'] = options
-    #     values = self._values.copy()
-    #     if '_source' in values.keys():
-    #         del(values['_source'])
-    #     slot['values'] = values
-    #     params = self._params.copy()
-    #     if len(params) > 0:
-    #         slot['params'] = self._params
-    #     return slot
-
-    # # ========================================================================
-    # #
-    # # json loading and generating functions
-    # #
-    # # ========================================================================
-
-    # def get_mode_from_keyo(self, keyo):
-    #     mode = None
-    #     if keyo is not None:
-    #         KOS = getattr(self, VAR_KOS, None)
-    #         if KOS is None:
-    #             self.log('BaseSlot ERROR : %s not defined in class'
-    #                      % (VAR_KOS), LOG_ERROR)
-    #             return None
-    #         if keyo in KOS:
-    #             mode = KOS.index(keyo)
-    #         else:
-    #             self.log('BaseSlot ERROR : keyo %d unknown %s'
-    #                      % (keyo, str(KOS)), LOG_ERROR)
-    #             raise IndexError
-    #     return mode
-
-    # def get_mode(self, data):
-    #     MODE_IDS = getattr(self, VAR_MODE_IDS, None)
-    #     if MODE_IDS is None:
-    #         self.log('BaseSlot ERROR: No %s in %s'
-    #                  % (VAR_MODE_IDS, self.__class__.__name__),
-    #                  LOG_ERROR)
-    #     mode = None
-    #     keyo = data.get(SLOT_VAR_KEYO, None)
-    #     if keyo is not None:
-    #         mode = self.get_mode_from_keyo(keyo)
-    #     if mode is None:
-    #         m = data.get(SLOT_VAR_MODE, None)
-    #         if isinstance(m, str):
-    #             if m.isdecimal():
-    #                 m = int(m)
-    #             else:
-    #                 m = map_value(m, MODE_IDS)
-    #         if isinstance(m, int):
-    #             if m in range(0, len(MODE_IDS)):
-    #                 mode = m
-    #     if mode is None:
-    #         self.log('BaseSlot ERROR: '
-    #                  'unable to read mode value',
-    #                  LOG_ERROR)
-    #     return mode
-
-    # def load_params(self, data, v):
-    #     if not isinstance(v, dict):
-    #         self.log('BaseSlot.load_params: %s should be a dict in %s'
-    #                     % (VAR_PARAMS_KEY, str(data)),
-    #                     LOG_ERROR)
-    #         return False
-    #     for pk, pv in v.items():
-    #         self.set_param(pk, pv)
-    #     return True
-
-    # def loads(self, data):
-    #     if not isinstance(data, dict):
-    #         return False
-    #     for k, v in data.items():
-    #         if k == VAR_PARAMS_KEY:
-    #             self.load_params(data, v)
-    #         else:
-    #             self.set_value(k, v)
-    #     return True
-
-    # def json_set_var(self, var, data):
-    #     val = self.get_value(var, None)
-    #     if val is not None:
-    #         data[var] = val
-    #     return val
-
-    # def __to_json__(self):
-    #     data = self._values
-    #     if len(self._params) > 0:
-    #         data[VAR_PARAMS_KEY] = self._params
-    #     return data
-
     # ========================================================================
     #
     # json loading function
@@ -319,12 +247,11 @@ class BaseSlot(object):
     # ========================================================================
 
     def loads(self, data):
-        FIELDS = getattr(self, 'FIELDS', None)
         loaded = []
         for f in data.keys():
-            field = FIELDS.get(f, None)
+            field = self._FIELDS.get(f, None)
             if field is None: 
-                self.log('Unexpected field %s, %s' % (f, str(FIELDS.keys())))
+                self.log('Unexpected field %s, %s' % (f, str(self._FIELDS.keys())))
             else:
                 ok = self.field_conditions_test(f)
                 if not ok:
@@ -347,16 +274,15 @@ class BaseSlot(object):
     # ========================================================================
 
     def __to_json__(self, numeric=False):
-        FIELDS = getattr(self, 'FIELDS', None)
         data = {}
         self.log('-----------------------------------------------')
         self.log('id : %s | slot : %d' % (self._slots.parent.hw_addr_hex, self.number))
-        for f in FIELDS.keys():
+        for f in self._FIELDS.keys():
             ok = self.field_conditions_test(f)
             if ok:
                 value = self.get_value(f, None)
                 if value is not None:
-                    field = FIELDS[f]
+                    field = self._FIELDS[f]
                     values = field['values']
                     v_type = None
                     if isinstance(values, tuple):
@@ -430,36 +356,22 @@ class BaseSlot(object):
     #
     # ========================================================================
 
-    # def res_ko_value(self, keyo, state):
-    #     self.set_value(SLOT_VAR_KEYO, keyo)
-    #     self.set_value(SLOT_VAR_STATE, state)
-    #     return True
-
     def res_ko_value(self, keyo, state):
         self.set_value(F_KO, keyo)
-        # original code
-        # mode = self.get_mode_from_keyo(keyo)
-        # self.set_value(SLOT_VAR_MODE, mode)
-        # if mode != self.MODE_UNCONFIGURED and state == 1 or \
-        #    mode == self.MODE_UNCONFIGURED and state == 0:
-        #     # should not happen
-        #     self.log('Device4652_Slot.res_ko_value ERROR: '
-        #              'mode %d and state %d don\'t match'
-        #              % (mode, state))
-        #     self.set_value(SLOT_VAR_STATE, state)
+        #self.set_value(F_STATE, state)
         return True
 
 
     def res_ko_sys(self, sys, addr):
-        self.set_value(SLOT_VAR_SYS, sys)
-        self.set_value(SLOT_VAR_ADDR, addr)
+        self.set_value(F_SYSTEM, sys)
+        self.set_check_value(F_SYS_ADDRESS, addr)
+        self.log('>>>>>>>>>>> RES_KO_SYS sys: %s addr: %s <<<<<<<<<<<' % (sys, str(self.get_value(F_SYS_ADDRESS, addr))))
         return True
 
     # def res_param_ko(self, index, val_par):
     #     self.set_param(index, val_par)
     #     return True
     def res_param_ko(self, index, val_par):
-        FIELDS = getattr(self, 'FIELDS', None)
         # parallel code
         found, ok, fields = self.find_field(index)
         self.log('PARAM %s %s %s => %s' % (str(index), str(found), str(fields), str(val_par)))
@@ -471,7 +383,7 @@ class BaseSlot(object):
                 else:
                     self.log('%s.res_param_ko: found %s' % (self.__class__.__name__, fields))
                     field_name = fields
-                    field = FIELDS[field_name]
+                    field = self._FIELDS[field_name]
                     self.log(field)
                     param = field['param']
                     # those validity tests should not be necessary

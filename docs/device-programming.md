@@ -198,6 +198,8 @@ Ths slot data model is given by the `RES_KO_VALUE` sentence.
 
 This needs an example...
 
+*#1001*02*31*4*1*0##
+
 When a F411/2 is configured with slot 1 set as _Automation Control_, this takes 2 adjacent relays. In that case, you will get the info with the `` sentence.
 
 _TODO: find which sentence is actually sent here_
