@@ -123,7 +123,7 @@ FIELDS = {
         'disp': {'label': 'CEN command', 'order': 1}
     },
     F_CEN_PLUS: {
-        'param': {'low_8': 0, 'high_8': 1},
+        'param': {0: 'low_8', 1: 'high_8'},
         'values': ('int', CEN_PLUS_MIN, CEN_PLUS_MAX),
         'cond': ('==', F_KO, KO_CEN_PLUS),
         'disp': {'label': 'CEN+ command', 'order': 1}
