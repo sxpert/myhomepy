@@ -236,7 +236,7 @@ class BaseSlot(object):
         options = self.slot_options
         if len(options) > 0:
             slot['options'] = options
-        values = self.__to_json__(True)
+        values = self.__internal_json__(False)
         slot['values'] = values
         return slot
 
@@ -273,10 +273,11 @@ class BaseSlot(object):
     #
     # ========================================================================
 
-    def __to_json__(self, numeric=False):
+    def __internal_json__(self, symbolic=True):
         data = {}
         self.log('-----------------------------------------------')
-        self.log('id : %s | slot : %d' % (self._slots.parent.hw_addr_hex, self.number))
+        self.log('id : %s | slot : %d | symbolic: %s' 
+                 % (self._slots.parent.hw_addr_hex, self.number, str(symbolic)))
         for f in self._FIELDS.keys():
             ok = self.field_conditions_test(f)
             if ok:
@@ -284,14 +285,11 @@ class BaseSlot(object):
                 if value is not None:
                     field = self._FIELDS[f]
                     values = field['values']
-                    v_type = None
-                    if isinstance(values, tuple):
-                        v_type = values[0]
-                    elif isinstance(values, str):
-                        v_type = values
+                    v_type = values[0]
                     if v_type == 'list':
-                        if not numeric:
+                        if symbolic:
                             # map to a user readable value
+                            orig_value = value
                             list_values = values[1]
                             int_values = list_values['values']
                             id_values = list_values['ids']
@@ -307,6 +305,8 @@ class BaseSlot(object):
                     self.log('for some reason, field %s is None' % f)
         return data
 
+    def __to_json__(self):
+        return self.__internal_json__(True)
 
     # ========================================================================
     #
