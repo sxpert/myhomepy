@@ -649,7 +649,7 @@ class Device4652_Slot(BaseSlot):
         # parallel code
         field_name = self.find_field(index)
         self.log('PARAM %s %s => %s' % (str(index), str(field_name), str(val_par)))
-
+        
         # original code
         mode = self.get_value(SLOT_VAR_MODE, None)
         if mode is not None:
