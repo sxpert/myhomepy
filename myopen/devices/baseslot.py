@@ -53,6 +53,9 @@ class BaseSlot(object):
 
     @property
     def number(self):
+        """
+        The index of this slot in the slots container
+        """
         if self._slots is not None:
             return self._slots.slots.index(self)
         return None
@@ -64,6 +67,9 @@ class BaseSlot(object):
     # ========================================================================
 
     def recurse_conditions(self, cond):
+        """
+        conditions checking engine
+        """
         op = cond[0]
         result = False
         if op == '==':
@@ -362,7 +368,8 @@ class BaseSlot(object):
     def res_ko_sys(self, sys, addr):
         self.set_value(F_SYSTEM, sys)
         self.set_check_value(F_SYS_ADDRESS, addr)
-        self.log('>>>>>>>>>>> RES_KO_SYS sys: %s addr: %s <<<<<<<<<<<' % (sys, str(self.get_value(F_SYS_ADDRESS, addr))))
+        self.log('>>>>>>>>>>> RES_KO_SYS sys: %s addr: %s <<<<<<<<<<<' 
+                 % (sys, str(self.get_value(F_SYS_ADDRESS, addr))))
         return True
 
     def res_param_ko(self, index, val_par):
