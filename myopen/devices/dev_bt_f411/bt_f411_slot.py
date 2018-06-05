@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from core.logger import LOG_ERROR, LOG_DEBUG
 
-from ..constants import (SLOT_VAR_A, SLOT_VAR_ADDR, SLOT_VAR_GROUPS,
+from ...constants import (SLOT_VAR_A, SLOT_VAR_ADDR, SLOT_VAR_GROUPS,
                          SLOT_VAR_MODE, SLOT_VAR_PL, SLOT_VAR_STATE,
                          SLOT_VAR_SYS, VAR_PARAMS_KEY)
-from .baseslot import F_KO, F_SYS_ADDRESS, BaseSlot
-from .dev_utils import split_long_addr
+from ..baseslot import F_KO, F_SYS_ADDRESS, BaseSlot
+from ..dev_utils import split_long_addr
 
 KO_UNCONFIGURED = 510
 KO_LIGHT_ACTUATOR = 6

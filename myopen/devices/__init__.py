@@ -2,11 +2,9 @@
 
 from .devices import Devices
 from .basedevice import BaseDevice
-from .bt_4652_2 import Device4652_2
-from .bt_4652_3 import Device4652_3
-from .bt_4693 import Device4693
-from .bt_f411_2 import DeviceF411_2
-from .bt_f411_4 import DeviceF411_4
+from .dev_bt_4652 import *
+from .dev_bt_4693 import *
+from .dev_bt_f411 import *
 
 # sorted by model_id
 DeviceTypes = (

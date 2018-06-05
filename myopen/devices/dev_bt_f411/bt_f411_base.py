@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from .basedevice import BaseDevice
-from ..subsystems.lighting import Lighting
+from ..basedevice import BaseDevice
+from ...subsystems.lighting import Lighting
 from .bt_f411_slot import DeviceF411_Slot
 
 
