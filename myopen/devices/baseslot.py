@@ -13,7 +13,6 @@ F_STATE = 'state'
 F_SYS_ADDRESS = 'sys_address'
 F_SYSTEM = 'system'
 
-
 BASE_FIELDS = {
 }
 
@@ -292,7 +291,6 @@ class BaseSlot(object):
                     if v_type == 'list':
                         if symbolic:
                             # map to a user readable value
-                            orig_value = value
                             list_values = values[1]
                             int_values = list_values['values']
                             id_values = list_values['ids']
