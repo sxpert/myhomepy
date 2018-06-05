@@ -132,6 +132,10 @@ class BaseSlot(object):
         return (found, ok, fields)
 
     def set_check_value(self, field_name, value, loads=False):
+        """
+        sets a value in the values dict, after looking if it's all
+        valid according to the _FIELDS definition data
+        """
         field = self._FIELDS[field_name]
         values = field['values']
         if isinstance(values, tuple) or isinstance(values, list):
@@ -146,13 +150,6 @@ class BaseSlot(object):
                 if isinstance(value, dict):
                     a = value.get('a', None)
                     pl = value.get('pl', None)
-                    if a is None or pl is None:
-                        self.log('%s : malformed address %s' % (field_name, str(value)))
-                        return False
-                    addr = (a & 0xf) << 4 | (pl & 0xf)
-                    if addr <= 0 or addr > 175:
-                        self.log('%s : address %s invalid' % (field_name, str(value)))
-                        return False
             else:
                 v_parse = values[1]
                 if v_parse == '8_bit':
@@ -173,15 +170,15 @@ class BaseSlot(object):
                     elif len(value) == 4:
                         a = int(value[0:2])
                         pl = int(value[2:4])
-                ok = True
-                ok = ok and ((a is not None) and (pl is not None))
-                ok = ok and (not ((a == 0) and (pl == 0)))
-                ok = ok and ((a >=0 ) and (a <= 10))
-                ok = ok and ((pl >= 0) and (pl <= 15))
-                if not ok:
-                    self.log('%s : address \'%s\' invalid' % (field_name, value))
-                    return False
-                value = {'a': a, 'pl': pl}
+            ok = True
+            ok = ok and ((a is not None) and (pl is not None))
+            ok = ok and (not ((a == 0) and (pl == 0)))
+            ok = ok and ((a >=0 ) and (a <= 10))
+            ok = ok and ((pl >= 0) and (pl <= 15))
+            if not ok:
+                self.log('%s : address \'%s\' invalid' % (field_name, value))
+                return False
+            value = {'a': a, 'pl': pl}
         elif v_type == 'area':
             if value < 0 or value > 10:
                 self.log('%s : area %d invalid (should be in (0..10)' % (field_name, value))
@@ -368,11 +365,7 @@ class BaseSlot(object):
         self.log('>>>>>>>>>>> RES_KO_SYS sys: %s addr: %s <<<<<<<<<<<' % (sys, str(self.get_value(F_SYS_ADDRESS, addr))))
         return True
 
-    # def res_param_ko(self, index, val_par):
-    #     self.set_param(index, val_par)
-    #     return True
     def res_param_ko(self, index, val_par):
-        # parallel code
         found, ok, fields = self.find_field(index)
         self.log('PARAM %s %s %s => %s' % (str(index), str(found), str(fields), str(val_par)))
         if found:
