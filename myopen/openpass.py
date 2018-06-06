@@ -23,16 +23,13 @@ def ownCalcPass (password, nonce, test=False) :
         if test:
             print("c: %s num1: %08x num2: %08x" % (c, num1, num2))
         if c == '1':
-            num1 = num2 & 0xFFFFFF80
-            num1 = num1 >> 7
+            num1 = (num2 & 0xFFFFFF80) >> 7
             num2 = num2 << 25
         elif c == '2':
-            num1 = num2 & 0xFFFFFFF0
-            num1 = num1 >> 4
+            num1 = (num2 & 0xFFFFFFF0) >> 4
             num2 = num2 << 28
         elif c == '3':
-            num1 = num2 & 0xFFFFFFF8
-            num1 = num1 >> 3
+            num1 = (num2 & 0xFFFFFFF8) >> 3
             num2 = num2 << 29
         elif c == '4':
             num1 = num2 << 1
