@@ -27,8 +27,6 @@ def ownCalcPass (password, nonce, test=False) :
     if test:
         print("password: %08x" % (password))
     for c in nonce :
-        #num1 = num1 & L_FFFFFFFF
-        #num2 = num2 & L_FFFFFFFF
         if c != "0":
             if start:
                 num2 = password
