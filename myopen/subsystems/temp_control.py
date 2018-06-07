@@ -28,8 +28,8 @@ class TempControl(OWNSubSystem):
         if len(address) != 3:
             self.log("ERROR, slave address for temperature probes are 3 chars long")
         else:
-            zone = int(address[1])
-            slave = int(address[2:3])
+            zone = int(address[0])
+            slave = int(address[1:2])
             addr = {
                 "zone": zone,
                 "slave": slave
