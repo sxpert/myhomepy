@@ -38,6 +38,11 @@ class Lighting(OWNSubSystem):
         value = {'a': a, 'pl': pl}
         return value
 
+    def parse_address_dict(self, field_name, value):
+        a = value.get('a', None)
+        pl = value.get('pl', None)
+        return self.check_address(field_name, a, pl)
+
     def parse_address_8_bit(self, field_name, value):
         a = (value & 0xf0) >> 4
         pl = value & 0xf

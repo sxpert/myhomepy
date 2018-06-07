@@ -155,7 +155,7 @@ class BaseSlot(object):
             self.log('unknown values type %s' % (values.__class__.__name__))
         if v_type == 'address':
             self.log(self._slots.parent.subsystem)
-            sub = self._slots.parent.subsystem(self._slots.parent.system)
+            sub = self._slots.parent.subsystem(self._slots.parent.devices.system)
             addr_type = values[1]
             # dict values only show up during loads from config file
             if isinstance(value, dict) and loads:
