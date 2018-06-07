@@ -136,6 +136,7 @@ class Gateway(object):
                                          self.msg_queue,
                                          MODE_COMMAND,
                                          loop=self.loop)
+                self.cmd_conn.auto_restart = False
                 self.cmd_conn_future = \
                     asyncio.ensure_future(self.cmd_conn.run(),
                                           loop=self.loop)
@@ -145,10 +146,10 @@ class Gateway(object):
             await self.cmd_conn.send_packet(pkt)
 
     def stop_cmd_conn(self):
+        self.log('end of the command connection')
         if self.cmd_conn is not None:
             self.cmd_conn.stop()
             if self.cmd_conn_future is not None:
-                self.cmd_conn_future.cancel()
                 asyncio.wait(self.cmd_conn_future)
                 self.cmd_conn_future = None
             self.cmd_conn = None
@@ -179,7 +180,7 @@ class Gateway(object):
                 data = None
 
             if data is not None:
-                # send the message to websocket listeners
+                # send the message to websocket listener
                 await self.system.websocket_dispatch(data)
                 handled = False
                 if self.system.is_cmd_busy:

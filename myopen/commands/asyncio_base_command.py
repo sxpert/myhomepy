@@ -47,4 +47,5 @@ class BaseCommand(object):
             self.log('BaseCommand.end : calling callback %s' % str(self.callback))
             self.callback(logger=self.log)
             self.log('BaseCommand.end : callback done')
+        # request the end of the command connection
         return True

@@ -35,6 +35,7 @@ class AsyncIOOWNConnection(object):
         self.queue = queue
         self.mode = mode
         self.loop = loop
+        self._auto_restart = True
         self._run = False
         if self.loop is None:
             self.loop = asyncio.get_event_loop()
@@ -48,14 +49,28 @@ class AsyncIOOWNConnection(object):
         else:
             self.log = log
 
+    @property
+    def auto_restart(self):
+        return self._auto_restart
+
+    @auto_restart.setter
+    def auto_restart(self, value):
+        self._auto_restart = value
+
     async def run(self):
         self._run = True
+        started = False
         # start with the login procedure
         self.reader = StreamReader(loop=self.loop)
         self.protocol = OWNProtocol(self.reader, log=self.log)
         ctr = 0
         while self._run:
             if not self.protocol.is_connected:
+                if not self._auto_restart:
+                    if started:
+                        self.log("no autorestart... bailing out")
+                        break
+                started = True
                 self.log('attempt connection')
                 self.is_ready.clear()
                 self.log('resetting the msg handler')
@@ -81,11 +96,11 @@ class AsyncIOOWNConnection(object):
                 self.log('<= %s' % (msg))
                 await self.msg_handler(msg)
                 ctr += 1
+        self.transport.close()
         self.log('AsyncIOOWNConnection.run : %s the end' % (str(self)))
 
     def stop(self):
         self.log('stop requested', LOG_DEBUG)
-        self.transport.close()
         self._run = False
 
     async def send_packet(self, msg):
@@ -140,9 +155,10 @@ class AsyncIOOWNConnection(object):
         if c_resp_m is not None:
                 c_resp = c_resp_m.group(1)
                 if c_resp == self.hmac_server:
+                    self.is_ready.set()
                     self.msg_handler = self.state_dispatch
                     await self.send_packet(self.ACK)
-                    self.is_ready.set()
+                    
                 else:
                     self.log("wrong response from server, expected %s", self.hmac_server)
                     await asyncio.sleep(0)

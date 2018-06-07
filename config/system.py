@@ -163,7 +163,6 @@ class System(object):
                 self._task = None
                 self.gateway.stop_cmd_conn()
                 self._free.set()
-
             return res
 
     def push_task(self, task, wait=True, callback=None, params=None):
