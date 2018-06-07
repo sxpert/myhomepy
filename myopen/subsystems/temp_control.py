@@ -23,6 +23,7 @@ class TempControl(OWNSubSystem):
     }
 
     def parse_address_slave(self, address):
+        self.log('address: \'%s\' %d' % (address, len(address)))
         if len(address) != 3:
             self.log("ERROR, slave address for temperature probes are 3 chars long")
             zone = int(address[1])
