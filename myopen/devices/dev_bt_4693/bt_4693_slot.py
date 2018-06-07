@@ -22,7 +22,7 @@ FIELDS = {
     },
     F_SYS_ADDRESS: {
         'param': F_SYS_ADDRESS,
-        'values': ['address', 'zazb'],
+        'values': ['address', 'slave'],
         'cond': ['in', F_KO, [KO_SLAVE_PROBE]],
         'disp': {'label': 'Address', 'order': 2}
     }
