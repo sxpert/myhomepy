@@ -19,3 +19,5 @@ venv
 .vscode/settings.json
 .vscode/.ropeproject/config.py
 .vscode/.ropeproject/objectdb
+Wireshark Captures
+myopen/open_hmac_test.py

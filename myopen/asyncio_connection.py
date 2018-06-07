@@ -96,7 +96,6 @@ class AsyncIOOWNConnection(object):
         await self.writer.drain()
 
     async def state_start(self, msg):
-        print('state_start', msg)
         if msg == self.ACK:
             self.msg_handler = self.state_login
             cmd_msg = self.SOCKET_MODES[self.mode]
@@ -106,12 +105,10 @@ class AsyncIOOWNConnection(object):
 
     async def state_login(self, msg):
         if msg == '*98*2##':
-            # this is a call for hmac authentication
-            self.log("HMAC-SHA2 authentication requested")
+            # this is a call for sha2 hmac authentication
             self.msg_handler = self.state_hmac_sha2
             await self.send_packet(self.ACK)
         else:
-            self.log("Open Password authentication system")
             # attempt matching the old password system
             ops_m = re.match(r'^\*#(\d+)##$', msg)
             if ops_m is not None:
@@ -128,11 +125,30 @@ class AsyncIOOWNConnection(object):
     async def state_hmac_sha2(self, msg):
         ra_m = re.match(r'^\*#(\d{128})##$', msg)
         if ra_m is not None:
-            self.log("we have HMAC authentication request %s" % (str(ra_m.groups())))
             ra = ra_m.group(1)
             hmac = ownCalcHmacSha2(self.passwd, ra)
-            self.log("hmac answer: %s" % (hmac))
-        await asyncio.sleep(0)
+            rb, hmac_client, self.hmac_server = hmac
+            self.msg_handler = self.state_hmac_sha2_check_response
+            hmac_packet = ('*#%s*%s##' % (rb, hmac_client))
+            await self.send_packet(hmac_packet)
+        else:
+            self.log("unable to parse the hmac_sha2 request")
+            await asyncio.sleep(0)
+
+    async def state_hmac_sha2_check_response(self, msg):
+        c_resp_m = re.match(r'^\*#(\d{128})##$', msg)
+        if c_resp_m is not None:
+                c_resp = c_resp_m.group(1)
+                if c_resp == self.hmac_server:
+                    self.msg_handler = self.state_dispatch
+                    await self.send_packet(self.ACK)
+                    self.is_ready.set()
+                else:
+                    self.log("wrong response from server, expected %s", self.hmac_server)
+                    await asyncio.sleep(0)
+        else:
+            self.log("unable to parse the hmac_sha2 request")
+            await asyncio.sleep(0)
 
     async def state_auth(self, msg):
         if msg == self.ACK:

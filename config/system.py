@@ -121,7 +121,9 @@ class System(object):
             await asyncio.wait([
                 self.gateway.is_ready(),
                 self._free.wait()])
+            
             self._task = await self.task_queue.get()
+            self.log(self._task)
             self._free.clear()
             taskcls = self._task.get('task', None)
             if issubclass(taskcls, BaseCommand):
