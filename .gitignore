@@ -21,3 +21,4 @@ venv
 .vscode/.ropeproject/objectdb
 Wireshark Captures
 myopen/open_hmac_test.py
+good-config.json

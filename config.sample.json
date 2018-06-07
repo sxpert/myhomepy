@@ -1,0 +1,15 @@
+{
+    "web": {
+        "address": "127.0.0.1",
+        "port": 8080
+    },
+    "systems": [
+        {
+            "gateway": {
+                "address": "<your gateway address>",
+                "port": 20000,
+                "passwd": "<your open password>"
+            }
+        }
+    ]
+}

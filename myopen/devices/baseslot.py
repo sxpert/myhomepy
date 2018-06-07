@@ -250,7 +250,17 @@ class BaseSlot(object):
 
     def loads(self, data):
         loaded = []
-        for f in data.keys():
+        try:
+            keys = data.keys()
+        except AttributeError:
+            # empty slot, we currently have this for f411 where a slot is 
+            # configured in automation mode.
+            # should do something else here
+            self.log(self._slots.parent)
+            self.log(self._slots)
+            self.log(data)
+            return False
+        for f in keys:
             field = self._FIELDS.get(f, None)
             if field is None: 
                 self.log('Unexpected field %s, %s' % (f, str(self._FIELDS.keys())))
@@ -364,6 +374,8 @@ class BaseSlot(object):
 
 
     def res_ko_sys(self, sys, addr):
+        # hah, can't handle addresses all the same way, they are parsed differently
+        # between systems !!
         self.set_value(F_SYSTEM, sys)
         self.set_check_value(F_SYS_ADDRESS, addr)
         self.log('>>>>>>>>>>> RES_KO_SYS sys: %s addr: %s <<<<<<<<<<<' 
