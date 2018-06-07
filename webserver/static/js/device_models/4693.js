@@ -11,11 +11,11 @@ Device_4693.prototype._device_types = {
         nb_slots : 1,
         references : {
             'BRAND_UNDEFINED' : {
-                icon: 'unknown-1',
-                0 : '<unknown>'
+                icon: 'device',
+                0 : '4693'
             },
             'BRAND_BTICINO' : {
-                icon: 'BTicino',
+                icon: 'Bticino',
                 3 : 'Axolute H4693'
             },
             'BRAND_LEGRAND' : {

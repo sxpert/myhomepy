@@ -11,8 +11,8 @@ Device_4652.prototype._device_types = {
         nb_slots : 2,
         references : {
             'BRAND_UNDEFINED' : {
-                icon: 'unknown-1',
-                0 : '<unknown>'
+                icon: 'unknown',
+                0 : '4652/2'
             },
             'BRAND_BTICINO' : {
                 icon: 'BTicino',
