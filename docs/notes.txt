@@ -1,4 +1,4 @@
-
+useful code https://github.com/angeloxx/homebridge-myhome/blob/master/lib/mhclient.js
 
 myhomesuite passwords :
 Developers profile    : "BtSWIgrass07"

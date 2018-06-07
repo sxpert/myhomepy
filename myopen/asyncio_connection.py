@@ -8,6 +8,7 @@ from socket import gaierror
 from core.logger import COLOR_LT_BLUE, COLOR_LT_GREEN, COLOR_LT_CYAN, LOG_DEBUG, get_logger
 from myopen.asyncio_protocol import OWNProtocol
 from myopen.openpass import ownCalcPass
+from myopen.open_hmac import ownCalcHmacSha2
 
 __all__ = [
     'MODE_COMMAND', 'MODE_MONITOR',
@@ -104,12 +105,34 @@ class AsyncIOOWNConnection(object):
             self.log('we didn\'t get ACK')
 
     async def state_login(self, msg):
-        ops_m = re.match(r'\*#(\d+)##', msg)
-        nonce = ops_m.groups()[0]
-        passwd = ownCalcPass(self.passwd, nonce)
-        passwd_msg = ('*#%s##' % (passwd))
-        self.msg_handler = self.state_auth
-        await self.send_packet(passwd_msg)
+        if msg == '*98*2##':
+            # this is a call for hmac authentication
+            self.log("HMAC-SHA2 authentication requested")
+            self.msg_handler = self.state_hmac_sha2
+            await self.send_packet(self.ACK)
+        else:
+            self.log("Open Password authentication system")
+            # attempt matching the old password system
+            ops_m = re.match(r'^\*#(\d+)##$', msg)
+            if ops_m is not None:
+                nonce = ops_m.groups()[0]
+                # calculate the password
+                passwd = ownCalcPass(self.passwd, nonce)
+                passwd_msg = ('*#%s##' % (passwd))
+                self.msg_handler = self.state_auth
+                await self.send_packet(passwd_msg)
+            else:
+                self.log("unable to parse the openpassword nonce request")
+                await asyncio.sleep(0)
+
+    async def state_hmac_sha2(self, msg):
+        ra_m = re.match(r'^\*#(\d{128})##$', msg)
+        if ra_m is not None:
+            self.log("we have HMAC authentication request %s" % (str(ra_m.groups())))
+            ra = ra_m.group(1)
+            hmac = ownCalcHmacSha2(self.passwd, ra)
+            self.log("hmac answer: %s" % (hmac))
+        await asyncio.sleep(0)
 
     async def state_auth(self, msg):
         if msg == self.ACK:
