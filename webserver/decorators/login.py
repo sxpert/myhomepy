@@ -17,7 +17,6 @@ DATABASE = [
 
 def login_required(fn):
     async def wrapped(req, *args, **kwargs):
-        print('inside login_required')
         request = req
         if isinstance(req, web.View):
             request = req.request
@@ -29,14 +28,12 @@ def login_required(fn):
         if 'user_id' not in session:
             # TODO: check if we can find all that...
             session['_return_to'] = request.match_info.route.name
-            print('used_id was not in session')
             return web.HTTPFound(router['login'].url_for())
 
         user_id = session['user_id']
         # actually load user from your database (e.g. with aiopg)
         user = DATABASE[user_id]
         app['user'] = user
-        print('found user_id', user_id, 'user is', user)
         return await fn(req, *args, **kwargs)
 
     return wrapped
