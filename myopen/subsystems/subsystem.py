@@ -13,7 +13,7 @@ class OWNSubSystem(object):
             self.log = get_logger(LOG_INFO, COLOR_LT_RED)
             self.log.debug = True
             self.log('had to create logger')
-            raise SystemError
+            #raise SystemError
         else:
             self.system = system
             self.log = system.log
