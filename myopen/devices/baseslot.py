@@ -158,7 +158,7 @@ class BaseSlot(object):
             # NOTE: this should be done through the subsystem as this current code only works
             # for lighting systems
             self.log(self._slots.parent.subsystem)
-            sub = self._slots.parent.subsystem
+            sub = self._slots.parent.subsystem()
             addr_type = values[1]
             func_name = 'parse_address_'+addr_type
             func = getattr(sub, func_name, None)
