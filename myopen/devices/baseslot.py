@@ -153,52 +153,22 @@ class BaseSlot(object):
             v_type = values
         else:
             self.log('unknown values type %s' % (values.__class__.__name__))
-        v_parse = None
         if v_type == 'address':
-            # NOTE: this should be done through the subsystem as this current code only works
-            # for lighting systems
             self.log(self._slots.parent.subsystem)
-            sub = self._slots.parent.subsystem()
+            sub = self._slots.parent.subsystem(self._slots.parent.system)
             addr_type = values[1]
-            func_name = 'parse_address_'+addr_type
+            # dict values only show up during loads from config file
+            if isinstance(value, dict) and loads:
+                func_name = 'parse_address_dict'
+            else:
+                func_name = 'parse_address_'+addr_type
             func = getattr(sub, func_name, None)
             if func is not None:
-                value = func(value)
+                # at this point, we may want to try/except ...
+                value = func(field_name, value)
                 self.log(value)
-            else:    
-                if loads:
-                    if isinstance(value, dict):
-                        a = value.get('a', None)
-                        pl = value.get('pl', None)
-                else:
-                    v_parse = values[1]
-                    if v_parse == '8_bit':
-                        if value > 0 and value <= 175:
-                            a = (value & 0xf0) >> 4
-                            pl = value & 0xf
-                            value = {'a': a, 'pl': pl}
-                        else:
-                            self.log('%s : address %d invalid (should be in (1..175)' % (field_name, value))
-                            return False
-                    elif v_parse == 'string':
-                        # we have either 2 of 4 chars
-                        a = None
-                        pl = None
-                        if len(value) == 2:
-                            a = int(value[0])
-                            pl = int(value[1])
-                        elif len(value) == 4:
-                            a = int(value[0:2])
-                            pl = int(value[2:4])
-                ok = True
-                ok = ok and ((a is not None) and (pl is not None))
-                ok = ok and (not ((a == 0) and (pl == 0)))
-                ok = ok and ((a >=0 ) and (a <= 10))
-                ok = ok and ((pl >= 0) and (pl <= 15))
-                if not ok:
-                    self.log('%s : address \'%s\' invalid' % (field_name, value))
-                    return False
-                value = {'a': a, 'pl': pl}
+            else:
+                raise NotImplementedError('missing %s.%s function' % (sub.__class__.__name__, func_name))
         elif v_type == 'area':
             if value < 0 or value > 10:
                 self.log('%s : area %d invalid (should be in (0..10)' % (field_name, value))

@@ -22,18 +22,20 @@ class TempControl(OWNSubSystem):
         ]
     }
 
-    def parse_address_slave(self, address):
-        self.log('address: \'%s\' %d' % (address, len(address)))
-        addr = None
-        if len(address) != 3:
-            self.log("ERROR, slave address for temperature probes are 3 chars long")
-        else:
-            zone = int(address[0])
-            slave = int(address[1:3])
-            addr = {
-                "zone": zone,
-                "slave": slave
-            }
+    def parse_address_dict(self, field_name, value):
+        # should only check for validity
+        return value
+
+    def parse_address_slave(self, field_name, value):
+        if (not isinstance(value, str)) or (len(value) != 3):
+            # something really wrong happened
+            raise ValueError('value must be a string, 3 digits long')
+        zone = int(value[0])
+        slave = int(value[1:3])
+        addr = {
+            "zone": zone,
+            "slave": slave
+        }
         return addr
 
     def _report_temperature(self, matches):

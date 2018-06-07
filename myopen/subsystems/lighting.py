@@ -27,6 +27,34 @@ class Lighting(OWNSubSystem):
         ]
     }
 
+    def check_address(self, field_name, a, pl):
+        ok = True
+        ok = ok and ((a is not None) and (pl is not None))
+        ok = ok and (not ((a == 0) and (pl == 0)))
+        ok = ok and ((a >=0 ) and (a <= 10))
+        ok = ok and ((pl >= 0) and (pl <= 15))
+        if not ok:
+            raise ValueError('%s : address \'%s | %s\' invalid' % (field_name, str(a), str(pl)))
+        value = {'a': a, 'pl': pl}
+        return value
+
+    def parse_address_8_bit(self, field_name, value):
+        a = (value & 0xf0) >> 4
+        pl = value & 0xf
+        return self.check_address(field_name, a, pl)
+
+    def parse_address_long(self, field_name, value):
+        a = None
+        pl = None
+        if len(value) == 2:
+            a = int(value[0])
+            pl = int(value[1])
+        elif len(value) == 4:
+            a = int(value[0:2])
+            pl = int(value[2:4])
+        value = {'a': a, 'pl': pl}
+        return self.check_address(field_name, a, pl)
+
     def _light_device(self, matches):
         # light command
         # '*0*#1##'
