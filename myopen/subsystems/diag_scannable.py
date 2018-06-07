@@ -181,7 +181,7 @@ class DiagScannable(OWNSubSystem):
         regexps = sys_regexps + scan_regexps
         return self._parse_regexp(msg, regexps)
 
-    # ---------------------------------------------------------------------
+   # ---------------------------------------------------------------------
     #
     # Callback stuff
     #
@@ -354,7 +354,7 @@ class DiagScannable(OWNSubSystem):
         _state = int(matches['state'])
         res = self.system.devices.res_ko_value(_virt_id, _slot, _keyo, _state)
         if not res:
-            self.log('res_ko_value %s' % (str(matches)))
+            self.log('FAILED: _diag_res_ko_value %s' % (str(matches)))
         return res
 
     def _diag_res_ko_sys(self, matches):
@@ -364,10 +364,9 @@ class DiagScannable(OWNSubSystem):
         _addr = matches['addr']
 
         def res_ko_sys():
-            res = self.system.devices.res_ko_sys(
-                _virt_id, _slot, _sys, _addr)
+            res = self.system.devices.res_ko_sys(_virt_id, _slot, _sys, _addr)
             if not res:
-                self.log('res_ko_sys %s' % (str(matches)))
+                self.log('FAILED: _diag_res_ko_sys %s' % (str(matches)))
             return res
 
         return res_ko_sys
@@ -379,11 +378,9 @@ class DiagScannable(OWNSubSystem):
         _val_par = int(matches['val_par'])
 
         def res_param_ko():
-            res = self.system.devices.res_param_ko(
-                _virt_id, _slot, _index, _val_par)
+            res = self.system.devices.res_param_ko(_virt_id, _slot, _index, _val_par)
             if not res:
-                self.log('failed _diag_res_param_ko.res_param_ko '
-                         '%s' % (str(matches)))
+                self.log('FAILED: _diag_res_param_ko %s' % (str(matches)))
             return res
 
         return res_param_ko

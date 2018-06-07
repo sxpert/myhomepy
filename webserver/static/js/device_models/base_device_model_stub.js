@@ -1,6 +1,7 @@
 import * as ajax from '../ajax.js';
 import * as dev_4652 from './4652.js';
 import * as dev_F411 from './F411.js';
+import * as dev_4693 from './4693.js';
 
 
 export class Base_Device_Model_Stub {
@@ -33,7 +34,7 @@ export class Base_Device_Model_Stub {
             return console.log('unable to find subsystem \''+data.subsystem+'\'');
         let device_class = subsystem[data.model_id];
         if (device_class===undefined)
-            return console.log('unable to find config page for model '+dev.subsystem+'.'+dev.model_id);
+            return console.log('unable to find config page for model '+data.subsystem+'.'+data.model_id);
         this.device_model = new device_class(data);
         this.device_model.system_id = this.system_id;
         this.success = true;
@@ -46,5 +47,8 @@ Base_Device_Model_Stub.prototype.device_types = {
         2: dev_4652.Device_4652,
         129: dev_F411.Device_F411,
         130: dev_F411.Device_F411,
+    },
+    'TEMP_CONTROL' : {
+        21: dev_4693.Device_4693,
     }
 };

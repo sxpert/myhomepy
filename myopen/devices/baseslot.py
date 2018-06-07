@@ -141,7 +141,11 @@ class BaseSlot(object):
         sets a value in the values dict, after looking if it's all
         valid according to the _FIELDS definition data
         """
-        field = self._FIELDS[field_name]
+        try:
+            field = self._FIELDS[field_name]
+        except KeyError:
+            self.log("set_check_value: unable to find key '%s' in FIELDS" % (field_name))
+            self.log(self._FIELDS)
         values = field['values']
         if isinstance(values, tuple) or isinstance(values, list):
             v_type = values[0]
@@ -151,6 +155,9 @@ class BaseSlot(object):
             self.log('unknown values type %s' % (values.__class__.__name__))
         v_parse = None
         if v_type == 'address':
+            # NOTE: this should be done through the subsystem as this current code only works
+            # for lighting systems
+            self.log(self._slots.parent.subsystem)
             if loads:
                 if isinstance(value, dict):
                     a = value.get('a', None)
@@ -371,7 +378,6 @@ class BaseSlot(object):
         self.set_value(F_KO, keyo)
         #self.set_value(F_STATE, state)
         return True
-
 
     def res_ko_sys(self, sys, addr):
         # hah, can't handle addresses all the same way, they are parsed differently
