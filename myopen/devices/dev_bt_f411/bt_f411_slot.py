@@ -53,7 +53,7 @@ FIELDS = {
     },
     F_SYS_ADDRESS: {
         'param': F_SYS_ADDRESS,
-        'values': ['address', 'string'],
+        'values': ['address', 'long'],
         'cond': ['in', F_KO, [KO_LIGHT_ACTUATOR, KO_AUTOMATION_ACTUATOR]],
         'disp': {'label': 'Address', 'order': 2}
     }

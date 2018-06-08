@@ -8,6 +8,7 @@ myopenlog.log
 myOpenProto.py
 devices.txt
 *.db
+!device_catalog.db
 *.swp
 *.pem
 settings.json
