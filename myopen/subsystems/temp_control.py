@@ -22,22 +22,6 @@ class TempControl(OWNSubSystem):
         ]
     }
 
-    def parse_address_dict(self, field_name, value):
-        # should only check for validity
-        return value
-
-    def parse_address_slave(self, field_name, value):
-        if (not isinstance(value, str)) or (len(value) != 3):
-            # something really wrong happened
-            raise ValueError('value must be a string, 3 digits long')
-        slave = int(value[0])
-        zone = int(value[1:3])
-        addr = {
-            "zone": zone,
-            "slave": slave
-        }
-        return addr
-
     def _report_temperature(self, matches):
         _zone = int(matches['probe'][0])
         _sensor = int(matches['probe'][1:])
