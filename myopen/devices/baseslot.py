@@ -52,10 +52,59 @@ class BaseSlot(object):
     # ========================================================================
 
     @property
-    def slot_options(self):
-        options = {
-            # 'fields': self._FIELDS
+    def kos_for_slot(self):
+        dev = self._slots.parent
+        who = dev.subsystem.SYSTEM_WHO
+        kos = device_db.find_kos_for_device(who, dev.model_id, dev.fw_version)
+        values = []
+        widths = []
+        ids = []
+        names = []
+        for ko in kos:
+            ko_data = device_db.get_ko_details(ko)
+            if ko_data is not None:
+                w, i, n = ko_data
+                # skip those that would be too wide
+                if self.number + w <= len(dev.slots):
+                    values.append(ko)
+                    widths.append(w)
+                    ids.append(i)
+                    names.append(n)
+        return {
+            'values': values,
+            'widths': widths,
+            'ids': ids,
+            'names': names
         }
+
+    @property
+    def slot_options(self):
+        kos = self.kos_for_slot
+        ko_values = kos['values']
+        conds = {}
+        lists = {}
+        fields = {}
+        for ko in ko_values:
+            index = ko_values.index(ko)
+            params = device_db.get_params_for_ko(ko)
+            # gets lists and conditions
+            for p in params:
+                cond = p['cond']
+                if cond is not None:
+                    c = device_db.get_condition_details(cond)
+                    conds.update(c)
+                field_type = p['field_type']
+                if field_type == 'LIST':
+                    field_type_detail = p['field_type_detail']
+                    list_details = device_db.get_list_details(field_type_detail)
+                    lists[field_type_detail] = list_details
+            ko_id = kos['ids'][index]
+            fields[ko_id] = params
+        options = {}
+        options['KO'] = kos
+        options['lists'] = lists
+        options['conds'] = conds
+        options['fields'] = fields
         return options
 
     @property

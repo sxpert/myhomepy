@@ -238,6 +238,93 @@ class DeviceDatabase(object):
     #
     #
 
+    def get_ko_details(self, ko_value):
+        """
+        Gets details for a ko
+
+        returns a tuple with
+        - slot width
+        - label
+        - description
+        """
+        c = self.conn.cursor()
+        sql = 'select slot_width, label, description from kos where ko=?;'
+        c.execute(sql, [ko_value])
+        ko_data = c.fetchall()
+        if len(ko_data) != 1:
+            self.log("get_ko_details ERROR: exactly 1 record expected")
+            return None
+        return ko_data[0]
+
+    def get_params_for_ko(self, ko_value):
+        """
+        """
+        c = self.conn.cursor()
+        sql = 'select "order", cond, access, type, type_info, tab, ' \
+              'var_name, array_index, description from ko_params where ko=?;'
+        c.execute(sql, [ko_value])
+        params = c.fetchall()
+        data = []
+        for p in params:
+            order, cond, access, field_type, field_type_detail, tab, var_name, array_index, description = p
+            val = {}
+            val['order'] = order
+            val['cond'] = cond
+            val['access'] = access
+            val['field_type'] = field_type
+            val['field_type_detail'] = field_type_detail
+            val['tab'] = tab
+            val['var_name'] = var_name
+            val['array_index'] = array_index
+            val['description'] = description
+            data.append(val)
+        return data
+
+    def get_condition_details(self, cond):
+        c = self.conn.cursor()
+        sql = 'select op, type, field, value, cond1, cond2 from cond where cond=?'
+        conds_id = [cond]
+        conds = {}
+        while len(conds_id) > 0:
+            cond = conds_id.pop(0)
+            c.execute(sql, [cond])
+            cond_info = c.fetchall()
+            if len(cond_info) != 1:
+                self.log('get_condition_details ERROR: expected only one record')
+            op, field_type, field_name, value, cond1, cond2 = cond_info[0]
+            data = {}
+            data['op'] = op
+            data['field_type'] = field_type
+            data['field_name'] = field_name
+            data['value'] = value
+            data['cond1'] = cond1
+            if cond1 is not None:
+                conds_id.append(cond1)
+            data['cond2'] = cond2
+            if cond2 is not None:
+                conds_id.append(cond2)
+            conds[cond] = data
+        return conds
+
+    def get_list_details(self, list_ref):
+        c = self.conn.cursor()
+        sql = 'select value, id, name from lists where list_ref=? order by "order";'
+        c.execute(sql, [list_ref])
+        values = []
+        ids = []
+        names = []
+        val = c.fetchall()
+        for v in val:
+            value, id, name = v
+            values.append(value)
+            ids.append(id)
+            names.append(name)
+        data = {}
+        data['values'] = values
+        data['ids'] = ids
+        data['names'] = names
+        return data
+
     def find_kos_for_device(self, system_id, model_id, firmware):
         """
         List KOs available for device with firmware

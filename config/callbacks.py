@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from core.logger import *
+from core.logger import LOG_INFO
 from myopen.subsystems import find_subsystem
 
 from . import callback, system
