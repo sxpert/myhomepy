@@ -47,7 +47,6 @@ class OWNSubSystem(object):
         * a tuple (function, matches)
         * None
         """
-        self.log('Subsystem._parse_regexp begin')
         # step 1: find a regexp that matches
         func_info = None
         if len(regexps) > 0:
@@ -65,7 +64,6 @@ class OWNSubSystem(object):
                     matches = m.groupdict()
                     func_info = (f, matches, name, )
         # either a tuple or none
-        self.log('Subsystem._parse_regexp end')
         return func_info
 
     # ---------------------------------------------------------------------

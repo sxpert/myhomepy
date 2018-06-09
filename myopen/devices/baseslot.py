@@ -150,10 +150,6 @@ class BaseSlot(object):
 
     def __internal_json__(self, symbolic=True):
         data = {}
-        self.log('-----------------------------------------------')
-        self.log('id : %s | slot : %d | symbolic: %s' 
-                 % (self._slots.parent.hw_addr_hex, self.number, str(symbolic)))
-
         empty = self.get_value(F_EMPTY, None)
         if empty:
             data[F_EMPTY] = empty

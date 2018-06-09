@@ -132,7 +132,7 @@ class DeviceDatabase(object):
         return self.check_ADDRESS_lighting(addr)
 
     def parse_ADDRESS_slave_probe(self, value):
-        if isinstance(value, int):
+        if isinstance(value, str):
             zone = None
             slave = None
             if len(value) == 3:

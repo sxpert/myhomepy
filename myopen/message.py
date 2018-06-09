@@ -227,7 +227,6 @@ class Message(object):
             self.log('Message._parse : expected an int for ver, got %s'
                      % (str(ver)), LOG_ERROR)
             return False
-        print("Message._parse _self._fields", self._fields)
         return True
 
     @property
