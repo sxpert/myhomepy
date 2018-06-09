@@ -4,17 +4,13 @@ from ..constants import (
     SLOT_VAR_STATE, SLOT_VAR_SYS, 
     VAR_KOS, VAR_MODE_IDS, VAR_PARAMS_KEY, )
 from .dev_utils import map_value
-from core.logger import LOG_ERROR
+from core.logger import LOG_ERROR 
+from myopen.conf_db import device_db
 
 __all__ = ['F_KO', 'MissingFieldsDefinitionError', 'BaseSlot', ]
 
 F_KO = 'KO'
-F_STATE = 'state'
-F_SYS_ADDRESS = 'sys_address'
-F_SYSTEM = 'system'
-
-BASE_FIELDS = {
-}
+F_EMPTY = '_empty'
 
 
 class MissingFieldsDefinitionError(Exception):
@@ -22,20 +18,10 @@ class MissingFieldsDefinitionError(Exception):
 
 
 class BaseSlot(object):
-    _FIELDS = None
     log = None
 
     def __init__(self, slots):
         self.log = slots.log
-
-        FIELDS = getattr(self, 'FIELDS', None)
-        # don't complain for BaseSlot instances ...
-        if (self.__class__.__name__ != BaseSlot.__name__) and (FIELDS is None):
-            raise MissingFieldsDefinitionError('BaseSlot.__init__ ERROR: no FIELDS member')
-        bf = BASE_FIELDS.copy()
-        if FIELDS is not None:
-            bf.update(FIELDS)
-        self._FIELDS = bf
         self._slots = slots
         self._values = {}
         self._params = {}
@@ -61,159 +47,14 @@ class BaseSlot(object):
 
     # ========================================================================
     #
-    # values checking methods
-    #
-    # ========================================================================
-
-    def recurse_conditions(self, cond):
-        """
-        conditions checking engine
-        """
-        op = cond[0]
-        result = False
-        if op == '==':
-            field = cond[1]
-            value = cond[2]
-            field_value = self.get_value(field, None)
-            if field_value is None:
-                return False
-            result = (field_value == value)
-        elif op == 'in':
-            field = cond[1]
-            values = cond[2]
-            field_value = self.get_value(field, None)
-            if field_value is None:
-                return False
-            result = field_value in values
-        elif op == 'and':
-            result = True
-            conds = cond[1]
-            for cond in conds:
-                result = result and self.recurse_conditions(cond)
-        else:
-            self.log('unknown operator %s' % (str(op)))
-        return result
-
-    def field_conditions_test(self, field_name):
-        """
-        Tests if field conditions are met with the data currently available
-        """
-        field = self._FIELDS[field_name]
-        cond = field.get('cond', None)
-        # no conditions, always ok
-        if cond is None:
-            return True
-        return self.recurse_conditions(cond)
-
-    def find_field(self, param_id):
-        """
-        Finds which field corresponds to the param_id, 
-        depending on data already there in the slot
-        """
-        found = False
-        fields = []
-        ok = False
-        for f in self._FIELDS.keys():
-            field = self._FIELDS[f]
-            param = field['param']
-            ok = False
-            if isinstance(param, dict):
-                for p in param.keys():
-                    if p == param_id:
-                        # append to list of tried fields
-                        fields.append(f)
-                        found = True
-                        ok = self.field_conditions_test(f)  
-            elif isinstance(param, int):
-                if param == param_id:
-                    # append to list of tried fields
-                    fields.append(f)
-                    found = True
-                    ok = self.field_conditions_test(f)
-            # else skip field...
-            if ok:
-                return (found, ok, f)
-        # should not happen ;-)
-        return (found, ok, fields)
-
-    def set_check_value(self, field_name, value, loads=False):
-        """
-        sets a value in the values dict, after looking if it's all
-        valid according to the _FIELDS definition data
-        """
-        try:
-            field = self._FIELDS[field_name]
-        except KeyError:
-            self.log("set_check_value: unable to find key '%s' in FIELDS" % (field_name))
-            self.log(self._FIELDS)
-        values = field['values']
-        if isinstance(values, tuple) or isinstance(values, list):
-            v_type = values[0]
-        elif isinstance(values, str):
-            v_type = values
-        else:
-            self.log('unknown values type %s' % (values.__class__.__name__))
-        if v_type == 'address':
-            self.log(self._slots.parent.subsystem)
-            sub = self._slots.parent.subsystem(self._slots.parent.devices.system)
-            addr_type = values[1]
-            # dict values only show up during loads from config file
-            if isinstance(value, dict) and loads:
-                func_name = 'parse_address_dict'
-            else:
-                func_name = 'parse_address_'+addr_type
-            func = getattr(sub, func_name, None)
-            if func is not None:
-                # at this point, we may want to try/except ...
-                value = func(field_name, value)
-                self.log(value)
-            else:
-                raise NotImplementedError('missing %s.%s function' % (sub.__class__.__name__, func_name))
-        elif v_type == 'area':
-            if value < 0 or value > 10:
-                self.log('%s : area %d invalid (should be in (0..10)' % (field_name, value))
-                return False
-        elif v_type == 'group':
-            if value < 0 or value > 255:
-                self.log('%s : group %d invalid (should be in (1..255)' % (field_name, value))
-                return False
-        elif v_type == 'int':
-            v_min = values[1]
-            v_max = values[2]
-            if value < v_min or value > v_max:
-                self.log('%s : int %d invalid (should be in (%d..%d)' % (field_name, value, v_min, v_max))
-                return False
-        elif v_type == 'list':
-            v_dict = values[1]
-            index = None
-            if loads:
-                v_list = v_dict['ids']
-                if value in v_list:
-                    index = v_list.index(value)
-            v_list = v_dict['values']
-            if loads and index is not None:
-                value = v_list[index]
-            if value not in v_list:
-                self.log('%s : list %d invalid (should be in %s' % (field_name, value, str(v_list)))
-                return False
-        else:
-            self.log('%s : unhandled type %s' % (field_name, v_type))
-            return False
-        self.log('setting value %s => %s' % (field_name, str(value)))
-        self.set_value(field_name, value)
-        return True
-
-    # ========================================================================
-    #
     # front-end related
     #
     # ========================================================================
 
-
     @property
     def slot_options(self):
         options = {
-            'fields': self._FIELDS
+            # 'fields': self._FIELDS
         }
         return options
 
@@ -234,34 +75,71 @@ class BaseSlot(object):
     # ========================================================================
 
     def loads(self, data):
-        loaded = []
-        try:
-            keys = data.keys()
-        except AttributeError:
-            # empty slot, we currently have this for f411 where a slot is 
-            # configured in automation mode.
-            # should do something else here
-            self.log(self._slots.parent)
-            self.log(self._slots)
-            self.log(data)
+        if not isinstance(data, dict):
+            device_db.log("BaseSlot.loads ERROR: data must be a dict")
             return False
-        for f in keys:
-            field = self._FIELDS.get(f, None)
-            if field is None: 
-                self.log('Unexpected field %s, %s' % (f, str(self._FIELDS.keys())))
-            else:
-                ok = self.field_conditions_test(f)
+        keys = data.keys()
+        if len(keys) == 0:
+            device_db.log("BaseSlot.loads WARNING: we're missing info for slot %d" % (self.number))
+            device_db.log(self._slots.parent)
+            device_db.log(data)
+            return False
+        ko = data.get(F_KO, None)
+        if ko is None:
+            # we don't have a ko, slot is probably empty
+            empty = data.get(F_EMPTY, None)
+            if empty is None:
+                device_db.log("BaseSlot.loads ERROR: there should be an '%s' value in this case" % (F_EMPTY))
+                return False
+            if empty != True:
+                device_db.log("BaseSlot.loads ERROR: %s should be True" % (F_EMPTY))
+                return False
+            self.set_value(F_EMPTY, empty)
+        else:
+            dev = self._slots.parent
+            who = dev.subsystem.SYSTEM_WHO
+            kos = device_db.find_symbolic_kos_for_device(who, dev.model_id, dev.fw_version)
+            if ko not in kos:
+                device_db.log("BaseSlot.loads ERROR: invalid KO %d for object" % ko)
+                return False
+            ko_value, width = kos[ko]    
+            if self.number + width > len(dev.slots):
+                device_db.log("BaseSlot.loads ERROR: KO %d is too wide (%d) to be set on slot %d" % (ko_value, width, self.number))
+                return False
+            self.set_value(F_KO, ko_value)
+
+            fields = device_db.find_fields_for_ko(ko_value)
+            for v in fields:
+                var_name, var_old = v
+                field = device_db.find_named_field(ko_value, var_name, self.get_value)
+                if field is None:
+                    # this field is not valid at this point
+                    continue
+                field_type, field_type_detail = field
+                ok = False
+                # try var_old first
+                if var_old is not None:
+                    if var_old in keys:
+                        value = data.get(var_old, None)
+                        ok = True
+                # try var_name next
                 if not ok:
-                    self.log('We can\'t have field %s at this point' % (f))
-                else:
-                    # at this point, it's the contents that say if it's ok or not
-                    if self.set_check_value(f, data[f], True):
-                        loaded.append(f)
-        self.log('loaded fields %s' % (str(loaded)))
-        if len(loaded) == 0:
-            # nothing loaded there's surely a problem
-            return False
-        # TODO: check for all required parameters 
+                    if var_name in keys:
+                        value = data.get(var_name, None)
+                        ok = True
+                # unable to find variable...
+                if not ok:
+                    value = None
+                    device_db.log("BasicSlot.loads WARNING: unable to find a value for %s" % (var_name))
+                    # skip to next field name
+                    continue
+                if value is None:
+                    # skip...
+                    continue
+                ok, value = device_db.parse_value(value, field_type, field_type_detail)
+                if ok:
+                    self.set_value(var_name, value)
+
         return True
 
     # ========================================================================
@@ -275,30 +153,27 @@ class BaseSlot(object):
         self.log('-----------------------------------------------')
         self.log('id : %s | slot : %d | symbolic: %s' 
                  % (self._slots.parent.hw_addr_hex, self.number, str(symbolic)))
-        for f in self._FIELDS.keys():
-            ok = self.field_conditions_test(f)
-            if ok:
-                value = self.get_value(f, None)
-                if value is not None:
-                    field = self._FIELDS[f]
-                    values = field['values']
-                    v_type = values[0]
-                    if v_type == 'list':
-                        if symbolic:
-                            # map to a user readable value
-                            list_values = values[1]
-                            int_values = list_values['values']
-                            id_values = list_values['ids']
-                            try:
-                                index = int_values.index(value)
-                            except ValueError:
-                                self.log('can\'t find %s in %s' % (str(value), str(int_values)))
-                            else:
-                                value = id_values[index]
-                    self.log('%s : %s' % (f, str(value)))
-                    data[f] = value 
-                else:
-                    self.log('for some reason, field %s is None' % f)
+
+        empty = self.get_value(F_EMPTY, None)
+        if empty:
+            data[F_EMPTY] = empty
+        else:
+            ko_value = self.get_value(F_KO, None)
+            if ko_value is None:
+                device_db.log("__internal_json__ ERROR: can't find a KO value and %s is not set" % (F_EMPTY))
+            else:
+                ko_id = device_db.find_symbolic_ko_value(ko_value)
+                data[F_KO] = ko_id
+                fields = device_db.find_fields_for_ko(ko_value)
+                for f in fields:
+                    field_name, _ = f
+                    field = device_db.find_named_field(ko_value, field_name, self.get_value)
+                    if field is not None:
+                        field_type, field_type_detail = field
+                        value = self.get_value(field_name, None)
+                        ok, value = device_db.export_value(value, field_type, field_type_detail)
+                        if ok:
+                            data[field_name] = value
         return data
 
     def __to_json__(self):
@@ -353,66 +228,78 @@ class BaseSlot(object):
     # ========================================================================
 
     def res_ko_value(self, keyo, state):
-        self.set_value(F_KO, keyo)
-        #self.set_value(F_STATE, state)
+        dev = self._slots.parent
+        who = dev.subsystem.SYSTEM_WHO
+        kos = device_db.find_kos_for_device(who, dev.model_id, dev.fw_version)
+        if keyo in kos:
+            self.set_value(F_KO, keyo)
+        else: 
+            # should not happen ;-)
+            self.log("ERROR: invalid KO for object")
         return True
 
     def res_ko_sys(self, sys, addr):
         # hah, can't handle addresses all the same way, they are parsed differently
         # between systems !!
-        self.set_value(F_SYSTEM, sys)
-        self.set_check_value(F_SYS_ADDRESS, addr)
-        self.log('>>>>>>>>>>> RES_KO_SYS sys: %s addr: %s <<<<<<<<<<<' 
-                 % (sys, str(self.get_value(F_SYS_ADDRESS, addr))))
+        dev = self._slots.parent
+        who = dev.subsystem.SYSTEM_WHO
+        if sys != who:
+            self.log("ERROR: sys is different from SYSTEM_WHO %d != %d" % (sys, who))
+            # not worth bailing though...
+        # not sure this is any useful !
+        # get the addr record 
+        # note: ko => None should not happen
+        addr_rec = device_db.find_sys_addr(self.get_value(F_KO, None))
+        if addr_rec is None:
+            # bail
+            return False
+        _, _, _, field_type, field_type_detail, var_name, _ = addr_rec
+        ok, value = device_db.parse_value(addr, field_type, field_type_detail)
+        if ok:
+            self.set_value(var_name, value)
+        else:
+            device_db.log("res_ko_sys: Unable to set %s => %s" % (var_name, str(value)))
+        device_db.log(self._values)
         return True
 
     def res_param_ko(self, index, val_par):
-        found, ok, fields = self.find_field(index)
-        self.log('PARAM %s %s %s => %s' % (str(index), str(found), str(fields), str(val_par)))
-        if found:
-            if ok:
-                if not isinstance(fields, str):
-                    self.log('%s.res_param_ko: ERROR: expected a field name, got %s \'%s\'' % 
-                             (self.__class__.__name__, fields.__class__.__name__, str(fields)))
+        # value for F_KO should never be None here !
+        field = device_db.find_field(self.get_value(F_KO, None), index, self.get_value)
+        if field is not None:
+            access_mode, field_type, field_type_detail, var_name, array_index = field
+            # should check value
+            ok, value = device_db.parse_value(val_par, field_type, field_type_detail)
+            if ok is not None:
+                if access_mode == 'array':
+                    try:
+                        val = self.get_value(var_name, [])
+                        while len(val) <= array_index:
+                            val.append(None)
+                        val[array_index] = value
+                        self.set_value(var_name, val)
+                    except:
+                        import traceback
+                        traceback.print_exc()
+                elif access_mode == 'bool_invert':
+                    if value is not None:
+                        self.set_value(var_name, not value)
+                elif access_mode == 'low_8':
+                    if value is not None:
+                        val = self.get_value(var_name, 0)
+                        n_value = (val & 0xff00) | (value & 0xff)
+                        self.set_value(var_name, n_value) 
+                elif access_mode == 'high_8':
+                    if value is not None:
+                        val = self.get_value(var_name, 0)
+                        n_value = ((value << 8) & 0xff00) | (val & 0xff)
+                        self.set_value(var_name, n_value)
+                elif access_mode == 'value':
+                    if value is not None:
+                        self.set_value(var_name, value)
                 else:
-                    self.log('%s.res_param_ko: found %s' % (self.__class__.__name__, fields))
-                    field_name = fields
-                    field = self._FIELDS[field_name]
-                    self.log(field)
-                    param = field['param']
-                    # those validity tests should not be necessary
-                    if isinstance(param, int):
-                        if param == index:
-                            self.log('%s => %s' % (field_name, str(val_par)))
-                            return self.set_check_value(field_name, val_par)
-                        else:
-                            # should never happen...
-                            self.log('%s.res_param_ko: ERROR: For some reason, param changed param: %s index: %s' % 
-                                     (self.__class__.__name__, str(param), str(index)))
-                    elif isinstance(param, dict):
-                        if index in param.keys():
-                            action = param[index]
-                            if action == 'low_8':
-                                val = self.get_value(field_name, 0)
-                                value = (val & 0xff00) | (val_par & 0xff)
-                                self.log('%s: %08x %08x => %08x' % (action, val, val_par, value))
-                                return self.set_check_value(field_name, value) 
-                            elif action == 'high_8':
-                                val = self.get_value(field_name, 0)
-                                value = ((val_par << 8) & 0xff00) | (val & 0xff)
-                                self.log('%s: %08x %08x => %08x' % (action, val, val_par, value))
-                                return self.set_check_value(field_name, value)
-                            else:
-                                self.log('%s.res_param_ko: ERROR: unknown action %s' % 
-                                     (self.__class__.__name__, str(action)))
-                        else:
-                            # should never happen either !
-                            self.log('%s.res_param_ko: ERROR: For some reason, index is not in index: %s param: %s' % 
-                                     (self.__class__.__name__, str(index), str(param)))
-                    return True
+                    # more complicated modes
+                    device_db.log('UNIMPLEMENTED: %s %s' % (str(field), str(value)))
             else:
-                self.log('%s.res_param_ko: WARNING: none of %s validated conditions' % (self.__class__.__name__, str(fields))) 
-                return True   
-        else:
-            self.log('%s.res_param_ko: WARNING: unable to find field for param %s' % (self.__class__.__name__, str(index)))
-        return False
+                device_db.log("ERROR: value returned is None")
+        device_db.log(self._values)
+        return True

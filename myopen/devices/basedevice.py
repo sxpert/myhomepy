@@ -179,7 +179,7 @@ class BaseDevice(object):
             line_name = self.dump_product_line()
             if line_name is not None:
                 _class += '%s ' % (line_name)
-        fw = self.fw_version_as_string()
+        fw = self.fw_version
         if fw is not None:
             _class += 'fw:%s ' % (fw)
         confs = self.dump_configurators()
@@ -442,7 +442,8 @@ class BaseDevice(object):
             return pln
         return pln_s
 
-    def fw_version_as_string(self):
+    @property
+    def fw_version(self):
         fw = getattr(self, '_fw_version', None)
         if fw is not None:
             fw = '%d.%d.%d' \

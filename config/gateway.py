@@ -184,10 +184,18 @@ class Gateway(object):
                 await self.system.websocket_dispatch(data)
                 handled = False
                 if self.system.is_cmd_busy:
-                    handled = self.system.dispatch_message(data)
+                    try:
+                        handled = self.system.dispatch_message(data)
+                    except:
+                        import traceback
+                        traceback.print_exc()
                 if not handled:
-                    m = Message(data, self)
-                    m.dispatch()
+                    try:
+                        m = Message(data, self)
+                        m.dispatch()
+                    except:
+                        import traceback
+                        traceback.print_exc()
 
     # ------------------------------------------------------------------------
     #

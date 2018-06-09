@@ -29,6 +29,9 @@ class Slots(object):
         s += '>'
         return s
 
+    def __len__(self):
+        return len(self.slots)
+
     # ========================================================================
     #
     # front-end related 
