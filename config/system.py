@@ -123,7 +123,7 @@ class System(object):
                 self._free.wait()])
             
             self._task = await self.task_queue.get()
-            self.log(self._task)
+            self.log('System.run_tasks : task %s' % str(self._task))
             self._free.clear()
             taskcls = self._task.get('task', None)
             if issubclass(taskcls, BaseCommand):
@@ -148,8 +148,7 @@ class System(object):
                 dispatch = getattr(self._task, 'dispatch', None)
                 if dispatch is None:
                     # should not happen
-                    self.log('the %s command has no \'dispatch\' method, '
-                             'can\'t send message %s'
+                    self.log('the %s command has no \'dispatch\' method, can\'t send message %s'
                              % (str(self._task), str(msg)))
                     return False
                 if callable(dispatch):
@@ -158,8 +157,7 @@ class System(object):
                 res = None
 
             if self._task is not None and self._task.is_done:
-                self.log('System.dispatch_message : command %s is done'
-                         % (str(self._task)))
+                self.log('System.dispatch_message : command %s is done' % (str(self._task)))
                 self._task = None
                 self.gateway.stop_cmd_conn()
                 self._free.set()
@@ -198,13 +196,9 @@ class System(object):
 
     def callback(self, *args, **kwargs):
         if self._callbacks is None:
-            self.log('System.callback WARNING : '
-                     'no callbacks found %s %s' % (str(args), str(kwargs)),
-                     LOG_INFO)
+            self.log('System.callback WARNING : no callbacks found %s %s' % (str(args), str(kwargs)), LOG_INFO)
             return None
-        self.log('System.callback : executing callback %s %s' %
-                 (str(args), str(kwargs)),
-                 LOG_INFO)
+        self.log('System.callback : executing callback %s %s' % (str(args), str(kwargs)), LOG_INFO)
         return self._callbacks.execute(*args, **kwargs)
 
     def socket(self, mode):

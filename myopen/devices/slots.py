@@ -66,9 +66,7 @@ class Slots(object):
             slot_ok = slot.loads(data[sid])
             # default loader ?
             if not slot_ok:
-                self.log('Loading slot %d => %s appears to have failed, launching default loader ?'
-                         % (sid, str(data[sid])), LOG_ERROR)
-                
+                self.log('Loading slot %d => %s appears to have failed, launching default loader ?' % (sid, str(data[sid])), LOG_ERROR)
             ok &= slot_ok
         return ok
 

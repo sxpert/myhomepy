@@ -185,41 +185,22 @@ class BaseSlot(object):
     #
     # ========================================================================
 
-    def get_value(self, key, default):
-        return self._values.get(key, default)
+    def get_value(self, key, default, values=None):
+        if values is None:
+            values = self._values
+        return values.get(key, default)
 
-    def set_value(self, key, value):
-        if key == VAR_PARAMS_KEY:
-            return False
-        self._values[key] = value
+    def set_value(self, key, value, values=None):
+        if values is None:
+            values = self._values
+        values[key] = value
 
-    def del_value(self, key):
-        if key == VAR_PARAMS_KEY:
-            return False
-        if key in self._values:
-            del(self._values[key])
+    def del_value(self, key, values=None):
+        if values is None:
+            values = self._values
+        if key in values:
+            del(values[key])
         return True
-
-    def check_param_key(self, key):
-        if isinstance(key, int):
-            return key
-        if isinstance(key, str):
-            if key.isnumeric():
-                return int(key)
-        raise AttributeError
-
-    def get_param(self, key, default):
-        i_key = self.check_param_key(key)
-        return self._params.get(i_key, default)
-
-    def set_param(self, key, value):
-        i_key = self.check_param_key(key)
-        self._params[i_key] = value
-
-    def del_param(self, key):
-        i_key = self.check_param_key(key)
-        if i_key in self._params:
-            del(self._params, i_key)
 
     # ========================================================================
     #

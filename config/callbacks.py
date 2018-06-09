@@ -15,8 +15,7 @@ class Callbacks(object):
                 self.system = obj
                 self.log = self.system.log
             else:
-                self.log("WARNING: wrong object passed "
-                         "to Callbacks.__init__ %s" % (str(obj)))
+                self.log("WARNING: wrong object passed to Callbacks.__init__ %s" % (str(obj)))
 
     def loads(self, data):
         self.log('loading callbacks')
@@ -66,20 +65,16 @@ class Callbacks(object):
             if key in self.keys():
                 cb = self[key]
                 if isinstance(cb, list):
-                    self.log('Callbacks.execute : .1 handling of lists '
-                             'of callbacks not implemented yet')
+                    self.log('Callbacks.execute : .1 handling of lists of callbacks not implemented yet')
                     self.log('Callbacks.execute : .2 %s' % (str(cb)))
                     return False
                 else:
-                    self.log('config.Callbacks.execute : found callback %s'
-                             % (str(cb)), LOG_INFO)
+                    self.log('config.Callbacks.execute : found callback %s' % (str(cb)), LOG_INFO)
                     return cb.execute(self.system, order, device, data)
             else:
                 # there is no callback by this key, ignore
-                # self.log('Callbacks.execute INFO : key %s '
-                #          'not in callbacks => return None' % (key))
+                # self.log('Callbacks.execute INFO : key %s not in callbacks => return None' % (key))
                 pass
         else:
-            self.log("Callbacks.execute WARNING : key is None => return None",
-                     LOG_INFO)
+            self.log("Callbacks.execute WARNING : key is None => return None", LOG_INFO)
         return None

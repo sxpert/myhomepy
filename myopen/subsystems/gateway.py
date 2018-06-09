@@ -76,12 +76,10 @@ class Gateway(OWNSubSystem):
         # _dow should be == to _wd
         if _dow != _wd:
             # just log it, doesn't really matter, we don't use that info
-            self.log('myopen.subsystems.Gateway._date_info WARNING : '
-                     'weekday differs : got %d expected %d' % (_dow, _wd))
+            self.log('myopen.subsystems.Gateway._date_info WARNING : weekday differs : got %d expected %d' % (_dow, _wd))
         res = self.system.gateway.date_info(_date)
         if not res:
-            self.log('myopen.subsystems.Gateway._date_info WARNING : '
-                     'date info not handled')
+            self.log('myopen.subsystems.Gateway._date_info WARNING : date info not handled')
         _order = self.OP_RES_DATE_INFO
         _device = None
         _data = {'date': _date}
@@ -89,8 +87,7 @@ class Gateway(OWNSubSystem):
 
     @staticmethod
     def gen_set_date_time(_dt):
-        cmd = '*#13**#22*[hour]*[minute]*[second]*[tz]' \
-              '*[dow]*[day]*[month]*[year]##'
+        cmd = '*#13**#22*[hour]*[minute]*[second]*[tz]*[dow]*[day]*[month]*[year]##'
         _tz = _dt.strftime('%z')
         _dow = _dt.isoweekday()
         params = {

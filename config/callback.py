@@ -13,8 +13,6 @@ PLUGINS_DIRS = "plugins/"
 
 
 class Condition(object):
-    _log = None
-
     _system_str = None
     _order_str = None
     _device = None
@@ -45,7 +43,7 @@ class Condition(object):
         self._callback_id = ssc(self._callback.callbacks.system) \
             .map_callback_name(self._order_str)
         if self._callback_id is None:
-            self._log("Unable to find callback \'%s\'" % (self._order_str))
+            self.log("Unable to find callback \'%s\'" % (self._order_str))
             return
 
     def __to_json__(self):
@@ -82,13 +80,8 @@ class Action(object):
     def __str__(self):
         a = 'Unknown'
         if self._action_mode == self.AC_PLUGIN:
-            a = "Plugin(%s, %s, %s)" % (
-                self._module,
-                self._method,
-                str(self._params)
-            )
-        return "<%s %s>" % (
-            self.__class__.__name__, a)
+            a = "Plugin(%s, %s, %s)" % (self._module, self._method, str(self._params))
+        return "<%s %s>" % (self.__class__.__name__, a)
 
     def loads(self, data):
         _plugin = data.get("plugin", None)
@@ -96,12 +89,10 @@ class Action(object):
             self._action_mode = self.AC_PLUGIN
             self._module = _plugin.get("module", None)
             if self._module is None:
-                self.log('config.Action.load : '
-                         'no module specified for plugin...')
+                self.log('config.Action.load : no module specified for plugin...')
             self._method = _plugin.get("method", None)
             if self._method is None:
-                self.log('config.Action.load: '
-                         'no method specified for plugin...')
+                self.log('config.Action.load: no method specified for plugin...')
         self._params = data.get("params", None)
 
     def __to_json__(self):
@@ -123,59 +114,45 @@ class Action(object):
 
     def _exec_plugin(self, system, order, device, data):
         if self._module is None:
-            self.log("config.Action._exec_plugin : "
-                     "Module not specified, cancelling callback")
+            self.log("config.Action._exec_plugin : Module not specified, cancelling callback")
             return None
         if self._method is None:
-            self.log("config.Action._exec_plugin : "
-                     "Method not specified, cancelling callback")
+            self.log("config.Action._exec_plugin : Method not specified, cancelling callback")
             return None
         self.log('config.Action._exec_plugin: plugin appears valid %s %s'
                  % (str(self._module), str(self._method)), LOG_INFO)
         plugins_paths = PLUGINS_DIRS.split(os.pathsep)
         sys.path.extend(plugins_paths)
-        self.log('config.Action._exec_plugin : plugins_paths %s'
-                 % (str(plugins_paths)), LOG_INFO)
+        self.log('config.Action._exec_plugin : plugins_paths %s' % (str(plugins_paths)), LOG_INFO)
         # find the file
         m = None
         for path in plugins_paths:
-            self.log('config.Action._exec_plugin : looking in path %s'
-                     % (str(path)), LOG_INFO)
+            self.log('config.Action._exec_plugin : looking in path %s' % (str(path)), LOG_INFO)
             dir_contents = os.listdir(path)
-            self.log('config.Action._exec_plugin : dir_contents %s'
-                     % (str(dir_contents)), LOG_INFO)
+            self.log('config.Action._exec_plugin : dir_contents %s' % (str(dir_contents)), LOG_INFO)
             for filename in dir_contents:
                 name, ext = os.path.splitext(filename)
                 if ext.endswith(".py") and (name == self._module):
-                    self.log('config.Action._exec_plugin : '
-                             'found module %s' % (filename), LOG_INFO)
+                    self.log('config.Action._exec_plugin : found module %s' % (filename), LOG_INFO)
                     # muck with the path and filename at this point...
                     module_name = path.replace('/', '.') + name
-                    self.log('config.Action._exec_plugin : '
-                             'importing %s' % (module_name), LOG_INFO)
+                    self.log('config.Action._exec_plugin : importing %s' % (module_name), LOG_INFO)
                     # importlib.invalidate_caches()
                     m = importlib.import_module(module_name, globals())
-                    self.log('config.Action._exec_plugin : '
-                             'module imported %s' % (str(m)), LOG_INFO)
+                    self.log('config.Action._exec_plugin : module imported %s' % (str(m)), LOG_INFO)
         if m is None:
             return None
         # find method
         func = getattr(m, self._method, None)
         if func:
-            self.log('config.Action._exec_plugin : '
-                     'calling %s %s %s %s %s' %
-                     (str(func), str(system),
-                      str(self._params),
-                      str(device), str(data)),
-                     LOG_INFO)
+            self.log('config.Action._exec_plugin : calling %s %s %s %s %s' %
+                     (str(func), str(system), str(self._params),
+                      str(device), str(data)), LOG_INFO)
             res = func(system, self._params, device, data)
-            self.log('config.Action._exec_plugin : '
-                     'callback plugin returned %s' % (str(res)),
-                     LOG_INFO)
+            self.log('config.Action._exec_plugin : callback plugin returned %s' % (str(res)), LOG_INFO)
             return res
-        self.log('config.Action._exec_plugin : unable to find function %s' %
-                 (str(self._method)), LOG_INFO)
-        self.log('%s' % (str(dir(m))), LOG_INFO)
+        self.log('Action._exec_plugin : unable to find function %s' % (str(self._method)), LOG_INFO)
+        self.log('Action._exec_plugin%s' % (str(dir(m))), LOG_INFO)
         return None
 
 
@@ -190,11 +167,7 @@ class Callback(object):
             print("in creating Callback, the Callbacks instance was None")
 
     def __str__(self):
-        return "<%s %s %s>" % (
-            self.__class__.__name__,
-            str(self.condition),
-            str(self.action)
-        )
+        return "<%s %s %s>" % (self.__class__.__name__, str(self.condition), str(self.action))
 
     def loads(self, data):
         # callbacks must have 2 sections :
@@ -222,10 +195,7 @@ class Callback(object):
 
     def execute(self, system, order, device, data):
         if self.action is not None:
-            self.log('config.Callback.execute : '
-                     'action is not None, launching',
-                     LOG_INFO)
+            self.log('config.Callback.execute : action is not None, launching', LOG_INFO)
             return self.action.execute(system, order, device, data)
-        self.log('config.Callback.execute : '
-                 'self.action is None => return None')
+        self.log('config.Callback.execute : self.action is None => return None')
         return None

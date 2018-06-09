@@ -47,6 +47,7 @@ class OWNSubSystem(object):
         * a tuple (function, matches)
         * None
         """
+        self.log('Subsystem._parse_regexp begin')
         # step 1: find a regexp that matches
         func_info = None
         if len(regexps) > 0:
@@ -64,6 +65,7 @@ class OWNSubSystem(object):
                     matches = m.groupdict()
                     func_info = (f, matches, name, )
         # either a tuple or none
+        self.log('Subsystem._parse_regexp end')
         return func_info
 
     # ---------------------------------------------------------------------
@@ -78,14 +80,20 @@ class OWNSubSystem(object):
             'data': data
         }
 
-    def _do_callback(self, cb_data):
+    def do_callback(self, cb_data):
+        self.log('SubSystem.do_callback %s' % (str(cb_data)))
+        _func = cb_data.get('func', None)
+        if _func is not None and callable(_func):
+            res = _func()
+            if not res:
+                self.log("SubSystem.do_callback WARNING: %s returned False" % (str(_func)))
         _command = cb_data.get('order', None)
         _device = cb_data.get('device', None)
         _data = cb_data.get('data', None)
         # device may be none... (for instance in the case of the gateway)
         if _command is not None:
             return self.callback(_command, _device, _data)
-        self.log('Subsystem._do_callback WARNING : %s' % (str(cb_data)))
+        self.log('Subsystem.do_callback WARNING : %s' % (str(cb_data)))
 
     def map_device(self, device):
         return None
@@ -96,13 +104,10 @@ class OWNSubSystem(object):
             dev = self.map_device(device)
             if dev is None:
                 # can't map it, no problem
-                self.log('Subsystem.map_callback %d-%d-%s' %
-                         (who, order, str(dev)),
-                         LOG_INFO)
+                self.log('Subsystem.map_callback %d-%d-%s' % (who, order, str(dev)), LOG_INFO)
                 return None
             ck = "%d-%d-%s" % (who, order, dev)
-            self.log('OWNSubSystem.map_callback %s' % (ck),
-                     LOG_INFO)
+            self.log('OWNSubSystem.map_callback %s' % (ck), LOG_INFO)
             return ck
         self.log("ERROR: Can't call %s.map_callback" % (
             self.__class__.__name__))
@@ -122,16 +127,14 @@ class OWNSubSystem(object):
         return self.__class__._map_callback_name(name, sys_callbacks)
 
     def callback(self, order, device, data=None):
-        logmsg = 'OWNSubSystem.callback %d %s %s' % \
-                 (order, str(device), str(data))
+        logmsg = 'OWNSubSystem.callback %d %s %s' % (order, str(device), str(data))
         self.log(logmsg, LOG_INFO)
         callback_ok = self.system.callback(self, order, device, data)
         if isinstance(callback_ok, bool):
             if callback_ok:
                 return True
             else:
-                self.log('OWNSubsystem.callback WARNING: '
-                         'unable to execute callback')
+                self.log('OWNSubsystem.callback WARNING: unable to execute callback')
                 return False
         # we had None here
         self.log('OWNSubSystem.callback WARNING : no callback found', LOG_INFO)

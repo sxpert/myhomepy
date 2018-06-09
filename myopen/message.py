@@ -62,7 +62,6 @@ class Message(object):
         if self._name is not None:
             data['name'] = self._name
         if self._fi is not None:
-            self.log(self._fi)
             data['fields'] = self._fi[1]
         obj = {}
         obj['type'] = self.__class__.__name__
@@ -207,19 +206,16 @@ class Message(object):
             fname, ver = finfo
             # check types and complain ?
         else:
-            self.log('Message._parse: '
-                     'expected a tuple of length 2 with (str, int)')
+            self.log('Message._parse: expected a tuple of length 2 with (str, int)')
         # find the corresponding function object
         f = getattr(self.subsystem, fname, None)
         if f is None:
             # better logging ?
-            self.log('Message._parse: '
-                     'Unable to find method %s.%s' %
+            self.log('Message._parse: Unable to find method %s.%s' %
                      (self._sc.__name__, fname))
             return None
         if not callable(f):
-            self.log('Message._parse: '
-                     'not a callable method %s.%s' %
+            self.log('Message._parse: not a callable method %s.%s' %
                      (self._sc.__name__, fname))
             return None
         if ver == 1:
@@ -231,6 +227,7 @@ class Message(object):
             self.log('Message._parse : expected an int for ver, got %s'
                      % (str(ver)), LOG_ERROR)
             return False
+        print("Message._parse _self._fields", self._fields)
         return True
 
     @property
@@ -246,4 +243,4 @@ class Message(object):
         if callable(self._fields):
             return self._fields()
         if self._fields is not None:
-            return self.subsystem._do_callback(self._fields)
+            return self.subsystem.do_callback(self._fields)

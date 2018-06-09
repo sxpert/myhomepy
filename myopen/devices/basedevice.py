@@ -157,8 +157,7 @@ class BaseDevice(object):
             #          LOG_ERROR)
             self.devices.system.push_task(CmdDiagAid, params=params, callback=callback)
         else:
-            self.log('BaseDevice.queue_for_discovery : '
-                     'no main loop, not doing anything')
+            self.log('BaseDevice.queue_for_discovery : no main loop, not doing anything')
 
     def update_base_data(self, params):
         self._virt_id = params.get('virt_id', None)
@@ -187,8 +186,7 @@ class BaseDevice(object):
             _class += '%s ' % (str(confs))
         if self.valid:
             from . import Devices
-            return '%sid: %s>' % \
-                   (_class, Devices.format_hw_addr(self._hw_addr))
+            return '%sid: %s>' % (_class, Devices.format_hw_addr(self._hw_addr))
         return '%sINVALID>' % (_class)
 
     # ========================================================================
@@ -363,9 +361,7 @@ class BaseDevice(object):
             slots = data.get('slots', None)
             if slots is not None and isinstance(slots, list):
                 if not self.slots.loads(slots):
-                    self.log('BaseDevice.loads ERROR : '
-                             'unable to load slots %s'
-                             % (str(slots)), LOG_ERROR)
+                    self.log('BaseDevice.loads ERROR : unable to load slots %s' % (str(slots)), LOG_ERROR)
                 self.log('slots -> %s' % (str(self.slots)), LOG_DEBUG)
             return self
 
@@ -374,8 +370,7 @@ class BaseDevice(object):
 
         dc = self.find_device_class(model_id)
         if dc is None:
-            self.log('unable to find appropriate class for model_id %d'
-                     % (model_id), LOG_ERROR)
+            self.log('unable to find appropriate class for model_id %d' % (model_id), LOG_ERROR)
             return self
         nd = dc(self.devices, self.subsystem, data)
         if nd.__class__ != BaseDevice:
@@ -446,10 +441,7 @@ class BaseDevice(object):
     def fw_version(self):
         fw = getattr(self, '_fw_version', None)
         if fw is not None:
-            fw = '%d.%d.%d' \
-                 % (fw['major'],
-                    fw['minor'],
-                    fw['build'])
+            fw = '%d.%d.%d' % (fw['major'], fw['minor'], fw['build'])
         return fw
 
     def __to_json__(self):
@@ -502,9 +494,7 @@ class BaseDevice(object):
                 # probably not configured yet, ok
                 return True
         if _virt_id != virt_id:
-            error_msg = 'this device\'s virt_id is %s, ' \
-                        'doesn\'t match with %s' \
-                        % (self._virt_id, virt_id)
+            error_msg = 'this device\'s virt_id is %s, doesn\'t match with %s' % (self._virt_id, virt_id)
             self.log(error_msg, LOG_ERROR)
             return False
         return True
@@ -529,12 +519,9 @@ class BaseDevice(object):
         if self.__class__ == BaseDevice:
             dc = self.find_device_class(model_id)
             if dc is not None:
-                nd = dc(self.devices, self.subsystem,
-                        {'virt_id': self._virt_id,
-                         'hw_addr': self._hw_addr})
+                nd = dc(self.devices, self.subsystem, {'virt_id': self._virt_id, 'hw_addr': self._hw_addr})
                 if nd is not None:
-                    nd.res_object_model(virt_id, model_id,
-                                        nb_conf, brand_id, prod_line)
+                    nd.res_object_model(virt_id, model_id, nb_conf, brand_id, prod_line)
                     self.devices.replace_active_device(nd)
                     return True
             # couldn't find a proper model id
@@ -549,8 +536,7 @@ class BaseDevice(object):
         if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_LENIENT):
             return False
         if self.__class__.__name__ == BaseDevice.__name__:
-            self.log('can\'t set the firmware version '
-                     'on a BaseDevice instance')
+            self.log('can\'t set the firmware version on a BaseDevice instance')
             return False
         self._fw_version = fw_version
         return True
@@ -567,8 +553,7 @@ class BaseDevice(object):
         if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_LENIENT):
             return False
         if self.__class__.__name__ == BaseDevice.__name__:
-            self.log('can\'t set configurators 1 through '
-                     '6 on a BaseDevice instance')
+            self.log('can\'t set configurators 1 through 6 on a BaseDevice instance')
             return False
         # limit the range to the actual number of configurators
         range_max = min(len(self._configurators), 6)

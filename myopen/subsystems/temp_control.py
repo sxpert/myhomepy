@@ -30,8 +30,8 @@ class TempControl(OWNSubSystem):
         if (not isinstance(value, str)) or (len(value) != 3):
             # something really wrong happened
             raise ValueError('value must be a string, 3 digits long')
-        zone = int(value[0])
-        slave = int(value[1:3])
+        slave = int(value[0])
+        zone = int(value[1:3])
         addr = {
             "zone": zone,
             "slave": slave

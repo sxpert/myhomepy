@@ -236,15 +236,22 @@ class DiagScannable(OWNSubSystem):
     def _diag_cmd_diag_id(self, matches):
         _hw_addr = int(matches.get('hw_addr', None))
         # do the system thing
-        res = self.system.devices.set_active_device(self, _hw_addr)
-        if not res:
-            self.log('DiagScannable._diag_cmd_diad_id ERROR : %s' %
-                     (str(matches)))
-        # callback
-        _order = self.OP_SCAN_CMD_DIAG_ID
-        _device = None
-        _data = {'hw_addr': _hw_addr}
-        return self.gen_callback_dict(_order, _device, _data)
+        
+        def cmd_diag_id():
+            res = self.system.devices.cmd_diag_id(_hw_addr, self)
+            if not res:
+                self.log('DiagScannable._diag_cmd_diad_id ERROR : %s' % (str(matches)))
+            return res
+        
+        info = {
+            'data': {
+                'hw_addr': _hw_addr 
+            },
+            'device': None,
+            'order': self.OP_SCAN_CMD_DIAG_ID,
+            'func': cmd_diag_id
+        }
+        return info
 
     def _cmd_scan_check(self, matches):
         return True

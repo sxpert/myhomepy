@@ -63,7 +63,6 @@ class Devices(object):
         return l
 
     def __getitem__(self, key):
-        self.log('requested item with key %s %s' % (str(type(key)), str(key)), LOG_ERROR)
         if isinstance(key, int):
             keys = sorted(self._devs.keys())
             self.log(keys, LOG_ERROR)
@@ -182,8 +181,10 @@ class Devices(object):
 
         return True
 
-    def res_object_model(self, virt_id, model_id,
-                         nb_conf, brand_id, prod_line):
+    def cmd_diag_id(self, hw_addr, caller=None):
+        return self.set_active_device(caller, hw_addr)
+
+    def res_object_model(self, virt_id, model_id, nb_conf, brand_id, prod_line):
         if self._active_device is not None:
             return self._active_device\
                 .res_object_model(virt_id, model_id,

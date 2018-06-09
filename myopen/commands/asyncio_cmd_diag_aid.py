@@ -88,7 +88,7 @@ class CmdDiagAid(BaseCommand):
         """
         we are only interested in RES_PARAM_KO at this point
         """
-        self.log(msg)
+        self.log('CmdDiagAid.read_keyo %s' % str(msg))
         if msg.name == 'RES_PARAM_KO':
             if msg.is_conn_command:
                 # handle the messages from the command socket
@@ -98,6 +98,8 @@ class CmdDiagAid(BaseCommand):
         # let the rest handle itself
         if msg.is_conn_command:
             if msg.is_ack:
+                # diagnostic complete !
+
                 self.end_diag()
         return False
 

@@ -66,23 +66,19 @@ class Gateway(object):
             if not self.address:
                 self.address = data.get('address', None)
             if not self.address:
-                self.log("WARNING: no address specified for this "
-                         "system's gateway")
+                self.log("WARNING: no address specified for this system's gateway")
             self.port = data.get('port', None)
             if not self.port:
-                self.log("WARNING: no port specified for this system's "
-                         "gateway, using default 20000")
+                self.log("WARNING: no port specified for this system's gateway, using default 20000")
                 self.port = 20000
             self.passwd = data.get('password', None)
             if not self.passwd:
                 self.passwd = data.get('passwd', None)
             if not self.passwd:
-                self.log("WARNING: no open password specified for this "
-                         "system's gateway")
+                self.log("WARNING: no open password specified for this system's gateway")
             self.set_available()
             if not self.available:
-                self.log("WARNING: problems in gateway configuration, "
-                         "this system will not be available")
+                self.log("WARNING: problems in gateway configuration, this system will not be available")
             else:
                 self.log("Gateway %s ready" % str(self))
         return self
@@ -105,8 +101,7 @@ class Gateway(object):
         port_s = str(self.port)
         # don't show password in logs
         passwd_s = '**********'
-        return '<%s address: %s port: %s passwd: \'%s\'>' % (
-            self.__class__.__name__, address_s, port_s, passwd_s)
+        return '<%s address: %s port: %s passwd: \'%s\'>' % (self.__class__.__name__, address_s, port_s, passwd_s)
 
     # ------------------------------------------------------------------------
     #
@@ -127,8 +122,7 @@ class Gateway(object):
         while self.loop.is_running():
             pkt = await self.send_queue.get()
             if self.cmd_conn is None:
-                self.log('Gateway.handle_send_queue : '
-                         'starting the command connection')
+                self.log('Gateway.handle_send_queue : starting the command connection')
                 self.cmd_conn = \
                     AsyncIOOWNConnection(self.address,
                                          self.port,
@@ -137,9 +131,7 @@ class Gateway(object):
                                          MODE_COMMAND,
                                          loop=self.loop)
                 self.cmd_conn.auto_restart = False
-                self.cmd_conn_future = \
-                    asyncio.ensure_future(self.cmd_conn.run(),
-                                          loop=self.loop)
+                self.cmd_conn_future = asyncio.ensure_future(self.cmd_conn.run(), loop=self.loop)
                 await self.cmd_conn.is_ready.wait()
                 self.log('Gateway.handle_send_queue : CMD conn is ready')
             self.log('Gateway.handle_send_queue : sending \'%s\'' % (str(pkt)))
