@@ -180,7 +180,7 @@ class Message(object):
                     _sc_name = '%s ' % self._sc.__name__
                 msg = "Message.parse : No regexp found to parse %s message \'%s\' %s\'%s\'" % \
                       (self.type_name, str(self._who), _sc_name, self._msg)
-                self.log(msg, LOG_ERROR)
+                #self.log(msg, LOG_ERROR)
                 return False
 
             self._parsed = True
