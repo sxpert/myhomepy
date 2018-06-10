@@ -403,17 +403,17 @@ class DeviceDatabase(object):
         - description
         """
         if ko is None:
-            self.log("ERROR: ko can't be None")
+            self.log("find_sys_addr ERROR: ko can't be None")
         c = self.conn.cursor()
         sql = "select \"order\", slot_param, access, type, type_info, var_name, description " \
               "from ko_params where ko=? and slot_param='ADDR';"
         c.execute(sql, [ko])
         rec = c.fetchall()
         if len(rec) > 1:
-            self.log("ERROR: I should have obtained only one record")
+            self.log("find_sys_addr ERROR: I should have obtained only one record")
             return None
         if len(rec) == 0:
-            self.log("ERROR: I should have found something !")
+            self.log("find_sys_addr ERROR: I should have found something !")
             return None
         return rec[0]
 
@@ -426,7 +426,7 @@ class DeviceDatabase(object):
             vals = c.fetchall()
             if len(vals) == 1:
                 return vals[0][0]
-        self.log("ERROR: bad number of records returned for %s[%s.%s] => %s" % (f_type, field, val_id, str(vals)))
+        self.log("get_field_value ERROR: bad number of records returned for %s[%s.%s] => %s" % (f_type, field, val_id, str(vals)))
 
     def recurse_conditions(self, cond, get_value):
         c = self.conn.cursor()
@@ -434,17 +434,17 @@ class DeviceDatabase(object):
         c.execute(sql, [cond])
         cond_rec = c.fetchall()
         if len(cond_rec) == 0:
-            self.log("ERROR: unable to find cond %s" % (cond))
+            self.log("recurse_conditions ERROR: unable to find cond %s" % (cond))
             return False
         if len(cond_rec) > 1:
-            self.log("ERROR: got more than one record for cond %s" % (cond))
+            self.log("recurse_conditions ERROR: got more than one record for cond %s" % (cond))
             return False
         _, op, f_type, field, value, cond1, cond2 = cond_rec[0]
         if op == "==":
             v = self.get_field_value(f_type, field, value)
             cv = get_value(field, None)
             if cv is None:
-                self.log("ERROR: unable to retrieve value for %s in op %s" % (field, op))
+                self.log("recurse_conditions ERROR: unable to retrieve value for %s in op %s" % (field, op))
                 return False
             return v==cv
         elif op == "OR":
@@ -452,7 +452,7 @@ class DeviceDatabase(object):
             c2 = self.recurse_conditions(cond2, get_value)
             return c1 or c2
         else:
-            self.log("ERROR: unknown op '%s' in cond %s" % (op, cond))
+            self.log("recurse_conditions ERROR: unknown op '%s' in cond %s" % (op, cond))
             return False
 
 
@@ -482,7 +482,7 @@ class DeviceDatabase(object):
                 vr.append(r)
         # vr should contain 0 or 1 record...
         if len(vr) > 1:
-            self.log("ERROR: there should be 0 or 1 record %s" % (str(vr)))
+            self.log("find_field ERROR: there should be 0 or 1 record %s" % (str(vr)))
         if len(vr) == 1:
             _, access, f_type, type_info, var_name, array_index = vr[0]
             return (access, f_type, type_info, var_name, array_index,)
@@ -498,8 +498,8 @@ class DeviceDatabase(object):
         - field_type_detail
         """
         c = self.conn.cursor()
-        sql = "select distinct cond, type, type_info"\
-              " from ko_params where ko=? and var_name=?;"
+        sql = "select distinct cond, access, type, type_info"\
+              " from ko_params where ko=? and var_name=? and disp='true';"
         c.execute(sql, [ko, field_name])
         recs = c.fetchall()
         vr = []
@@ -512,10 +512,10 @@ class DeviceDatabase(object):
                 vr.append(r)
         # vr should contain 0 or 1 record...
         if len(vr) > 1:
-            self.log("ERROR: there should be 0 or 1 record %s" % (str(vr)))
+            self.log("find_named_field ERROR: there should be 0 or 1 record %s" % (str(vr)))
         if len(vr) == 1:
-            _, f_type, type_info = vr[0]
-            return (f_type, type_info)
+            _, access, f_type, type_info = vr[0]
+            return (access, f_type, type_info)
         return None
     
 

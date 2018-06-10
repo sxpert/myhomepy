@@ -164,7 +164,7 @@ class BaseSlot(object):
                 if field is None:
                     # this field is not valid at this point
                     continue
-                field_type, field_type_detail = field
+                access_mode, field_type, field_type_detail = field
                 ok = False
                 # try var_old first
                 if var_old is not None:
@@ -185,7 +185,17 @@ class BaseSlot(object):
                 if value is None:
                     # skip...
                     continue
-                ok, value = device_db.parse_value(value, field_type, field_type_detail)
+                if access_mode == 'array':
+                    for i in range(0, len(value)):
+                        if value[i] is None:
+                            # none is an acceptable value in arrays
+                            continue
+                        o, v = device_db.parse_value(value[i], field_type, field_type_detail)
+                        if not o: 
+                            self.log('BasicSlot.loads WARNING: invalid value \'%s\' for %s[%d]' % (value[i], var_name, i))
+                        ok = ok and o
+                else:
+                    ok, value = device_db.parse_value(value, field_type, field_type_detail)
                 if ok:
                     self.set_value(var_name, value)
 
@@ -214,7 +224,7 @@ class BaseSlot(object):
                     field_name, _ = f
                     field = device_db.find_named_field(ko_value, field_name, self.get_value)
                     if field is not None:
-                        field_type, field_type_detail = field
+                        _, field_type, field_type_detail = field
                         value = self.get_value(field_name, None)
                         ok, value = device_db.export_value(value, field_type, field_type_detail)
                         if ok:
