@@ -3,14 +3,10 @@ export class Base_Slot_Model {
         this._on_value_updated =null
         let options = data.options;
         if (options!==undefined) {
-            let fields = options.fields;
-            if (fields!==undefined) {
-                this.fields = fields;
-                this.names = Object.keys(fields);
-                for(var n=0; n<this.names.length; n++)
-                    fields[this.names[n]].name = this.names[n];
-            } else    
-                this.fields = null;
+            this.kos = options.KO;
+            this.lists = options.lists;
+            this.conds = options.conds;
+            this.fields = options.fields;
         } else
             this.fields = null;
         let values = data.values;
@@ -32,10 +28,15 @@ export class Base_Slot_Model {
             this.set_value(key, data.values[key]);
         }
     }
+    generate_field_name(field) {
+        var name = field.access+'_'+field.var_name;
+        if (field.array_index!==null) name += '_'+field.array_index
+        return name
+    }
     get_field(field_name) {
 
     };
-    get_value(name) {
+    get_value(name, array_index=null) {
         var v = undefined;
         if (this.values!==null)
             v = this.values[name]

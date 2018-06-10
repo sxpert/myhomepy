@@ -159,6 +159,7 @@ class DeviceDatabase(object):
         return self.check_ok(value)
 
     def parse_INTEGER(self, field_type_detail, value):
+        # TODO: handle array value
         if isinstance(value, int):
             c = self.conn.cursor()
             sql = "select value_undef, value_min, value_max from integers where type=?"
@@ -260,16 +261,18 @@ class DeviceDatabase(object):
         """
         """
         c = self.conn.cursor()
-        sql = 'select "order", cond, access, type, type_info, tab, ' \
-              'var_name, array_index, description from ko_params where ko=?;'
+        sql = 'select "order", cond, disp, access, type, type_info, tab, ' \
+              'var_name, array_index, description from ko_params ' \
+              'where ko=? order by "order";'
         c.execute(sql, [ko_value])
         params = c.fetchall()
         data = []
         for p in params:
-            order, cond, access, field_type, field_type_detail, tab, var_name, array_index, description = p
+            order, cond, disp, access, field_type, field_type_detail, tab, var_name, array_index, description = p
             val = {}
             val['order'] = order
             val['cond'] = cond
+            val['disp'] = disp=='true'
             val['access'] = access
             val['field_type'] = field_type
             val['field_type_detail'] = field_type_detail
@@ -291,19 +294,23 @@ class DeviceDatabase(object):
             cond_info = c.fetchall()
             if len(cond_info) != 1:
                 self.log('get_condition_details ERROR: expected only one record')
-            op, field_type, field_name, value, cond1, cond2 = cond_info[0]
-            data = {}
-            data['op'] = op
-            data['field_type'] = field_type
-            data['field_name'] = field_name
-            data['value'] = value
-            data['cond1'] = cond1
-            if cond1 is not None:
-                conds_id.append(cond1)
-            data['cond2'] = cond2
-            if cond2 is not None:
-                conds_id.append(cond2)
-            conds[cond] = data
+            try:
+                op, field_type, field_name, value, cond1, cond2 = cond_info[0]
+            except IndexError:
+                self.log('erh, wtf happened here ? %s %s' % (str(cond), str(cond_info)))
+            else:
+                data = {}
+                data['op'] = op
+                data['field_type'] = field_type
+                data['field_name'] = field_name
+                data['value'] = value
+                data['cond1'] = cond1
+                if cond1 is not None:
+                    conds_id.append(cond1)
+                data['cond2'] = cond2
+                if cond2 is not None:
+                    conds_id.append(cond2)
+                conds[cond] = data
         return conds
 
     def get_list_details(self, list_ref):

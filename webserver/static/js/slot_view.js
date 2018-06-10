@@ -1,6 +1,7 @@
 export class Slot_View {
     constructor() {
-        this.fields = null;
+        this.ko_el = null;
+        this.ko_view = null;
         this.el_slot = this.create_slot_element();
     };
     create_slot_element() {
@@ -8,20 +9,27 @@ export class Slot_View {
         el.classList.add('device-slot');
         return el;
     };
+    refresh_children() {
+        if (this.el_slot===undefined) return;
+        // should make this smarter...
+        this.el_slot.innerHTML="";
+        if (this.ko_el!==null) this.el_slot.appendChild(this.ko_el.field);
+        if (this.ko_view!==null) this.el_slot.appendChild(this.ko_view.element);
+    };
     get element() {
         return this.el_slot;
-    }
-    set_field(name, field) {
-        if (this.fields===null)
-            this.fields = {};
-        if (this.fields[name]!==undefined);
-        this.fields[name] = field;
-        this.el_slot.appendChild(field.field)
     };
+    set_ko_element(ko_el) {
+        this.ko_el = ko_el;
+        this.refresh_children();
+    };
+    set_ko_view(ko_view) {
+        this.ko_view = ko_view;
+        this.refresh_children();
+    }
     set_visible(name, visible) {
-        let f = this.fields[name];
-        if (f!==undefined)
-            f.visible = visible;
+        if (this.ko_view === null) return;
+        this.ko_view.set_visible(name, visible);
     }
     set_field_valid(name) {
         console.log('value for field', name, 'was valid');
@@ -30,8 +38,7 @@ export class Slot_View {
         console.log('value for field', name, 'was invalid');
     };
     set_value(name, value) {
-        let field = this.fields[name];
-        if (field!==undefined)
-            field.value = value;
+        if (this.ko_view === null) return;
+        this.ko_view.set_value(name, value);
     }
 }
