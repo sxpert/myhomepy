@@ -43,11 +43,13 @@ export class Slot_Controller {
             // generate the fields for each ko in the respective ko_view
             let ko_view = this.ko_views[ko_i];
             let ko_model = model.fields[ko_id];
+            let names = model.names[ko_id];
 
             for(var f=0; f<ko_model.length; f++) {
                 let f_model = ko_model[f];
                 if (!f_model.disp) continue;
-                let current = model.get_value(f_model.var_name, f_model.array_index);
+                let name = names[f]
+                let current = model.get_value(name);
                 var field_view;
                 switch(f_model.field_type) {
                     case 'ADDRESS':
@@ -65,7 +67,7 @@ export class Slot_Controller {
                         field_view.label = f_model.description;
                         let list = model.lists[f_model.field_type_detail];
                         for(var o=0; o<list.values.length; o++) {
-                            field_view.append_option(list.values[o], list.names[o], list.ids[o]==current);
+                            field_view.append_option(list.values[o], list.names[o], list.values[o]==current);
                         }
                     break;
                 };
@@ -114,6 +116,7 @@ export class Slot_Controller {
         this.slot_view.set_ko_view(ko_view);
     }
     field_changed(name, value) {
+        console.log('field_changed', name, value);
         if (this.slot_model.set_value(name, value)) 
             this.slot_view.set_field_valid(name);
         else  
@@ -121,6 +124,7 @@ export class Slot_Controller {
         this.set_fields_visibility();
     };
     value_updated(name) {
+        console.log('value_updated', name);
         var value = this.slot_model.get_value(name)
         this.slot_view.set_value(name, value);
         this.set_fields_visibility();

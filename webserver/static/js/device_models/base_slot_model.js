@@ -3,12 +3,26 @@ export class Base_Slot_Model {
         this._on_value_updated =null
         let options = data.options;
         if (options!==undefined) {
-            this.kos = options.KO;
-            this.lists = options.lists;
             this.conds = options.conds;
             this.fields = options.fields;
+            this.integers = options.integers;
+            this.kos = options.kos;
+            this.lists = options.lists;
         } else
             this.fields = null;
+        // generate all field names
+        this.names = {};
+        if (this.fields!==null) {
+            for(var i_ko=0; i_ko<this.kos.ids.length; i_ko++) {
+                let ko_names = []
+                let ko_id = this.kos.ids[i_ko]
+                let fields = this.fields[ko_id]
+                for(var f=0; f<fields.length; f++){
+                    ko_names[f] = this.generate_field_name(fields[f]);
+                }
+                this.names[ko_id] = ko_names;
+            }
+        }
         let values = data.values;
         if (values!==undefined) 
             this.values = data.values;
@@ -33,72 +47,90 @@ export class Base_Slot_Model {
         if (field.array_index!==null) name += '_'+field.array_index
         return name
     }
-    get_field(field_name) {
-
-    };
-    get_value(name, array_index=null) {
-        var v = undefined;
-        if (this.values!==null)
-            v = this.values[name]
-        if (v===undefined) {
-            // time to return some sensible default, depending on type, if possible
-            if (this.fields!==null) {
-                let f = this.fields[name];
-                if (f!==undefined) {
-                    let values = f.values
-                    let type = values[0];
-                    switch(type) {
-                        case 'address': v = {a:0, pl:1}; break;
-                        case 'area': v = 0; break;
-                        case 'group': v = 1; break;
-                        case 'int': v = values[1]; break;
-                        case 'list': v = (values[1]!==null) ? values[1].values[0] : null; break;
-                    }
-                }
-            }
+    get_value(name) {
+        if (name=='KO') {
+            // special case !
+            return this.values.KO;
         }
-        return v;
+        //console.log('get_value', name);
+        var v = undefined;
+        let ko_name = this.values.KO;
+        let names = this.names[ko_name];
+        let index = names.indexOf(name);
+        if (index>=0) {
+            let field = this.fields[ko_name][index];
+            let var_name = field.var_name;
+            let v = this.values[var_name]
+            let access = field.access;
+            if (access=='array') {
+                if (v!==null) v = v[field.array_index];
+                if (v===null) v = undefined;
+            }
+            let field_type = field.field_type;
+            switch (field_type) {
+                case 'LIST': 
+                    let list = this.lists[field.field_type_detail];
+                    index = list.ids.indexOf(v);
+                    if (index>=0) v = list.values[index];
+                    else v = undefined;
+                    break;
+            }
+            return v;
+        } else {
+            console.log('Base_Slot_Model.get_value : unable to find name', name);
+            console.log(ko_name, names, index)
+        }
+        return undefined;
+
+        //                 case 'address': v = {a:0, pl:1}; break;
+        //                 case 'area': v = 0; break;
+        //                 case 'group': v = 1; break;
+        //                 case 'int': v = values[1]; break;
+        //                 case 'list': v = (values[1]!==null) ? values[1].values[0] : null; break;
     };
     set_value(name, value) {
         // we expect the value to be a string... make an int of it...
-        if (typeof(value) === 'string')
-            value = parseInt(value);
-        // check the value
-        var ok = false;
-        if (this.fields!==null) {
-            let f = this.fields[name];
-            if (f!==undefined) {
-                var type = f.values[0];
-                switch(type) {
-                    case 'address': 
-                        console.log(type, value);
-                        let not_0_0 = !((value.a==0)&&(value.pl==0));
-                        let a_valid = ((value.a>=0)&&(value.a<=10));
-                        let pl_valid = ((value.pl>=0)&&(value.pl<=15));
-                        ok = not_0_0 && a_valid && pl_valid; 
-                        break;
-                    case 'area': ok = ((value.area>=0)&&(value.area<=10)); break;
-                    case 'group': ok = ((value.group>=1)&&(value.group<=255)); break;
-                    case 'int': ok = ((value>=f.values[1])&&(value<=f.values[2])); break;
-                    case 'list':      
-                        if (f.values[1] !== undefined) {
-                            let values = f.values[1]
-                            let options = values.values;
-                            ok = options.indexOf(value)!=-1;
-                        }
-                        break;
-                    default:
-                        console.log('Base_Slot_Model::set_value', name, value, 'ERROR')
-                        console.log('unhandled field type', f);
-                        ok = true;
-                }
+        let ko_name = this.values.KO;
+        let names = this.names[ko_name];
+        let index = names.indexOf(name);
+        if (index>=0) {
+            let field = this.fields[ko_name][index];
+            let var_name = field.var_name;
+            // check validity
+            var ok = false;
+            switch(field.field_type) {
+                case 'INTEGER':
+                    value = parseInt(value);
+                    if (value===NaN) value=undefined;
+                    let int = this.integers[field.field_type_detail]
+                    if (int!==undefined) ok = (value>=int.min)&&(value<=int.max);
+                    else ok = true;
+                    break;
+                case 'LIST':
+                    // value is a string damnint
+                    value = parseInt(value);
+                    let list = this.lists[field.field_type_detail];
+                    let values = list.values;
+                    let index = values.indexOf(value);
+                    ok = index >= 0;
+                    value = ok?list.ids[index]:value;
+                    break;
+                default:
+                    console.log('Base_Slot_Model::set_value', name, value, 'ERROR')
+                    console.log('unhandled field type', f);
+                    ok = true;
             }
+            if (ok) {
+                console.log('Base_Slot_Model.set_value', 'old value', this.values[var_name], 'new value', value);
+                this.values[var_name] = value;
+                if (this._on_value_updated!==null)
+                    this._on_value_updated(name);
+            }
+            return ok;
+        } else {
+            console.log('Base_Slot_Model.set_value : unable to find name', name);
+            console.log(ko_name, names, index)
         }
-        if (ok) {
-            this.values[name] = value;
-            if (this._on_value_updated!==null)
-                this._on_value_updated(name);
-        }
-        return ok;
+        return false;
     };
 }

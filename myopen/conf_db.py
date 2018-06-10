@@ -313,6 +313,20 @@ class DeviceDatabase(object):
                 conds[cond] = data
         return conds
 
+    def get_integer_details(self, integer_name):
+        c = self.conn.cursor()
+        sql = 'select value_min, value_max from integers where type=?;'
+        c.execute(sql, [integer_name])
+        val = c.fetchall()
+        if len(val) != 1:
+            self.log('get_integer_details ERROR: expected only 1 record')
+            return None
+        val_min, val_max = val[0]
+        data = {}
+        data['min'] = val_min
+        data['max'] = val_max
+        return data
+
     def get_list_details(self, list_ref):
         c = self.conn.cursor()
         sql = 'select value, id, name from lists where list_ref=? order by "order";'

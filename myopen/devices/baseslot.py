@@ -81,9 +81,10 @@ class BaseSlot(object):
     def slot_options(self):
         kos = self.kos_for_slot
         ko_values = kos['values']
+        integers = {}
         conds = {}
-        lists = {}
         fields = {}
+        lists = {}
         for ko in ko_values:
             index = ko_values.index(ko)
             params = device_db.get_params_for_ko(ko)
@@ -94,6 +95,10 @@ class BaseSlot(object):
                     c = device_db.get_condition_details(cond)
                     conds.update(c)
                 field_type = p['field_type']
+                if field_type == 'INTEGER':
+                    field_type_detail = p['field_type_detail']
+                    integer_details = device_db.get_integer_details(field_type_detail)
+                    integers[field_type_detail] = integer_details
                 if field_type == 'LIST':
                     field_type_detail = p['field_type_detail']
                     list_details = device_db.get_list_details(field_type_detail)
@@ -101,10 +106,11 @@ class BaseSlot(object):
             ko_id = kos['ids'][index]
             fields[ko_id] = params
         options = {}
-        options['KO'] = kos
-        options['lists'] = lists
         options['conds'] = conds
         options['fields'] = fields
+        options['integers'] = integers
+        options['kos'] = kos
+        options['lists'] = lists
         return options
 
     @property
