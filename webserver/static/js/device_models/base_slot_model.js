@@ -63,25 +63,28 @@ export class Base_Slot_Model {
             let v = this.values[var_name]
             let access = field.access;
             if (access=='array') {
-                if (v!==null) v = v[field.array_index];
+                if (v!==undefined) v = v[field.array_index];
                 if (v===null) v = undefined;
             }
             let field_type = field.field_type;
             switch (field_type) {
                 case 'LIST': 
+                    console.log(v);
                     let list = this.lists[field.field_type_detail];
                     index = list.ids.indexOf(v);
                     if (index>=0) v = list.values[index];
                     else v = undefined;
+                    console.log(v);
                     break;
             }
             return v;
-        } else {
-            console.log('Base_Slot_Model.get_value : unable to find name', name);
-            console.log(ko_name, names, index)
         }
+        // should return default values...
+        // } else {
+        //     console.log('Base_Slot_Model.get_value : unable to find name', name);
+        //     console.log(ko_name, names, index)
+        // }
         return undefined;
-
         //                 case 'address': v = {a:0, pl:1}; break;
         //                 case 'area': v = 0; break;
         //                 case 'group': v = 1; break;
@@ -89,6 +92,11 @@ export class Base_Slot_Model {
         //                 case 'list': v = (values[1]!==null) ? values[1].values[0] : null; break;
     };
     set_value(name, value) {
+        if (name=='KO') {
+            // special case
+            this.values.KO = value;
+            return true;
+        }
         // we expect the value to be a string... make an int of it...
         let ko_name = this.values.KO;
         let names = this.names[ko_name];
@@ -122,15 +130,27 @@ export class Base_Slot_Model {
             }
             if (ok) {
                 console.log('Base_Slot_Model.set_value', 'old value', this.values[var_name], 'new value', value);
-                this.values[var_name] = value;
+                if (field.access=='array') {
+                    console.log('setting array value for ', var_name, field.array_index, value);
+                    var v = this.values[var_name];
+                    if (v===undefined) {
+                        // should create an array with the right dimension
+                        v = [];
+                    }
+                    v[field.array_index] = value;
+                    this.values[var_name] = v
+                } else this.values[var_name] = value;
                 if (this._on_value_updated!==null)
                     this._on_value_updated(name);
             }
+            console.log(this.values);
             return ok;
-        } else {
-            console.log('Base_Slot_Model.set_value : unable to find name', name);
-            console.log(ko_name, names, index)
         }
+        // in case we can't find the appropriate variable...
+        // } else {
+        //     console.log('Base_Slot_Model.set_value : unable to find name', name);
+        //     console.log(ko_name, names, index)
+        // }
         return false;
     };
 }
