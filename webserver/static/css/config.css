@@ -131,6 +131,12 @@
     width: var(--slot-input-width);
     border: var(--border-width) solid var(--border-color);
 }
+.device-slot-bool {
+    font-size: var(--slot-font-size);
+    width: var(--slot-input-width);
+    border: var(--border-width) solid var(--border-color);
+    text-align: right;
+}
 .device-slot-integer {
     font-size: var(--slot-font-size);
     width: var(--slot-input-width);
@@ -151,4 +157,10 @@
 }
 .device-slot-select:hover {
     background: var(--hover-background);
+}
+.device-slot-temp {
+    font-size: var(--slot-font-size);
+    width: var(--slot-input-width);
+    border: var(--border-width) solid var(--border-color);
+    text-align: right;
 }

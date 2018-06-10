@@ -6,6 +6,7 @@ import * as bool_view from './slot_bool_view.js';
 import * as group_view from './slot_group_view.js';
 import * as integer_view from './slot_integer_view.js';
 import * as select_view from './slot_select_view.js';
+import * as temp_view from './slot_temp_view.js';
 
 export class Slot_Controller {
     constructor(slot_model) {
@@ -71,6 +72,10 @@ export class Slot_Controller {
                             field_view.append_option(list.values[o], list.names[o], list.values[o]==current);
                         }
                         break;
+                    case 'TEMP':
+                        field_view = new temp_view.Slot_Temp_View();
+                        field_view.value = current;
+                        break;
                     default: 
                         console.log('unhandled', field);
                         field_view = undefined;
@@ -110,8 +115,6 @@ export class Slot_Controller {
         this.slot_view.set_ko_view(this.ko_views[i_ko]);
     }
     ko_changed(value) {
-        // value is a string !
-        value = parseInt(value);
         let ko_values = this.slot_model.kos.values;
         let i_ko = ko_values.indexOf(value);
         let ko_ids = this.slot_model.kos.ids;

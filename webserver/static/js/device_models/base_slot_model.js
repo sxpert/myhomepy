@@ -28,7 +28,7 @@ export class Base_Slot_Model {
                     // add nonexistent values
                     var v = this.values[field.var_name];
                     // generate default
-                    var default_value = null;
+                    var default_value = field.default_value;
                     if(v===undefined) {
                         if (field.access=='array') v = [];
                         else v = default_value;
@@ -136,6 +136,16 @@ export class Base_Slot_Model {
                     ok = index >= 0;
                     value = ok?list.ids[index]:value;
                     break;
+                case 'TEMP': 
+                    value = parseFloat(value); 
+                    if (isNaN(value)) value=undefined;
+                    else {
+                        switch(field.field_type_detail) {
+                            case 'temp_*_2': value = Math.round(value*2)/2; break;
+                        }
+                    }
+                    ok = true;
+                    break;
                 default:
                     console.log('Base_Slot_Model::set_value', name, value, 'ERROR')
                     console.log('unhandled field type', f);
@@ -158,11 +168,6 @@ export class Base_Slot_Model {
             }
                 return ok;
         }
-        // in case we can't find the appropriate variable...
-        // } else {
-        //     console.log('Base_Slot_Model.set_value : unable to find name', name);
-        //     console.log(ko_name, names, index)
-        // }
         return false;
     };
 }
