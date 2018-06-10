@@ -257,18 +257,30 @@ class DeviceDatabase(object):
             return None
         return ko_data[0]
 
+    def cast_value(self, field_type, default):
+        if default is None: return default
+        if field_type=='BOOL': 
+            if default is None: return False
+            if default.lower() in ('true', 't', '1',): return True
+            if default.lower() in ('false', 'f', '0',): return False
+            return False
+        if field_type=='TEMP':
+            return float(default)
+        # catch all...
+        return default
+
     def get_params_for_ko(self, ko_value):
         """
         """
         c = self.conn.cursor()
-        sql = 'select "order", cond, disp, access, type, type_info, tab, ' \
+        sql = 'select "order", cond, disp, access, type, type_info, def_val, tab, ' \
               'var_name, array_index, description from ko_params ' \
               'where ko=? order by "order";'
         c.execute(sql, [ko_value])
         params = c.fetchall()
         data = []
         for p in params:
-            order, cond, disp, access, field_type, field_type_detail, tab, var_name, array_index, description = p
+            order, cond, disp, access, field_type, field_type_detail, def_val, tab, var_name, array_index, description = p
             val = {}
             val['order'] = order
             val['cond'] = cond
@@ -276,6 +288,7 @@ class DeviceDatabase(object):
             val['access'] = access
             val['field_type'] = field_type
             val['field_type_detail'] = field_type_detail
+            val['default_value'] = self.cast_value(field_type, def_val)
             val['tab'] = tab
             val['var_name'] = var_name
             val['array_index'] = array_index

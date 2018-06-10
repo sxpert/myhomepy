@@ -9,6 +9,9 @@ export class Base_Slot_Field_View {
     set on_change(func) {
         this._on_change = func;
     };
+    _value_changed(val) {
+        this._on_change(val);
+    }
     create_label_element() {
         let el = document.createElement('label');
         el.classList.add('device-slot-label');

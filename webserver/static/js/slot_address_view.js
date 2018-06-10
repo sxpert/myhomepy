@@ -29,13 +29,14 @@ export class Slot_Address_View extends slot_field.Base_Slot_Field_View {
                 let a = field._a_input.value;
                 let pl = field._pl_input.value;
                 let val= {a: a, pl: pl};
-                field._on_change(val);
+                field._value_changed(val);
             }
         });
         return el;
     };
     set value(value) {
         if (value===undefined) return;
+        if (value===null) return;
         if (value.a===undefined) return;
         if (value.pl===undefined) return;
         this._a_input.value = value.a;

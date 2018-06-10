@@ -1,6 +1,13 @@
 export class Base_Slot_Model {
     constructor(data) {
         this._on_value_updated =null
+
+        let values = data.values;
+        if (values!==undefined) 
+            this.values = values;
+        else
+            this.values = {};
+
         let options = data.options;
         if (options!==undefined) {
             this.conds = options.conds;
@@ -13,21 +20,27 @@ export class Base_Slot_Model {
         // generate all field names
         this.names = {};
         if (this.fields!==null) {
-            for(var i_ko=0; i_ko<this.kos.ids.length; i_ko++) {
+            for(let ko_id of this.kos.ids) {  
                 let ko_names = []
-                let ko_id = this.kos.ids[i_ko]
                 let fields = this.fields[ko_id]
-                for(var f=0; f<fields.length; f++){
-                    ko_names[f] = this.generate_field_name(fields[f]);
+                for(let field of fields) {
+                    ko_names.push(this.generate_field_name(field));
+                    // add nonexistent values
+                    var v = this.values[field.var_name];
+                    // generate default
+                    var default_value = null;
+                    if(v===undefined) {
+                        if (field.access=='array') v = [];
+                        else v = default_value;
+                    }
+                    if ((Array.isArray(v))&&(field.access=='array')) {
+                        if (v[field.array_index]===undefined) v[field.array_index]=default_value;
+                    }
+                    this.values[field.var_name] = v;
                 }
                 this.names[ko_id] = ko_names;
             }
         }
-        let values = data.values;
-        if (values!==undefined) 
-            this.values = data.values;
-        else
-            this.values = null;
     };
     set on_value_updated(func) {
         this._on_value_updated = func;
@@ -36,9 +49,7 @@ export class Base_Slot_Model {
         return this.values;
     }
     update(data) {
-        let keys = Object.keys(data.values);
-        for(var k=0; k<keys.length; k++) {
-            let key = keys[k];
+        for(let key in data.values) {
             this.set_value(key, data.values[key]);
         }
     }
@@ -46,6 +57,29 @@ export class Base_Slot_Model {
         var name = field.access+'_'+field.var_name;
         if (field.array_index!==null) name += '_'+field.array_index
         return name
+    }
+    get_value_for_field(field) {
+        let var_name = field.var_name;
+        let v = this.values[var_name]
+        let access = field.access;
+        if (access=='array') {
+            if (v!==undefined) v = v[field.array_index];
+            if (v===null) v = undefined;
+        }
+        let field_type = field.field_type;
+        switch (field_type) {
+            case 'LIST': 
+                let list = this.lists[field.field_type_detail];
+                let index = list.ids.indexOf(v);
+                if (index>=0) v = list.values[index];
+                else v = undefined;
+                break;
+        }
+        if(v===undefined) {
+            v = field.default_value
+            console.log(field.var_name, 'default => value', v);
+        }
+        return v;
     }
     get_value(name) {
         if (name=='KO') {
@@ -58,38 +92,16 @@ export class Base_Slot_Model {
         let names = this.names[ko_name];
         let index = names.indexOf(name);
         if (index>=0) {
-            let field = this.fields[ko_name][index];
-            let var_name = field.var_name;
-            let v = this.values[var_name]
-            let access = field.access;
-            if (access=='array') {
-                if (v!==undefined) v = v[field.array_index];
-                if (v===null) v = undefined;
+            return this.get_value_for_field(this.fields[ko_name][index])
+        } else {
+            // find if this name exist in other kos
+            for(var ko_id in this.names) {
+                let index = this.names[ko_id].indexOf(name);
+                if (index>=0)
+                    return this.get_value_for_field(this.fields[ko_id][index])
             }
-            let field_type = field.field_type;
-            switch (field_type) {
-                case 'LIST': 
-                    console.log(v);
-                    let list = this.lists[field.field_type_detail];
-                    index = list.ids.indexOf(v);
-                    if (index>=0) v = list.values[index];
-                    else v = undefined;
-                    console.log(v);
-                    break;
-            }
-            return v;
         }
-        // should return default values...
-        // } else {
-        //     console.log('Base_Slot_Model.get_value : unable to find name', name);
-        //     console.log(ko_name, names, index)
-        // }
         return undefined;
-        //                 case 'address': v = {a:0, pl:1}; break;
-        //                 case 'area': v = 0; break;
-        //                 case 'group': v = 1; break;
-        //                 case 'int': v = values[1]; break;
-        //                 case 'list': v = (values[1]!==null) ? values[1].values[0] : null; break;
     };
     set_value(name, value) {
         if (name=='KO') {
@@ -143,8 +155,7 @@ export class Base_Slot_Model {
                 if (this._on_value_updated!==null)
                     this._on_value_updated(name);
             }
-            console.log(this.values);
-            return ok;
+                return ok;
         }
         // in case we can't find the appropriate variable...
         // } else {

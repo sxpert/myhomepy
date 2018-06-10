@@ -13,7 +13,7 @@ export class Slot_Area_View  extends slot_field.Base_Slot_Field_View {
         el.addEventListener('change', event => {
             if (field._on_change!==null) {
                 let val = el.value;
-                field._on_change(val);
+                field._value_changed(val);
             }
         });
         return el;
