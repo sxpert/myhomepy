@@ -119,6 +119,7 @@ export class Base_Slot_Model {
             // check validity
             var ok = false;
             switch(field.field_type) {
+                case 'BOOL': if ((value===true)||(value===false)) ok=true; break;
                 case 'INTEGER':
                     value = parseInt(value);
                     if (value===NaN) value=undefined;

@@ -2,6 +2,7 @@ import * as slot_view from './slot_view.js';
 import * as ko_view from './ko_view.js';
 import * as address_view from './slot_address_view.js';
 import * as area_view from './slot_area_view.js';
+import * as bool_view from './slot_bool_view.js';
 import * as group_view from './slot_group_view.js';
 import * as integer_view from './slot_integer_view.js';
 import * as select_view from './slot_select_view.js';
@@ -53,17 +54,18 @@ export class Slot_Controller {
                 switch(field.field_type) {
                     case 'ADDRESS':
                         field_view = new address_view.Slot_Address_View();
-                        field_view.label = field.description;
+                        field_view.value = current;
+                        break;
+                    case 'BOOL':
+                        field_view = new bool_view.Slot_Bool_View();
                         field_view.value = current;
                         break;
                     case 'INTEGER':
                         field_view = new integer_view.Slot_Integer_View();
-                        field_view.label = field.description;
                         field_view.value = current;
                         break;
                     case 'LIST':
                         field_view = new select_view.Slot_Select_View();
-                        field_view.label = field.description;
                         let list = model.lists[field.field_type_detail];
                         for(var o=0; o<list.values.length; o++) {
                             field_view.append_option(list.values[o], list.names[o], list.values[o]==current);
@@ -74,6 +76,7 @@ export class Slot_Controller {
                         field_view = undefined;
                 };
                 if (field_view!==undefined) {
+                    field_view.label = field.description;
                     let controller=this;
                     field_view.on_change = function (value) {
                         controller.field_changed(name, value);
