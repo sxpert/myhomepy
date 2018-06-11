@@ -222,9 +222,10 @@ class Devices(object):
         self.log('Devices.res_ko_sys : no active device', LOG_INFO)
         return False
 
-    def eot_event(self, command, matches):
+    def res_trans_end(self):
         # if we have an active device, just reply true
         if self._active_device is not None:
+            # nothing to do here, wait for more info...
             return True
         # no active device, reply false
         self.log('Devices.eot_event : no active device', LOG_INFO)

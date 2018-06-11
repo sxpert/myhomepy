@@ -10,26 +10,66 @@ __fname__ = lambda n=0: sys._getframe(n + 1).f_code.co_name
 class DiagScannable(OWNSubSystem):
     SYSTEM_IS_SCANNABLE = True
 
-    # scan ops
-    OP_CMD_DIAG_ID = 0
-    # config ops
-    OP_CMD_CONF_ID = 10
+    OP_CMD_CONF_END =       2
+    OP_CMD_CONF_ABORT =     3
+    OP_CMD_DIAG_ABORT =     6
+    OP_CMD_CONF_ID =        9
+    OP_CMD_DIAG_ID =       10
+    OP_CMD_SCAN_CHECK =    11
+    OP_CMD_RESET =         12
+    OP_CMD_RESET_ALL_KO =  14
+    OP_CMD_RESET_KO =     114
+    OP_RES_CONF_OK =       52
+    OP_RES_TRANS_END =   1004
+    OP_RES_KO_VALUE =    1030
+    OP_RES_KO_SYS =      1032
+    OP_RES_PARAM_KO =    1035
+    OP_CMD_KO_VALUE =    1130
+    OP_CMD_KO_SYS =      1132
+    OP_CMD_PARAM_KO =    1135
 
     SCAN_CALLBACKS = {
-        'CMD_CONF_ID': OP_CMD_CONF_ID,
-        'CMD_DIAG_ID': OP_CMD_DIAG_ID,
+        'CMD_CONF_END':     OP_CMD_CONF_END,
+        'CMD_CONF_ABORT':   OP_CMD_CONF_ABORT,
+        'CMD_DIAG_ABORT':   OP_CMD_DIAG_ABORT,
+        'CMD_CONF_ID':      OP_CMD_CONF_ID,
+        'CMD_DIAG_ID':      OP_CMD_DIAG_ID,
+        'CMD_SCAN_CHECK':   OP_CMD_SCAN_CHECK,
+        'CMD_RESET':        OP_CMD_RESET,
+        'CMD_RESET_ALL_KO': OP_CMD_RESET_ALL_KO,
+        'CMD_RESET_KO':     OP_CMD_RESET_KO,
+        'RES_CONF_OK':      OP_RES_CONF_OK,
+
+        'RES_TRANS_END':    OP_RES_TRANS_END,
+        'RES_KO_VALUE':     OP_RES_KO_VALUE,
+        'RES_KO_SYS':       OP_RES_KO_SYS,
+        'RES_PARAM_KO':     OP_RES_PARAM_KO,
+        'RES_CONF_OK':      OP_RES_CONF_OK,
+        'CMD_KO_VALUE':     OP_CMD_KO_VALUE,
+        'CMD_KO_SYS':       OP_CMD_KO_SYS,
+        'CMD_PARAM_KO':     OP_CMD_PARAM_KO,
     }
 
     SCAN_REGEXPS = {
         'COMMAND': [
+
+            # cmd_conf_end
+            # programmer send end of configuration
+            # *[WHO]*2*0##
+            {
+                'name': 'CMD_CONF_END',
+                're': r'^\*2\*0##$',
+                'func': 'diag_cmd_conf_end'
+            },
+
             # cmd_conf_abort
             # device abort configuration
             # *[who]*3*0##
-            # in reality : the gateway is busy doing stuff on the bus, probably...
+            # Note: in reality : the gateway is busy doing stuff on the bus, probably...
             {
                 'name': 'CMD_CONF_ABORT',
                 're': r'^\*3\*0##$', 
-                'func': '_diag_busy'
+                'func': 'diag_cmd_conf_abort'
             },
 
             # res_trans_end
@@ -38,7 +78,7 @@ class DiagScannable(OWNSubSystem):
             {
                 'name': 'RES_TRANS_END',
                 're': r'^\*4\*(?P<_junk>.*)##$',
-                'func': '_diag_res_trans_end'
+                'func': 'diag_res_trans_end'
             },
 
             # cmd_diag_abort
@@ -47,7 +87,7 @@ class DiagScannable(OWNSubSystem):
             {
                 'name': 'CMD_DIAG_ABORT',
                 're': r'^\*6\*0##$', 
-                'func': '_diag_cmd_diag_abort'
+                'func': 'diag_cmd_diag_abort'
             },
 
             # cmd_conf_id
@@ -55,7 +95,7 @@ class DiagScannable(OWNSubSystem):
             # *[WHO]*9#[ID]*0##
             {
                 'name': 'CMD_CONF_ID',
-                're': r'\*9#(?P<hw_addr>\d{1,10})\*0##',
+                're': r'^\*9#(?P<hw_addr>\d{1,10})\*0##$',
                 'func': 'diag_cmd_conf_id'
             },
 
@@ -65,21 +105,46 @@ class DiagScannable(OWNSubSystem):
             {
                 'name': 'CMD_DIAG_ID',
                 're': r'^\*10#(?P<hw_addr>\d{1,10})\*0##$', 
-                'func': '_diag_cmd_diag_id'
+                'func': 'diag_cmd_diag_id'
             },
 
             # cmd_scan_check
+            # programmer send flag to all the devices found
+            # *[WHO]*11#[ID]*0##
             {
                 'name': 'CMD_SCAN_CHECK',
                 're': r'^\*11#(?P<hw_addr>\d{1,10})\*0##$', 
-                'func': '_cmd_scan_check'
+                'func': 'diag_cmd_scan_check'
             },
 
-            # scanning subsystem reset
+            # cmd_reset
+            # programmer delete from memory the previous scans
+            # *[WHO]*12*0##
             {
                 'name': 'CMD_RESET',
                 're': r'^\*12\*0##$', 
-                'func': '_subsystem_scan_reset'
+                'func': 'diag_cmd_reset'
+            },
+
+            # cmd_reset_all_ko
+            # programmer reset all KO of device
+            # *[WHO]*14#0*0##
+            # cmd_reset_ko
+            # programmer reset a specific KO of device
+            # *[WHO]*14#[SLOT]*0##
+            {
+                'name': 'CMD_RESET_KO',
+                're': r'^\*14#(?P<slot>\d{1,3})\*0##$',
+                'func': 'diag_cmd_reset_ko'
+            },
+
+            # res_conf_ok
+            # device answer configuration ok
+            # *[WHO]*52*[_junk]##
+            {
+                'name': 'RES_CONF_OK',
+                're': r'^\*52\*(?P<_junk>.*)##$',
+                'func': 'diag_res_conf_ok'
             },
 
         ],
@@ -91,7 +156,7 @@ class DiagScannable(OWNSubSystem):
             {
                 'name': 'RES_OBJECT_MODEL',
                 're': r'^\*(?P<virt_id>\d{1,4})\*1\*(?P<model_id>\d{1,3})\*(?P<nb_conf>\d{1,2})\*(?P<brand_id>\d)\*(?P<prod_line>\d)##$',
-                'func': '_diag_res_object_model'
+                'func': 'diag_res_object_model'
             },
 
             # res_fw_version
@@ -109,7 +174,7 @@ class DiagScannable(OWNSubSystem):
             {
                 'name': 'RES_CONF_1_6',
                 're': r'^\*(?P<virt_id>\d{1,4})\*4\*(?P<c1>\d{1,3})\*(?P<c2>\d{1,3})\*(?P<c3>\d{1,3})\*(?P<c4>\d{1,3})\*(?P<c5>\d{1,3})\*(?P<c6>\d{1,3})##$',
-                'func': '_diag_res_conf_1_6'
+                'func': 'diag_res_conf_1_6'
             },
 
             # res_conf_7_12
@@ -118,7 +183,7 @@ class DiagScannable(OWNSubSystem):
             {
                 'name': 'RES_CONF_7_12',
                 're': r'^\*(?P<virt_id>\d{1,4})\*5\*(?P<c7>\d{1,3})\*(?P<c8>\d{1,3})\*(?P<c9>\d{1,3})\*(?P<c10>\d{1,3})\*(?P<c11>\d{1,3})\*(?P<c12>\d{1,3})##$', 
-                'func': '_diag_res_conf_7_12'
+                'func': 'diag_res_conf_7_12'
             },
 
             # res_diag_a
@@ -127,7 +192,7 @@ class DiagScannable(OWNSubSystem):
             {
                 'name': 'RES_DIAG_A',
                 're': r'^\*(?P<virt_id>\d{1,4})\*7\*(?P<diag_bits>[01]{24})##$',
-                'func': '_diag_res_diag_a'
+                'func': 'diag_res_diag_a'
             },
 
             # res_diag_b
@@ -136,7 +201,7 @@ class DiagScannable(OWNSubSystem):
             {
                 'name': 'RES_DIAG_B',
                 're': r'^\*(?P<virt_id>\d{1,4})\*8\*(?P<diag_bits>[01]{24})##$',
-                'func': '_diag_res_diag_b'
+                'func': 'diag_res_diag_b'
             },
 
             # device diagnostics
@@ -144,7 +209,7 @@ class DiagScannable(OWNSubSystem):
             {
                 'name': 'WARN_DEVICE_DIAG',
                 're': r'^\*(?P<virt_id>\d{1,4})\*11\*(?P<diag_bits>[01]{24})##$',
-                'func': '_analyze_diagnostics'
+                'func': 'analyze_diagnostics'
             },
 
             # res_id
@@ -153,7 +218,7 @@ class DiagScannable(OWNSubSystem):
             {
                 'name': 'DIAG_RES_ID',
                 're': r'^\*(?P<virt_id>\d{1,4})\*13\*(?P<hw_addr>\d{1,10})##$',
-                'func': '_diag_res_id'
+                'func': 'diag_res_id'
             },
             # res_ko_value
             # device answers with it's key/object, value and state
@@ -247,95 +312,8 @@ class DiagScannable(OWNSubSystem):
 
     # ---------------------------------------------------------------------
     #
-    # SubSystem-specific functions
+    # helper fuctions
     #
-
-    def _diag_busy(self, matches):
-        return True
-
-    def _diag_res_trans_end(self, matches):
-
-        def end_of_transmission_event():
-            res = self.system.devices.eot_event(self, matches)
-            if not res:
-                self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-                return False
-            return True
-
-        return end_of_transmission_event
-
-    def _diag_cmd_diag_abort(self, matches):
-
-        def end_of_configuration():
-            self.log('Signaling the end of configuration')
-            self.system.devices.end_config_read()
-            self.system.devices.reset_active_device()
-            return True
-
-        return end_of_configuration
-
-    def diag_cmd_conf_id(self, matches):
-        hw_addr = int(matches.get('hw_addr', None))
-
-        def cmd_conf_id():
-            try:
-                res = self.system.devices.cmd_conf_id(hw_addr, self)
-            except Exception as e:
-                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
-                return False
-            else:
-                if not res:
-                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-                return res
-
-        info = {
-            'data': {
-                'hw_addr': hw_addr
-            },
-            'device': None,
-            'order': self.OP_CMD_CONF_ID,
-            'func': cmd_conf_id
-        }
-        return info
-
-    def diag_cmd_diag_id(self, matches):
-        hw_addr = int(matches.get('hw_addr', None))
-        
-        def cmd_diag_id():
-            res = self.system.devices.cmd_diag_id(hw_addr, self)
-            if not res:
-                self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-            return res
-        
-        info = {
-            'data': {
-                'hw_addr': hw_addr 
-            },
-            'device': None,
-            'order': self.OP_CMD_DIAG_ID,
-            'func': cmd_diag_id
-        }
-        return info
-
-    def _cmd_scan_check(self, matches):
-        return True
-
-    def _subsystem_scan_reset(self, matches):
-        # self.log('scan reset for %d subsystem' % self.SYSTEM_WHO)
-        return True
-
-    def _diag_res_object_model(self, matches):
-        _virt_id = matches['virt_id']
-        _model_id = int(matches['model_id'])
-        _nb_conf = int(matches['nb_conf'])
-        _brand_id = int(matches['brand_id'])
-        _prod_line = int(matches['prod_line'])
-        res = self.system.devices.res_object_model(_virt_id, _model_id,
-                                                   _nb_conf, _brand_id,
-                                                   _prod_line)
-        if not res:
-            self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-        return res
 
     def parse_version(self, version):
         if version[-1] != '*':
@@ -357,6 +335,178 @@ class DiagScannable(OWNSubSystem):
                 cur += 1
         return ver
 
+    # ---------------------------------------------------------------------
+    #
+    # SubSystem-specific functions
+    #
+
+    def diag_cmd_conf_end(self, matches):
+        def cmd_conf_end():
+            try:
+                res = self.system.devices.cmd_conf_end()
+            except Exception as e:
+                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
+                return False
+            else:
+                if not res:
+                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
+                return res
+
+        info = {
+            'data': None,
+            'device': None,
+            'order': self.OP_CMD_CONF_END,
+            'func': cmd_conf_end
+        }
+        return info
+
+
+    def diag_cmd_conf_abort(self, matches):
+        """
+        supposedly 'res_gw_busy' but it's rather useless, so we just skip it...
+        """
+        return True
+
+    def diag_res_trans_end(self, matches):
+        def res_trans_end():
+            try:
+                res = self.system.devices.res_trans_end()
+            except Exception as e:
+                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
+                return False
+            else:
+                if not res:
+                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
+                return res
+
+        info = {
+            'data': None,
+            'device': None,
+            'order': self.OP_RES_TRANS_END,
+            'func': res_trans_end
+        }
+        return info
+
+    def diag_cmd_diag_abort(self, matches):
+        """
+        should be named 'res_end_of_diagnostic'
+        """
+        def cmd_diag_abort():
+            self.system.devices.end_config_read()
+            self.system.devices.reset_active_device()
+            return True
+
+        info = {
+            'data': None,
+            'device': None,
+            'order': self.OP_CMD_DIAG_ABORT,
+            'func': cmd_diag_abort
+        }
+        return info
+
+    def diag_cmd_conf_id(self, matches):
+        hw_addr = int(matches.get('hw_addr', None))
+        def cmd_conf_id():
+            try:
+                res = self.system.devices.cmd_conf_id(hw_addr, self)
+            except Exception as e:
+                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
+                return False
+            else:
+                if not res:
+                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
+                return res
+
+        info = {
+            'data': {'hw_addr': hw_addr},
+            'device': None,
+            'order': self.OP_CMD_CONF_ID,
+            'func': cmd_conf_id
+        }
+        return info
+
+    def diag_cmd_diag_id(self, matches):
+        hw_addr = int(matches.get('hw_addr', None))      
+        def cmd_diag_id():
+            res = self.system.devices.cmd_diag_id(hw_addr, self)
+            if not res:
+                self.log('FAILED: %s %s' % (__fname__(), str(matches)))
+            return res
+        
+        info = {
+            'data': {'hw_addr': hw_addr},
+            'device': None,
+            'order': self.OP_CMD_DIAG_ID,
+            'func': cmd_diag_id
+        }
+        return info
+
+    def diag_cmd_scan_check(self, matches):
+        return True
+
+    def diag_cmd_reset(self, matches):
+        # self.log('scan reset for %d subsystem' % self.SYSTEM_WHO)
+        return True
+
+    def diag_cmd_reset_ko(self, matches):
+        slot = int(matches.get('slot', None))
+        op = self.OP_CMD_RESET_KO
+        data = {'slot': slot}
+        if slot == 0: 
+            slot = None
+            data = None
+            op = self.OP_CMD_RESET_ALL_KO
+        def cmd_reset_ko():
+            try:
+                res = self.system.devices.cmd_reset_ko(slot)
+            except Exception as e:
+                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
+                return False
+            else:
+                if not res:
+                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
+                return res
+        info = {
+            'data': data,
+            'device': None,
+            'order': op,
+            'func': cmd_reset_ko
+        }
+        return info
+                
+    def diag_res_conf_ok(self, matches):
+        def res_conf_ok():
+            try:
+                res = self.system.devices.res_conf_ok()
+            except Exception as e:
+                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
+                return False
+            else:
+                if not res:
+                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
+                return res
+
+        info = {
+            'data': None,
+            'device': None,
+            'order': self.OP_RES_CONF_OK,
+            'func': res_conf_ok
+        }
+        return info      
+
+    def diag_res_object_model(self, matches):
+        _virt_id = matches['virt_id']
+        _model_id = int(matches['model_id'])
+        _nb_conf = int(matches['nb_conf'])
+        _brand_id = int(matches['brand_id'])
+        _prod_line = int(matches['prod_line'])
+        res = self.system.devices.res_object_model(_virt_id, _model_id,
+                                                   _nb_conf, _brand_id,
+                                                   _prod_line)
+        if not res:
+            self.log('FAILED: %s %s' % (__fname__(), str(matches)))
+        return res
+
     def diag_res_fw_version(self, matches):
         virt_id = matches['virt_id']
         fw_ver = self.parse_version(matches['fw_version'])
@@ -365,7 +515,7 @@ class DiagScannable(OWNSubSystem):
             self.log('FAILED: %s %s' % (__fname__(), str(matches)))
         return res
 
-    def _diag_res_conf_1_6(self, matches):
+    def diag_res_conf_1_6(self, matches):
         _virt_id = matches['virt_id']
         _c1 = int(matches['c1'])
         _c2 = int(matches['c2'])
@@ -379,7 +529,7 @@ class DiagScannable(OWNSubSystem):
             self.log('FAILED: %s %s' % (__fname__(), str(matches)))
         return res
 
-    def _diag_res_conf_7_12(self, matches):
+    def diag_res_conf_7_12(self, matches):
         _virt_id = matches['virt_id']
         _c7 = int(matches['c7'])
         _c8 = int(matches['c8'])
@@ -393,15 +543,15 @@ class DiagScannable(OWNSubSystem):
             self.log('FAILED: %s %s' % (__fname__(), str(matches)))
         return res
 
-    def _diag_res_diag_a(self, matches):
+    def diag_res_diag_a(self, matches):
         self.log('res_diag_a %s' % (str(matches)))
         return True
 
-    def _analyze_diagnostics(self, matches):
+    def analyze_diagnostics(self, matches):
         self.log('FAILED: %s %s' % (__fname__(), str(matches)))
         return True
 
-    def _diag_res_id(self, matches):
+    def diag_res_id(self, matches):
         # self.log('res_id %s' % str(matches))
         _virt_id = matches['virt_id']
         _hw_addr = matches['hw_addr']
@@ -421,34 +571,62 @@ class DiagScannable(OWNSubSystem):
         slot = int(matches['slot'])
         keyo = int(matches['keyo'])
         state = int(matches['state'])
-
         def res_ko_value():
             res = self.system.devices.res_ko_value(virt_id, slot, keyo, state)
             if not res:
                 self.log('FAILED: %s %s' % (__fname__(), str(matches)))
             return res
-        
-        return res_ko_value
+        info = {
+            'data': {'virt_id': virt_id, 'slot': slot, 'keyo': keyo, 'state': state},
+            'device': None,
+            'order': self.OP_RES_KO_VALUE,
+            'func': res_ko_value
+        }            
+        return info
+
+    def diag_cmd_ko_value(self, matches):
+        slot = int(matches['slot'])
+        keyo = int(matches['keyo'])
+        def cmd_ko_value():
+            try:
+                res = self.system.devices.cmd_ko_value(slot, keyo)
+            except Exception as e:
+                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
+                return False
+            else:
+                if not res:
+                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
+                return res
+        info = {
+            'data': {'slot': slot, 'keyo': keyo},
+            'device': None,
+            'order': self.OP_CMD_KO_VALUE,
+            'func': cmd_ko_value
+        }            
+        return info
 
     def diag_res_ko_sys(self, matches):
         virt_id = matches['virt_id']
         slot = int(matches['slot'])
         sys = int(matches['sys'])
         addr = matches['addr']
-
         def res_ko_sys():
             res = self.system.devices.res_ko_sys(virt_id, slot, sys, addr)
             if not res:
                 self.log('FAILED: %s %s' % (__fname__(), str(matches)))
             return res
-
-        return res_ko_sys
+        info = {
+            'data': {'virt_id': virt_id, 'slot': slot, 'sys': sys, 'addr': addr},
+            'device': None,
+            'order': self.OP_RES_KO_SYS,
+            'func': res_ko_sys
+        }            
+        return info
 
     def diag_cmd_ko_sys(self, matches):
         slot = int(matches['slot'])
         sys = int(matches['sys'])
         addr = matches['addr']
-
         def cmd_ko_sys():
             try:
                 res = self.system.devices.cmd_ko_sys(slot, sys, addr)
@@ -459,15 +637,19 @@ class DiagScannable(OWNSubSystem):
                 if not res:
                     self.log('FAILED: %s %s' % (__fname__(), str(matches)))
                 return res
-            
-        return cmd_ko_sys
+        info = {
+            'data': {'slot': slot, 'sys': sys, 'addr': addr},
+            'device': None,
+            'order': self.OP_CMD_KO_SYS,
+            'func': cmd_ko_sys
+        }            
+        return info
 
     def diag_res_param_ko(self, matches):
         virt_id = matches['virt_id']
         slot = int(matches['slot'])
         index = int(matches['index'])
         value = int(matches['val_par'])
-
         def res_param_ko():
             try:
                 res = self.system.devices.res_param_ko(virt_id, slot, index, value)
@@ -478,14 +660,18 @@ class DiagScannable(OWNSubSystem):
                 if not res:
                     self.log('FAILED: %s %s' % (__fname__(), str(matches)))
                 return res
-
-        return res_param_ko
+        info = {
+            'data': {'virt_id': virt_id, 'slot': slot, 'index': index, 'value': value},
+            'device': None,
+            'order': self.OP_RES_PARAM_KO,
+            'func': res_param_ko
+        }            
+        return info
 
     def diag_cmd_param_ko(self, matches):
         slot = int(matches['slot'])
         index = int(matches['index'])
         value = int(matches['value'])
-
         def cmd_param_ko():
             try:
                 res = self.system.devices.cmd_param_ko(slot, index, value)
@@ -496,5 +682,10 @@ class DiagScannable(OWNSubSystem):
                 if not res:
                     self.log('FAILED: %s %s' % (__fname__(), str(matches)))
                 return res
-
-        return cmd_param_ko
+        info = {
+            'data': {'slot': slot, 'index': index, 'value': value},
+            'device': None,
+            'order': self.OP_CMD_PARAM_KO,
+            'func': cmd_param_ko
+        }            
+        return info
