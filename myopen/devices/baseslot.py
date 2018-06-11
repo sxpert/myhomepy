@@ -257,6 +257,7 @@ class BaseSlot(object):
         if values is None:
             values = self._values
         values[key] = value
+        device_db.log(values)
         return True
 
     def del_value(self, key, values=None):
@@ -342,12 +343,14 @@ class BaseSlot(object):
         device_db.log("cmd_ko_sys: Unable to set %s => %s" % (var_name, str(value)))
         return False
 
-    def do_param_ko(self, index, val_par):
+    def do_param_ko(self, index, val_par, _get_value=None):
+        if _get_value is None:
+            _get_value = self.get_value
         var_name = None
         value = None
 
         # value for F_KO should never be None here !
-        field = device_db.find_field(self.get_value(F_KO, None), index, self.get_value)
+        field = device_db.find_field(_get_value(F_KO, None), index, _get_value)
         if field is not None:
             access_mode, field_type, field_type_detail, var_name, array_index = field
             # should check value
@@ -355,7 +358,7 @@ class BaseSlot(object):
             if ok is not None:
                 if access_mode == 'array':
                     try:
-                        val = self.get_value(var_name, [])
+                        val = _get_value(var_name, [])
                         while len(val) <= array_index:
                             val.append(None)
                         val[array_index] = value
@@ -368,11 +371,11 @@ class BaseSlot(object):
                         value = not value
                 elif access_mode == 'low_8':
                     if value is not None:
-                        val = self.get_value(var_name, 0)
+                        val = _get_value(var_name, 0)
                         value = (val & 0xff00) | (value & 0xff)
                 elif access_mode == 'high_8':
                     if value is not None:
-                        val = self.get_value(var_name, 0)
+                        val = _get_value(var_name, 0)
                         value = ((value << 8) & 0xff00) | (val & 0xff)
                 elif access_mode == 'value':
                     pass
@@ -386,13 +389,13 @@ class BaseSlot(object):
     def res_param_ko(self, index, value):
         var_name, value = self.do_param_ko(index, value)
         if var_name is not None and value is not None:
-            self.set_value(var_name, value)
-        device_db.log(self._values)
-        return True
+            return self.set_value(var_name, value)
+        return False
 
     def cmd_param_ko(self, index, value):
-        var_name, value = self.do_param_ko(index, value)
+        def _get_value(var_name, default_value):
+            return self.get_value(var_name, default_value, self._tmp_values)
+        var_name, value = self.do_param_ko(index, value, _get_value)
         if var_name is not None and value is not None:
-            self.set_value(var_name, value, self._tmp_values)
-        device_db.log(self._tmp_values)
-        return True
+            return self.set_value(var_name, value, self._tmp_values)
+        return False
