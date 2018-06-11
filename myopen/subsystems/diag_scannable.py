@@ -393,9 +393,15 @@ class DiagScannable(OWNSubSystem):
         should be named 'res_end_of_diagnostic'
         """
         def cmd_diag_abort():
-            self.system.devices.end_config_read()
-            self.system.devices.reset_active_device()
-            return True
+            try:
+                res = self.system.devices.cmd_diag_abort()
+            except Exception as e:
+                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
+                return False
+            else:
+                if not res:
+                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
+                return res
         info = {
             'data': None,
             'device': None,
@@ -545,6 +551,10 @@ class DiagScannable(OWNSubSystem):
 
     def diag_res_diag_a(self, matches):
         self.log('res_diag_a %s' % (str(matches)))
+        return True
+
+    def diag_res_diag_b(self, matches):
+        self.log('res_diag_b %s' % (str(matches)))
         return True
 
     def analyze_diagnostics(self, matches):

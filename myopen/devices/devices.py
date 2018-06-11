@@ -181,14 +181,72 @@ class Devices(object):
 
         return True
 
+    def end_config_read(self):
+        if self._active_device is not None:
+            self._active_device.end_config_read()
+        # save configuration
+        self.system.systems.config.save()
+
+    def reset_active_device(self):
+        if self._active_device is not None:
+            # self.log('resetting active device')
+            self._active_device = None
+            self._active_device_caller = None
+            return
+        self.log('there was no active device')
+
+    # ------------------------------------------------------------------------
+    #
+    # config-reactor functions
+    #
+    #
+
+    def cmd_conf_end(self):
+        if self._active_device is not None:
+            self.system.devices.end_config_read()
+            self.system.devices.reset_active_device()
+            return True           
+        self.log('Devices.cmd_conf_end : no active device', LOG_INFO)
+        return False
+
+    def res_trans_end(self):
+        # if we have an active device, just reply true
+        if self._active_device is not None:
+            # nothing to do here, wait for more info...
+            return True
+        # no active device, reply false
+        self.log('Devices.res_trans_end : no active device', LOG_INFO)
+        return False
+
+    def cmd_diag_abort(self):
+        if self._active_device is not None:
+            self.system.devices.end_config_read()
+            self.system.devices.reset_active_device()
+            return True           
+        self.log('Devices.cmd_diag_abort : no active device', LOG_INFO)
+        return False
+
+    def cmd_conf_id(self, hw_addr, caller=None):
+        return self.set_active_device(caller, hw_addr)
+
     def cmd_diag_id(self, hw_addr, caller=None):
         return self.set_active_device(caller, hw_addr)
 
+    def cmd_reset_ko(self, slot):
+        if self._active_device is not None:
+            return self._active_device.cmd_reset_ko(slot)
+        self.log('Devices.cmd_reset_ko : no active device', LOG_INFO)
+        return False
+
+    def cmd_res_conf_ok(self):
+        if self._active_device is not None:
+            return self._active_device.res_conf_ok()
+        self.log('Devices.res_conf_ok : no active device', LOG_INFO)
+        return False
+
     def res_object_model(self, virt_id, model_id, nb_conf, brand_id, prod_line):
         if self._active_device is not None:
-            return self._active_device\
-                .res_object_model(virt_id, model_id,
-                                  nb_conf, brand_id, prod_line)
+            return self._active_device.res_object_model(virt_id, model_id,nb_conf, brand_id, prod_line)
         self.log('Devices.res_object_model : no active device', LOG_INFO)
         return False
 
@@ -210,10 +268,21 @@ class Devices(object):
         self.log('Devices.res_conf_7_12 : no active device', LOG_INFO)
         return False
 
+    # missing: 
+    # res_diag_a
+    # res_diag_b
+    # res_id (register)
+
     def res_ko_value(self, virt_id, slot, keyo, state):
         if self._active_device is not None:
             return self._active_device.res_ko_value(virt_id, slot, keyo, state)
         self.log('Devices.res_ko_value : no active device', LOG_INFO)
+        return False
+
+    def cmd_ko_value(self, slot, keyo):
+        if self._active_device is not None:
+            return self._active_device.cmd_ko_value(slot, keyo)
+        self.log('Devices.cmd_ko_value : no active device', LOG_INFO)
         return False
 
     def res_ko_sys(self, virt_id, slot, sys, addr):
@@ -222,19 +291,15 @@ class Devices(object):
         self.log('Devices.res_ko_sys : no active device', LOG_INFO)
         return False
 
-    def res_trans_end(self):
-        # if we have an active device, just reply true
+    def cmd_ko_sys(self, slot, sys, addr):
         if self._active_device is not None:
-            # nothing to do here, wait for more info...
-            return True
-        # no active device, reply false
-        self.log('Devices.eot_event : no active device', LOG_INFO)
+            return self._active_device.cmd_ko_sys(slot, sys, addr)
+        self.log('Devices.cmd_ko_sys : no active device', LOG_INFO)
         return False
 
     def res_param_ko(self, virt_id, slot, index, val_par):
         if self._active_device is not None:
-            return self._active_device.res_param_ko(virt_id, slot,
-                                                    index, val_par)
+            return self._active_device.res_param_ko(virt_id, slot, index, val_par)
         self.log('Devices.res_param_ko : no active device', LOG_INFO)
         return False
 
@@ -243,17 +308,3 @@ class Devices(object):
             return self._active_device.cmd_param_ko(slot, index, value)
         self.log('Devices.cmd_param_ko : no active device', LOG_INFO)
         return False
-
-    def end_config_read(self):
-        if self._active_device is not None:
-            self._active_device.end_config_read()
-        # save configuration
-        self.system.systems.config.save()
-
-    def reset_active_device(self):
-        if self._active_device is not None:
-            # self.log('resetting active device')
-            self._active_device = None
-            self._active_device_caller = None
-            return
-        self.log('there was no active device')
