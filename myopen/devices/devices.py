@@ -237,6 +237,12 @@ class Devices(object):
         self.log('Devices.res_param_ko : no active device', LOG_INFO)
         return False
 
+    def cmd_param_ko(self, slot, index, value):
+        if self._active_device is not None:
+            return self._active_device.cmd_param_ko(slot, index, value)
+        self.log('Devices.cmd_param_ko : no active device', LOG_INFO)
+        return False
+
     def end_config_read(self):
         if self._active_device is not None:
             self._active_device.end_config_read()

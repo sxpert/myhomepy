@@ -9,25 +9,28 @@ class TempControl(OWNSubSystem):
     SYSTEM_NAME = 'TEMP_CONTROL'
     SYSTEM_WHO = 4
 
-    OP_REPORT_TEMP = 0
+    OP_RES_TEMP_REPORT = 0
 
     SYSTEM_CALLBACKS = {
-        'REPORT_TEMP': OP_REPORT_TEMP,
+        'RES_TEMP_REPORT': OP_RES_TEMP_REPORT,
     }
 
     SYSTEM_REGEXPS = {
         'STATUS': [
-            (r'^\*(?P<probe>\d{3})\*0\*(?P<temperature>\d{4})##$',
-             '_report_temperature')
+            {
+                'name': 'RES_TEMP_REPORT',
+                're': r'^\*(?P<probe>\d{3})\*0\*(?P<temperature>\d{4})##$',
+                'func': 'res_temp_report'
+            }
         ]
     }
 
-    def _report_temperature(self, matches):
-        _zone = int(matches['probe'][0])
-        _sensor = int(matches['probe'][1:])
+    def res_temp_report(self, matches):
+        _zone = int(matches['probe'][1:])
+        _sensor = int(matches['probe'][0])
         _temp = float(matches['temperature'])/10.0
 
-        _order = self.OP_REPORT_TEMP
+        _order = self.OP_RES_TEMP_REPORT 
         _device = {'zone': _zone, 'sensor': _sensor}
         _data = {'temp': _temp, 'unit': '°C'}
         return self.gen_callback_dict(_order, _device, _data)

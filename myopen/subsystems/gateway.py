@@ -20,12 +20,16 @@ class Gateway(OWNSubSystem):
 
     SYSTEM_REGEXPS = {
         'STATUS': [
-            (r'^\*\*#0\*(?P<hour>[0-2][0-9])\*(?P<minute>[0-5][0-9])'
-             r'\*(?P<second>[0-5][0-9])\*(?P<timezone>\d{1,3})##$',
-             ('_time_info', 2, )),
-            (r'^\*\*#1\*(?P<weekday>0[0-6])\*(?P<day>[0-3][0-9])'
-             r'\*(?P<month>[01][0-9])\*(?P<year>\d{4})##$',
-             ('_date_info', 2, )),
+            {   
+                'name': 'RES_TIME_INFO',
+                're': r'^\*\*#0\*(?P<hour>[0-2][0-9])\*(?P<minute>[0-5][0-9])\*(?P<second>[0-5][0-9])\*(?P<timezone>\d{1,3})##$',
+                'func': 'res_time_info' 
+            },
+            {
+                'name': 'RES_DATE_INFO',
+                're': r'^\*\*#1\*(?P<weekday>0[0-6])\*(?P<day>[0-3][0-9])\*(?P<month>[01][0-9])\*(?P<year>\d{4})##$',
+                'func': 'res_date_info'
+            },
         ]
     }
 
@@ -45,7 +49,7 @@ class Gateway(OWNSubSystem):
     # SubSystem-specific functions
     #
 
-    def _time_info(self, msg, matches):
+    def res_time_info(self, msg, matches):
         _hour = int(matches['hour'])
         _minute = int(matches['minute'])
         _second = int(matches['second'])
@@ -64,7 +68,7 @@ class Gateway(OWNSubSystem):
         _data = {'time': _time}
         return self.gen_callback_dict(_order, _device, _data)
 
-    def _date_info(self, msg, matches):
+    def res_date_info(self, msg, matches):
         _day = int(matches['day'])
         _month = int(matches['month'])
         _year = int(matches['year'])
