@@ -49,7 +49,7 @@ class Gateway(OWNSubSystem):
     # SubSystem-specific functions
     #
 
-    def res_time_info(self, msg, matches):
+    def res_time_info(self, matches):
         _hour = int(matches['hour'])
         _minute = int(matches['minute'])
         _second = int(matches['second'])
@@ -68,7 +68,7 @@ class Gateway(OWNSubSystem):
         _data = {'time': _time}
         return self.gen_callback_dict(_order, _device, _data)
 
-    def res_date_info(self, msg, matches):
+    def res_date_info(self, matches):
         _day = int(matches['day'])
         _month = int(matches['month'])
         _year = int(matches['year'])
