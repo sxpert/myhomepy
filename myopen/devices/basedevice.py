@@ -518,6 +518,16 @@ class BaseDevice(object):
     #
     # ========================================================================
    
+    def cmd_reset_ko(self, slot):
+        return self.slots.cmd_reset_ko(slot)
+
+    def res_conf_ok(self):
+        ok = self.slots.res_conf_ok()
+        msg = {}
+        msg['type'] = 'Device'
+        msg['data'] = self.web_data
+        self.devices.system.systems.config.websocket_send(msg)
+        return ok
 
     def res_object_model(self, virt_id, model_id,
                          nb_conf, brand_id, prod_line):
@@ -578,29 +588,41 @@ class BaseDevice(object):
         if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_STRICT):
             return False
         if self.__class__.__name__ == BaseDevice.__name__:
-            self.log('can\'t set keyo and state on a BaseDevice instance')
+            self.log('res_ko_value: can\'t set keyo and state on a BaseDevice instance')
             return False
         return self.slots.res_ko_value(slot, keyo, state)
+
+    def cmd_ko_value(self, slot, keyo):
+        if self.__class__.__name__ == BaseDevice.__name__:
+            self.log('cmd_ko_value: can\'t set keyo and state on a BaseDevice instance')
+            return False
+        return self.slots.cmd_ko_value(slot, keyo)
 
     def res_ko_sys(self, virt_id, slot, sys, addr):
         if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_STRICT):
             return False
         if self.__class__.__name__ == BaseDevice.__name__:
-            self.log('can\'t set sys and addr on a BaseDevice instance')
+            self.log('res_ko_sys: can\'t set sys and addr on a BaseDevice instance')
             return False
         return self.slots.res_ko_sys(slot, sys, addr)
+
+    def cmd_ko_sys(self, slot, sys, addr):
+        if self.__class__.__name__ == BaseDevice.__name__:
+            self.log('cmd_ko_sys: can\'t set sys and addr on a BaseDevice instance')
+            return False
+        return self.slots.cmd_ko_sys(slot, sys, addr)
 
     def res_param_ko(self, virt_id, slot, index, value):
         if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_STRICT):
             return False
         if self.__class__.__name__ == BaseDevice.__name__:
-            self.log('can\'t set parameter on a BaseDevice instance')
+            self.log('res_param_ko: can\'t set parameter on a BaseDevice instance')
             return False
         return self.slots.res_param_ko(slot, index, value)
 
     def cmd_param_ko(self, slot, index, value):
         if self.__class__.__name__ == BaseDevice.__name__:
-            self.log('can\'t set parameter on a BaseDevice instance')
+            self.log('cmd_param_ko: can\'t set parameter on a BaseDevice instance')
             return False
         return self.slots.cmd_param_ko(slot, index, value)
 

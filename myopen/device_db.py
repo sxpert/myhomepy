@@ -219,7 +219,11 @@ class DeviceDatabase(object):
     def export_LIST(self, field_type_detail, value):
         c = self.conn.cursor()
         sql = "select id from lists where list_ref=? and value=?;"
-        c.execute(sql, [field_type_detail, value])
+        try:
+            c.execute(sql, [field_type_detail, value])
+        except Exception as e:
+            # TODO: handle the array case !
+            return self.check_error("DeviceDatabase.export_LIST ERROR: ['%s', '%s'] <%s>" % (str(field_type_detail), str(value), str(e)))
         val = c.fetchall()
         if len(val) != 1:
             return self.check_error("export_LIST: should have only one record here")

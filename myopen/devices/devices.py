@@ -203,6 +203,10 @@ class Devices(object):
 
     def cmd_conf_end(self):
         if self._active_device is not None:
+            try:
+                self._active_device.cmd_conf_end()
+            except Exception:
+                pass
             self.system.devices.end_config_read()
             self.system.devices.reset_active_device()
             return True           
@@ -238,7 +242,7 @@ class Devices(object):
         self.log('Devices.cmd_reset_ko : no active device', LOG_INFO)
         return False
 
-    def cmd_res_conf_ok(self):
+    def res_conf_ok(self): 
         if self._active_device is not None:
             return self._active_device.res_conf_ok()
         self.log('Devices.res_conf_ok : no active device', LOG_INFO)

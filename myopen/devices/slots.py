@@ -21,6 +21,7 @@ class Slots(object):
                 ns = 0
             nb_slots = ns
         self.slots = [None] * nb_slots
+        self.current_slot = None
 
     def __str__(self):
         s = '<Slots (max=%d)' % (self.max_slots)
@@ -159,27 +160,65 @@ class Slots(object):
     # config-reactor functions
     #
     # ========================================================================
+    
+    def _cmd_reset_ko(self, slot):
+        self.log('Slots._cmd_reset_ko resetting slot %s' % (str(slot)), LOG_ERROR)
+        return slot.cmd_reset_ko()
+
+    def cmd_reset_ko(self, sid):
+        ok = True
+        if sid is None:
+            # reset all available slots
+            for slot in self.slots:
+                ok = ok and self._cmd_reset_ko(slot)
+        else:
+            ok = self._cmd_reset_ko(self.ensure_store_slot(sid))
+        return ok
+
+    def res_conf_ok(self):
+        if self.current_slot is not None:
+            return self.current_slot.res_conf_ok()
+        self.log('Slots.res_conf_ok ERROR: there was no current_slot defined', LOG_ERROR)
+        return False
 
     def res_ko_value(self, sid, keyo, state):
         slot = self.ensure_store_slot(sid)
         if slot is False:
             return False
+        self.current_slot = slot
         return slot.res_ko_value(keyo, state)
+
+    def cmd_ko_value(self, sid, keyo):
+        slot = self.ensure_store_slot(sid)
+        if slot is False:
+            return False
+        self.current_slot = slot
+        return slot.cmd_ko_value(keyo)
 
     def res_ko_sys(self, sid, sys, addr):
         slot = self.ensure_store_slot(sid)
         if slot is False:
             return False
+        self.current_slot = slot
         return slot.res_ko_sys(sys, addr)
+
+    def cmd_ko_sys(self, sid, sys, addr):
+        slot = self.ensure_store_slot(sid)
+        if slot is False:
+            return False
+        self.current_slot = slot
+        return slot.cmd_ko_sys(sys, addr)
 
     def res_param_ko(self, sid, index, val_par):
         slot = self.ensure_store_slot(sid)
         if slot is False:
             return False
+        self.current_slot = slot
         return slot.res_param_ko(index, val_par)
 
     def cmd_param_ko(self, sid, index, value):
         slot = self.ensure_store_slot(sid)
         if slot is False:
             return False
+        self.current_slot = slot
         return slot.cmd_param_ko(index, value)

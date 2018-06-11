@@ -24,6 +24,7 @@ class BaseSlot(object):
         self.log = slots.log
         self._slots = slots
         self._values = {}
+        self._tmp_values = None
         self._params = {}
 
     def __str__(self):
@@ -256,6 +257,7 @@ class BaseSlot(object):
         if values is None:
             values = self._values
         values[key] = value
+        return True
 
     def del_value(self, key, values=None):
         if values is None:
@@ -270,24 +272,49 @@ class BaseSlot(object):
     #
     # ========================================================================
 
-    def res_ko_value(self, keyo, state):
+    def cmd_reset_ko(self):
+        if self._tmp_values is None:
+            self._tmp_values = {}
+        else:
+            self.log("BaseSlot.cmd_reset_ko ERROR: _tmp_values was not empty %s" % (self._tmp_values))
+        return True
+
+    def res_conf_ok(self):
+        self.log('BaseSlot.res_conf_ok: %s' % (str(self._tmp_values)), LOG_ERROR)
+        self._values = self._tmp_values
+        self._tmp_values = None
+        return True
+
+    def do_ko_value(self, keyo, state):
         dev = self._slots.parent
         who = dev.subsystem.SYSTEM_WHO
         kos = device_db.find_kos_for_device(who, dev.model_id, dev.fw_version)
         if keyo in kos:
-            self.set_value(F_KO, keyo)
-        else: 
-            # should not happen ;-)
-            self.log("ERROR: invalid KO for object")
-        return True
+            return keyo
+        self.log("BaseSlot.do_ko_value ERROR: invalid KO for object %s" % (str(keyo)))
+        return None
 
-    def res_ko_sys(self, sys, addr):
+    def res_ko_value(self, keyo, state):
+        keyo = self.do_ko_value(keyo, state)
+        if keyo is not None:
+            return self.set_value(F_KO, keyo)
+        self.log("BaseSlot.res_ko_value ERROR: WTF KO is  '%s' ??" % (str(keyo)), LOG_ERROR)
+        return False
+
+    def cmd_ko_value(self, keyo):
+        keyo = self.do_ko_value(keyo, 0)
+        if keyo is not None:
+            return self.set_value(F_KO, keyo, self._tmp_values)
+        self.log("BaseSlot.cmd_ko_value ERROR: WTF KO is  '%s' ??" % (str(keyo)), LOG_ERROR)
+        return False
+
+    def do_ko_sys(self, sys, addr):
         # hah, can't handle addresses all the same way, they are parsed differently
         # between systems !!
         dev = self._slots.parent
         who = dev.subsystem.SYSTEM_WHO
         if sys != who:
-            self.log("ERROR: sys is different from SYSTEM_WHO %d != %d" % (sys, who))
+            self.log("ERROR: sys is different from SYSTEM_WHO %d != %d" % (sys, who), LOG_ERROR)
             # not worth bailing though...
         # not sure this is any useful !
         # get the addr record 
@@ -298,12 +325,22 @@ class BaseSlot(object):
             return False
         _, _, _, field_type, field_type_detail, var_name, _ = addr_rec
         ok, value = device_db.parse_value(addr, field_type, field_type_detail)
+        return (ok, var_name, value,)
+
+    def res_ko_sys(self, sys, addr):
+        ok, var_name, value = self.do_ko_sys(sys, addr)
         if ok:
-            self.set_value(var_name, value)
-        else:
-            device_db.log("res_ko_sys: Unable to set %s => %s" % (var_name, str(value)))
+            return self.set_value(var_name, value)
+        device_db.log("res_ko_sys: Unable to set %s => %s" % (var_name, str(value)))
         device_db.log(self._values)
-        return True
+        return False
+
+    def cmd_ko_sys(self, sys, addr):
+        ok, var_name, value = self.do_ko_sys(sys, addr)
+        if ok:
+            return self.set_value(var_name, value, self._tmp_values)
+        device_db.log("cmd_ko_sys: Unable to set %s => %s" % (var_name, str(value)))
+        return False
 
     def do_param_ko(self, index, val_par):
         var_name = None
@@ -344,17 +381,18 @@ class BaseSlot(object):
                     device_db.log('UNIMPLEMENTED: %s %s' % (str(field), str(value)))
             else:
                 device_db.log("ERROR: value returned is None")
-        device_db.log(self._values)
         return (var_name, value)
 
     def res_param_ko(self, index, value):
         var_name, value = self.do_param_ko(index, value)
         if var_name is not None and value is not None:
             self.set_value(var_name, value)
+        device_db.log(self._values)
         return True
 
     def cmd_param_ko(self, index, value):
         var_name, value = self.do_param_ko(index, value)
         if var_name is not None and value is not None:
-            self.set_value(var_name, value)
+            self.set_value(var_name, value, self._tmp_values)
+        device_db.log(self._tmp_values)
         return True

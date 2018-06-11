@@ -98,7 +98,9 @@ class OWNSubSystem(object):
             try:
                 res = _func()
             except Exception as e:
-                self.log('Message.dispatch (callback) FAILED: %s [%s]' % (_func.__name__, str(e)), LOG_ERROR)
+                self.log('OWNSubSystem.do_callback (callback) FAILED: %s [%s]' % (_func.__name__, str(e)), LOG_ERROR)
+                import traceback
+                traceback.print_exc()
             else:
                 if not res:
                     self.log("SubSystem.do_callback WARNING: %s returned False" % (str(_func)))

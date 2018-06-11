@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
-import threading
+import asyncio
 
 import core.core_json_encoder as cje
 from core.logger import (get_logger, LOG_INFO, COLOR_YELLOW)
@@ -103,7 +103,7 @@ class Config(object):
         """
         Dispatches messages to all registered websocket queues
         """
-        self.log('Config.websocket_dispatch %s %s' % (str(msg.system.id), str(msg)))
+        self.log('Config.websocket_dispatch %s' % (str(msg)))
         for ws in self._websockets:
             # don't send if the websocket is closing...
             if not ws.closed:
@@ -114,6 +114,10 @@ class Config(object):
                     await ws.send_json(msg)
                 except TypeError:
                     self.log('ERROR: %s can\'t be converted to json' % (str(msg)))
+
+    def websocket_send(self, msg):
+        loop = asyncio.get_event_loop()
+        asyncio.ensure_future(self.websocket_dispatch(msg), loop=loop)
 
     def websocket_register(self, ws):
         """
