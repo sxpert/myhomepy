@@ -12,6 +12,7 @@ class TempControl(OWNSubSystem):
     OP_RES_TEMP_REPORT = 0
 
     SYSTEM_CALLBACKS = {
+        'REPORT_TEMP': OP_RES_TEMP_REPORT,
         'RES_TEMP_REPORT': OP_RES_TEMP_REPORT,
     }
 

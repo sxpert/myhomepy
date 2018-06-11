@@ -104,7 +104,11 @@ class OWNSubSystem(object):
                 # can't map it, no problem
                 self.log('Subsystem.map_callback %d-%d-%s' % (who, order, str(dev)), LOG_INFO)
                 return None
-            ck = "%d-%d-%s" % (who, order, dev)
+            try:
+                ck = "%d-%d-%s" % (who, order, dev)
+            except Exception as e:
+                self.log('OWNSubSystem.map_callback unable to generate mapping \'%s\' \'%s\' \'%s\' [%s]' % (str(who), str(order), str(dev), str(e)))
+                return None
             self.log('OWNSubSystem.map_callback %s' % (ck), LOG_INFO)
             return ck
         self.log("ERROR: Can't call %s.map_callback" % (

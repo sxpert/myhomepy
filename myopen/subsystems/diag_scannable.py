@@ -34,6 +34,7 @@ class DiagScannable(OWNSubSystem):
         'CMD_CONF_ABORT':   OP_CMD_CONF_ABORT,
         'CMD_DIAG_ABORT':   OP_CMD_DIAG_ABORT,
         'CMD_CONF_ID':      OP_CMD_CONF_ID,
+        'SCAN_CMD_DIAG_ID': OP_CMD_DIAG_ID,
         'CMD_DIAG_ID':      OP_CMD_DIAG_ID,
         'CMD_SCAN_CHECK':   OP_CMD_SCAN_CHECK,
         'CMD_RESET':        OP_CMD_RESET,
