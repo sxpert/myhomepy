@@ -518,15 +518,18 @@ class BaseDevice(object):
     #
     # ========================================================================
    
+    def cmd_conf_end(self):
+        msg = {}
+        msg['type'] = 'Device'
+        msg['data'] = self.web_data
+        self.devices.system.systems.config.websocket_send(msg)
+        return True
+
     def cmd_reset_ko(self, slot):
         return self.slots.cmd_reset_ko(slot)
 
     def res_conf_ok(self):
         ok = self.slots.res_conf_ok()
-        msg = {}
-        msg['type'] = 'Device'
-        msg['data'] = self.web_data
-        self.devices.system.systems.config.websocket_send(msg)
         return ok
 
     def res_object_model(self, virt_id, model_id,
