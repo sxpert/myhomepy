@@ -5,7 +5,7 @@ from ..constants import (
     VAR_KOS, VAR_MODE_IDS, VAR_PARAMS_KEY, )
 from .dev_utils import map_value
 from core.logger import LOG_ERROR 
-from myopen.conf_db import device_db
+from myopen.device_db import device_db
 
 __all__ = ['F_KO', 'MissingFieldsDefinitionError', 'BaseSlot', ]
 
