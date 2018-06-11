@@ -332,7 +332,8 @@ class DeviceDatabase(object):
         c.execute(sql, [integer_name])
         val = c.fetchall()
         if len(val) != 1:
-            self.log('get_integer_details ERROR: expected only 1 record')
+            self.log('get_integer_details ERROR: expected only 1 record (%s)' % (str(integer_name)))
+            self.log(val)
             return None
         val_min, val_max = val[0]
         data = {}

@@ -154,8 +154,9 @@ class BaseSlot(object):
             dev = self._slots.parent
             who = dev.subsystem.SYSTEM_WHO
             kos = device_db.find_symbolic_kos_for_device(who, dev.model_id, dev.fw_version)
+            # KO should be a symbol
             if ko not in kos:
-                device_db.log("BaseSlot.loads ERROR: invalid KO %d for object" % ko)
+                device_db.log("BaseSlot.loads ERROR: invalid KO %s for object" % str(ko))
                 return False
             ko_value, width = kos[ko]    
             if self.number + width > len(dev.slots):
