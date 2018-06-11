@@ -222,9 +222,10 @@ class Devices(object):
         self.log('Devices.res_ko_sys : no active device', LOG_INFO)
         return False
 
-    def eot_event(self, command, matches):
+    def res_trans_end(self):
         # if we have an active device, just reply true
         if self._active_device is not None:
+            # nothing to do here, wait for more info...
             return True
         # no active device, reply false
         self.log('Devices.eot_event : no active device', LOG_INFO)
@@ -235,6 +236,12 @@ class Devices(object):
             return self._active_device.res_param_ko(virt_id, slot,
                                                     index, val_par)
         self.log('Devices.res_param_ko : no active device', LOG_INFO)
+        return False
+
+    def cmd_param_ko(self, slot, index, value):
+        if self._active_device is not None:
+            return self._active_device.cmd_param_ko(slot, index, value)
+        self.log('Devices.cmd_param_ko : no active device', LOG_INFO)
         return False
 
     def end_config_read(self):

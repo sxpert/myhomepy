@@ -63,7 +63,7 @@ export class Base_Slot_Model {
         let v = this.values[var_name]
         let access = field.access;
         if (access=='array') {
-            if (v!==undefined) v = v[field.array_index];
+            if ((v!==undefined)&&(v!==null)) v = v[field.array_index];
             if (v===null) v = undefined;
         }
         let field_type = field.field_type;

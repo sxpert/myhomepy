@@ -177,3 +177,9 @@ class Slots(object):
         if slot is False:
             return False
         return slot.res_param_ko(index, val_par)
+
+    def cmd_param_ko(self, sid, index, value):
+        slot = self.ensure_store_slot(sid)
+        if slot is False:
+            return False
+        return slot.cmd_param_ko(index, value)

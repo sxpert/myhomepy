@@ -583,13 +583,19 @@ class BaseDevice(object):
             return False
         return self.slots.res_ko_sys(slot, sys, addr)
 
-    def res_param_ko(self, virt_id, slot, index, val_par):
+    def res_param_ko(self, virt_id, slot, index, value):
         if not self._virt_id_check(virt_id, self._VIRT_ID_CHECK_STRICT):
             return False
         if self.__class__.__name__ == BaseDevice.__name__:
             self.log('can\'t set parameter on a BaseDevice instance')
             return False
-        return self.slots.res_param_ko(slot, index, val_par)
+        return self.slots.res_param_ko(slot, index, value)
+
+    def cmd_param_ko(self, slot, index, value):
+        if self.__class__.__name__ == BaseDevice.__name__:
+            self.log('can\'t set parameter on a BaseDevice instance')
+            return False
+        return self.slots.cmd_param_ko(slot, index, value)
 
     def end_config_read(self):
         self._discovery = False

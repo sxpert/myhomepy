@@ -5,7 +5,7 @@ from ..constants import (
     VAR_KOS, VAR_MODE_IDS, VAR_PARAMS_KEY, )
 from .dev_utils import map_value
 from core.logger import LOG_ERROR 
-from myopen.conf_db import device_db
+from myopen.device_db import device_db
 
 __all__ = ['F_KO', 'MissingFieldsDefinitionError', 'BaseSlot', ]
 
@@ -305,7 +305,10 @@ class BaseSlot(object):
         device_db.log(self._values)
         return True
 
-    def res_param_ko(self, index, val_par):
+    def do_param_ko(self, index, val_par):
+        var_name = None
+        value = None
+
         # value for F_KO should never be None here !
         field = device_db.find_field(self.get_value(F_KO, None), index, self.get_value)
         if field is not None:
@@ -319,30 +322,39 @@ class BaseSlot(object):
                         while len(val) <= array_index:
                             val.append(None)
                         val[array_index] = value
-                        self.set_value(var_name, val)
+                        value = val
                     except:
                         import traceback
                         traceback.print_exc()
                 elif access_mode == 'bool_invert':
                     if value is not None:
-                        self.set_value(var_name, not value)
+                        value = not value
                 elif access_mode == 'low_8':
                     if value is not None:
                         val = self.get_value(var_name, 0)
-                        n_value = (val & 0xff00) | (value & 0xff)
-                        self.set_value(var_name, n_value) 
+                        value = (val & 0xff00) | (value & 0xff)
                 elif access_mode == 'high_8':
                     if value is not None:
                         val = self.get_value(var_name, 0)
-                        n_value = ((value << 8) & 0xff00) | (val & 0xff)
-                        self.set_value(var_name, n_value)
+                        value = ((value << 8) & 0xff00) | (val & 0xff)
                 elif access_mode == 'value':
-                    if value is not None:
-                        self.set_value(var_name, value)
+                    pass
                 else:
                     # more complicated modes
                     device_db.log('UNIMPLEMENTED: %s %s' % (str(field), str(value)))
             else:
                 device_db.log("ERROR: value returned is None")
         device_db.log(self._values)
+        return (var_name, value)
+
+    def res_param_ko(self, index, value):
+        var_name, value = self.do_param_ko(index, value)
+        if var_name is not None and value is not None:
+            self.set_value(var_name, value)
+        return True
+
+    def cmd_param_ko(self, index, value):
+        var_name, value = self.do_param_ko(index, value)
+        if var_name is not None and value is not None:
+            self.set_value(var_name, value)
         return True
