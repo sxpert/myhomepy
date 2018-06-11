@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-
 import re
+import sys
 from datetime import datetime, timezone
 
 from core.logger import LOG_ERROR, LOG_INFO
@@ -240,6 +240,10 @@ class Message(object):
         if isinstance(self._fields, bool):
             return self._fields
         if callable(self._fields):
-            return self._fields()
+            try:
+                return self._fields()
+            except Exception as e:
+                self.log('Message.dispatch (fields) FAILED: %s [%s]' % (sys._getframe(1).f_code.co_name, str(e)), LOG_ERROR)
+                return False
         if self._fields is not None:
             return self.subsystem.do_callback(self._fields)

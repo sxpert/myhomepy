@@ -483,7 +483,7 @@ class BaseDevice(object):
 
     # ========================================================================
     #
-    # callbacks used by the configuration system in the bus
+    # helper functions
     #
     # ========================================================================
 
@@ -511,6 +511,13 @@ class BaseDevice(object):
             if mss is self.subsystem and mid == model_id:
                 return dt
         return None
+
+    # ========================================================================
+    #
+    # config-reactor functions
+    #
+    # ========================================================================
+   
 
     def res_object_model(self, virt_id, model_id,
                          nb_conf, brand_id, prod_line):

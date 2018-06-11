@@ -2,8 +2,9 @@
 
 import json
 import re
+import sys
 
-from core.logger import LOG_INFO, COLOR_LT_RED, get_logger
+from core.logger import COLOR_LT_RED, LOG_ERROR, LOG_INFO, get_logger
 
 
 class OWNSubSystem(object):
@@ -68,6 +69,18 @@ class OWNSubSystem(object):
 
     # ---------------------------------------------------------------------
     #
+    # utilities
+    #
+
+    def check_result(self, result, matches, if_fail=None):
+        if not result:
+            self.log('FAILED: %s %s' % (sys._getframe(1).f_code.co_name, str(matches)), LOG_ERROR)
+            if if_fail is not None:
+                return if_fail
+        return result
+        
+    # ---------------------------------------------------------------------
+    #
     # Callback stuff
     #
 
@@ -82,9 +95,13 @@ class OWNSubSystem(object):
         self.log('SubSystem.do_callback %s' % (str(cb_data)))
         _func = cb_data.get('func', None)
         if _func is not None and callable(_func):
-            res = _func()
-            if not res:
-                self.log("SubSystem.do_callback WARNING: %s returned False" % (str(_func)))
+            try:
+                res = _func()
+            except Exception as e:
+                self.log('Message.dispatch (callback) FAILED: %s [%s]' % (_func.__name__, str(e)), LOG_ERROR)
+            else:
+                if not res:
+                    self.log("SubSystem.do_callback WARNING: %s returned False" % (str(_func)))
         _command = cb_data.get('order', None)
         _device = cb_data.get('device', None)
         _data = cb_data.get('data', None)

@@ -26,7 +26,7 @@ class Automator(object):
         print(context)
 
     def run(self):
-        SYSTEM_LOGGER.level = LOG_INFO
+        SYSTEM_LOGGER.level = LOG_ERROR
         SYSTEM_LOGGER.logfile = 'myopen.log'
         self.loop = asyncio.get_event_loop()
         logging.basicConfig(level=logging.DEBUG)

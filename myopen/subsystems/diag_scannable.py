@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-import sys
 
 from core.logger import LOG_ERROR
 
 from .subsystem import OWNSubSystem
 
-__fname__ = lambda n=0: sys._getframe(n + 1).f_code.co_name
 
 class DiagScannable(OWNSubSystem):
     SYSTEM_IS_SCANNABLE = True
@@ -345,15 +343,7 @@ class DiagScannable(OWNSubSystem):
 
     def diag_cmd_conf_end(self, matches):
         def cmd_conf_end():
-            try:
-                res = self.system.devices.cmd_conf_end()
-            except Exception as e:
-                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
-                return False
-            else:
-                if not res:
-                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-                return res
+            return self.check_result(self.system.devices.cmd_conf_end(), matches)
         info = {
             'data': None,
             'device': None,
@@ -371,15 +361,7 @@ class DiagScannable(OWNSubSystem):
 
     def diag_res_trans_end(self, matches):
         def res_trans_end():
-            try:
-                res = self.system.devices.res_trans_end()
-            except Exception as e:
-                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
-                return False
-            else:
-                if not res:
-                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-                return res
+            return self.check_result(self.system.devices.res_trans_end(), matches)
         info = {
             'data': None,
             'device': None,
@@ -393,15 +375,7 @@ class DiagScannable(OWNSubSystem):
         should be named 'res_end_of_diagnostic'
         """
         def cmd_diag_abort():
-            try:
-                res = self.system.devices.cmd_diag_abort()
-            except Exception as e:
-                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
-                return False
-            else:
-                if not res:
-                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-                return res
+            return self.check_result(self.system.devices.cmd_diag_abort(), matches)
         info = {
             'data': None,
             'device': None,
@@ -413,15 +387,7 @@ class DiagScannable(OWNSubSystem):
     def diag_cmd_conf_id(self, matches):
         hw_addr = int(matches.get('hw_addr', None))
         def cmd_conf_id():
-            try:
-                res = self.system.devices.cmd_conf_id(hw_addr, self)
-            except Exception as e:
-                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
-                return False
-            else:
-                if not res:
-                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-                return res
+            return self.check_result(self.system.devices.cmd_conf_id(hw_addr, self), matches)
         info = {
             'data': {'hw_addr': hw_addr},
             'device': None,
@@ -433,15 +399,7 @@ class DiagScannable(OWNSubSystem):
     def diag_cmd_diag_id(self, matches):
         hw_addr = int(matches.get('hw_addr', None))      
         def cmd_diag_id():
-            try:
-                res = self.system.devices.cmd_diag_id(hw_addr, self)
-            except Exception as e:
-                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
-                return False
-            else:
-                if not res:
-                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-                return res      
+            return self.check_result(self.system.devices.cmd_diag_id(hw_addr, self), matches)
         info = {
             'data': {'hw_addr': hw_addr},
             'device': None,
@@ -466,15 +424,7 @@ class DiagScannable(OWNSubSystem):
             data = None
             op = self.OP_CMD_RESET_ALL_KO
         def cmd_reset_ko():
-            try:
-                res = self.system.devices.cmd_reset_ko(slot)
-            except Exception as e:
-                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
-                return False
-            else:
-                if not res:
-                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-                return res
+            return self.check_result(self.system.devices.cmd_reset_ko(slot), matches)
         info = {
             'data': data,
             'device': None,
@@ -485,15 +435,7 @@ class DiagScannable(OWNSubSystem):
                 
     def diag_res_conf_ok(self, matches):
         def res_conf_ok():
-            try:
-                res = self.system.devices.res_conf_ok()
-            except Exception as e:
-                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
-                return False
-            else:
-                if not res:
-                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-                return res
+            return self.check_result(self.system.devices.res_conf_ok(), matches)
         info = {
             'data': None,
             'device': None,
@@ -508,18 +450,13 @@ class DiagScannable(OWNSubSystem):
         nb_conf = int(matches['nb_conf'])
         brand_id = int(matches['brand_id'])
         prod_line = int(matches['prod_line'])
-        res = self.system.devices.res_object_model(virt_id, model_id, nb_conf, brand_id, prod_line)
-        if not res:
-            self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-        return res
+        return self.check_result(self.system.devices.res_object_model(
+            virt_id, model_id, nb_conf, brand_id, prod_line), matches)
 
     def diag_res_fw_version(self, matches):
         virt_id = matches['virt_id']
         fw_ver = self.parse_version(matches['fw_version'])
-        res = self.system.devices.res_fw_version(virt_id, fw_ver)
-        if not res:
-            self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-        return res
+        return self.check_result(self.system.devices.res_fw_version(virt_id, fw_ver), matches)
 
     def diag_res_conf_1_6(self, matches):
         virt_id = matches['virt_id']
@@ -530,10 +467,7 @@ class DiagScannable(OWNSubSystem):
         c5 = int(matches['c5'])
         c6 = int(matches['c6'])
         c_1_6 = (c1, c2, c3, c4, c5, c6, )
-        res = self.system.devices.res_conf_1_6(virt_id, c_1_6)
-        if not res:
-            self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-        return res
+        return self.check_result(self.system.devices.res_conf_1_6(virt_id, c_1_6), matches)
 
     def diag_res_conf_7_12(self, matches):
         virt_id = matches['virt_id']
@@ -544,10 +478,7 @@ class DiagScannable(OWNSubSystem):
         c11 = int(matches['c11'])
         c12 = int(matches['c12'])
         c_7_12 = (c7, c8, c9, c10, c11, c12, )
-        res = self.system.devices.res_conf_7_12(virt_id, c_7_12)
-        if not res:
-            self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-        return res
+        return self.check_result(self.system.devices.res_conf_7_12(virt_id, c_7_12), matches)
 
     def diag_res_diag_a(self, matches):
         self.log('res_diag_a %s' % (str(matches)))
@@ -558,24 +489,14 @@ class DiagScannable(OWNSubSystem):
         return True
 
     def analyze_diagnostics(self, matches):
-        self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-        return True
+        return self.check_result(False, matches, True)
 
     def diag_res_id(self, matches):
         virt_id = matches['virt_id']
         hw_addr = matches['hw_addr']
         hw_addr_x = self.system.devices.format_hw_addr(hw_addr)
         def res_id():
-            try:
-                dev = self.system.devices.register(self, matches)
-            except Exception as e:
-                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
-                return False
-            else:
-                if not dev:
-                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-                    return False
-                return True
+            return self.check_result(self.system.devices.register(self, matches), matches, False)
         info = {
             'data': {'virt_id': virt_id, 'hw_addr': hw_addr, 'hw_addr_x': hw_addr_x},
             'device': None,
@@ -590,15 +511,7 @@ class DiagScannable(OWNSubSystem):
         keyo = int(matches['keyo'])
         state = int(matches['state'])
         def res_ko_value():
-            try:
-                res = self.system.devices.res_ko_value(virt_id, slot, keyo, state)
-            except Exception as e:
-                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
-                return False
-            else:
-                if not res:
-                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-                return res
+            return self.check_result(self.system.devices.res_ko_value(virt_id, slot, keyo, state), matches)
         info = {
             'data': {'virt_id': virt_id, 'slot': slot, 'keyo': keyo, 'state': state},
             'device': None,
@@ -611,15 +524,7 @@ class DiagScannable(OWNSubSystem):
         slot = int(matches['slot'])
         keyo = int(matches['keyo'])
         def cmd_ko_value():
-            try:
-                res = self.system.devices.cmd_ko_value(slot, keyo)
-            except Exception as e:
-                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
-                return False
-            else:
-                if not res:
-                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-                return res
+            return self.check_result(self.system.devices.cmd_ko_value(slot, keyo), matches)
         info = {
             'data': {'slot': slot, 'keyo': keyo},
             'device': None,
@@ -634,15 +539,7 @@ class DiagScannable(OWNSubSystem):
         sys = int(matches['sys'])
         addr = matches['addr']
         def res_ko_sys():
-            try:
-                res = self.system.devices.res_ko_sys(virt_id, slot, sys, addr)
-            except Exception as e:
-                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
-                return False
-            else:
-                if not res:
-                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-                return res
+            return self.check_result(self.system.devices.res_ko_sys(virt_id, slot, sys, addr), matches)
         info = {
             'data': {'virt_id': virt_id, 'slot': slot, 'sys': sys, 'addr': addr},
             'device': None,
@@ -656,15 +553,7 @@ class DiagScannable(OWNSubSystem):
         sys = int(matches['sys'])
         addr = matches['addr']
         def cmd_ko_sys():
-            try:
-                res = self.system.devices.cmd_ko_sys(slot, sys, addr)
-            except Exception as e:
-                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
-                return False
-            else:
-                if not res:
-                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-                return res
+            return self.check_result(self.system.devices.cmd_ko_sys(slot, sys, addr), matches)
         info = {
             'data': {'slot': slot, 'sys': sys, 'addr': addr},
             'device': None,
@@ -679,15 +568,7 @@ class DiagScannable(OWNSubSystem):
         index = int(matches['index'])
         value = int(matches['val_par'])
         def res_param_ko():
-            try:
-                res = self.system.devices.res_param_ko(virt_id, slot, index, value)
-            except Exception as e:
-                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
-                return False
-            else:
-                if not res:
-                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-                return res
+            return self.check_result(self.system.devices.res_param_ko(virt_id, slot, index, value), matches)
         info = {
             'data': {'virt_id': virt_id, 'slot': slot, 'index': index, 'value': value},
             'device': None,
@@ -701,15 +582,7 @@ class DiagScannable(OWNSubSystem):
         index = int(matches['index'])
         value = int(matches['value'])
         def cmd_param_ko():
-            try:
-                res = self.system.devices.cmd_param_ko(slot, index, value)
-            except Exception as e:
-                self.log('FAILED: %s [%s]' % (__fname__(), str(e)), LOG_ERROR)
-                return False
-            else:
-                if not res:
-                    self.log('FAILED: %s %s' % (__fname__(), str(matches)))
-                return res
+            return self.check_result(self.system.devices.cmd_param_ko(slot, index, value), matches)
         info = {
             'data': {'slot': slot, 'index': index, 'value': value},
             'device': None,
