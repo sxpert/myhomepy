@@ -61,28 +61,23 @@ export class Base_Slot_Model {
     get_symbolic_value_for_field(field) {
         if (field===undefined) return undefined;
         let var_name = field.var_name;
-        let v = this.values[var_name]
+        let v = this.values[var_name];
         let access = field.access;
         if (access=='array') {
             if ((v!==undefined)&&(v!==null)) v = v[field.array_index];
             if (v===null) v = undefined;
         }
-        if(v===undefined) {
+        if((v===null)||(v===undefined)) {
             v = field.default_value
-            console.log(field.var_name, 'default => value', v);
+            if ((v===null)&&(field.field_type=='LIST')) {
+                let list = this.lists[field.field_type_detail]
+                v = list.ids[0];
+            }
         }
         return v;
     }
     get_value_for_field(field) {
-        // if (field===undefined) return undefined;
-        // let var_name = field.var_name;
-        // let v = this.values[var_name]
-        // let access = field.access;
-        // if (access=='array') {
-        //     if ((v!==undefined)&&(v!==null)) v = v[field.array_index];
-        //     if (v===null) v = undefined;
-        // }
-        var v = this.get_symbolic_value_for_field(field);
+       var v = this.get_symbolic_value_for_field(field);
         let field_type = field.field_type;
         switch (field_type) {
             case 'LIST': 
@@ -92,10 +87,6 @@ export class Base_Slot_Model {
                 else v = undefined;
                 break;
         }
-        // if(v===undefined) {
-        //     v = field.default_value
-        //     console.log(field.var_name, 'default => value', v);
-        // }
         return v;
     };
     get_names() {

@@ -96,19 +96,66 @@ export class Slot_Controller {
         return;
     };
     recurse_conditions(cond) {
+        let debug = false;
         if ((cond === null)||(cond===undefined)) return true;
         if (cond in this.slot_model.conds) {
             let cond_data = this.slot_model.conds[cond];
             let op=cond_data.op;
+            let field_name, field, field_value, cond1, cond2, result;
             switch(op) {
+                case 'FALSE':
+                    field_name = cond_data.field_name;
+                    field = this.slot_model.get_field(field_name);
+                    field_value = this.slot_model.get_symbolic_value_for_field(field);
+                    result = (field_value == false)
+                    if (debug) console.log(op, field_name, field_value, result); 
+                    return result;
+                case 'TRUE':
+                    field_name = cond_data.field_name;
+                    field = this.slot_model.get_field(field_name);
+                    field_value = this.slot_model.get_symbolic_value_for_field(field);
+                    result = (field_value == true)
+                    if (debug) console.log(op, field_name, field_value, result)
+                    return result;
+                case '!=':
+                    field_name = cond_data.field_name;
+                    field = this.slot_model.get_field(field_name);
+                    field_value = this.slot_model.get_symbolic_value_for_field(field);
+                    result = (field_value != cond_data.value)
+                    if(debug) console.log(op, field_name, field_value, cond_data.value, result)
+                    return result;
                 case '==':
-                    let field = this.slot_model.get_field(cond_data.field_name);
-                    let field_value = this.slot_model.get_symbolic_value_for_field(field);
-                    return (field_value == cond_data.value);
+                    field_name = cond_data.field_name;
+                    field = this.slot_model.get_field(field_name);
+                    field_value = this.slot_model.get_symbolic_value_for_field(field);
+                    result = (field_value == cond_data.value)
+                    if(debug) console.log(op, field_name, field_value, cond_data.value, result)
+                    return result;
                 case 'OR': 
-                    let cond1 = this.recurse_conditions(cond_data.cond1);
-                    let cond2 = this.recurse_conditions(cond_data.cond2);
-                    return (cond1 || cond2);
+                    cond1 = this.recurse_conditions(cond_data.cond1);
+                    cond2 = this.recurse_conditions(cond_data.cond2);
+                    result = (cond1 || cond2)
+                    if(debug) console.log(op, cond1, cond2, result)
+                    return result;
+                case 'AND': 
+                    cond1 = this.recurse_conditions(cond_data.cond1);
+                    cond2 = this.recurse_conditions(cond_data.cond2);
+                    result = (cond1 && cond2)
+                    if(debug) console.log(op, cond1, cond2, result)
+                    return result;
+                case 'NOR': 
+                    cond1 = this.recurse_conditions(cond_data.cond1);
+                    cond2 = this.recurse_conditions(cond_data.cond2);
+                    result = !(cond1 || cond2)
+                    if(debug) console.log(op, cond1, cond2, result)
+                    return result;
+                case 'NAND': 
+                    cond1 = this.recurse_conditions(cond_data.cond1);
+                    cond2 = this.recurse_conditions(cond_data.cond2);
+                    result = !(cond1 && cond2)
+                    if(debug) console.log(op, cond1, cond2, result)
+                    return result;
+
             }
         } else console.log('can\'t find condition record for', cond);
         return false;
@@ -117,6 +164,7 @@ export class Slot_Controller {
         for(var field_name of this.slot_model.get_names()) {
             let field = this.slot_model.get_field(field_name);
             var can_display = true;
+            // console.log("set_fields_visibility", field_name);
             if (field.cond!==undefined)
                 can_display = this.recurse_conditions(field.cond);
             this.slot_view.set_visible(field_name, can_display);
