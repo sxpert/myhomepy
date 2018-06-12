@@ -84,7 +84,7 @@ class DeviceDatabase(object):
             return self.check_error("ERROR: invalid address, slave is None")
         if zone < 1 or zone > 99:
             return self.check_error("ERROR: invalid address, zone(%d) should be in [1..99]" % zone)
-        if slave < 0 or slave > 9:
+        if slave < 1 or slave > 9:
             return self.check_error("ERROR: invalid address, slave(%d) should be in [0..9]" % slave)
         return self.check_ok(addr)
 
