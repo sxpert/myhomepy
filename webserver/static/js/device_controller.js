@@ -58,7 +58,6 @@ export class Device {
                     controller.config_view.enabled = false;
                     controller.device_model.program_device();
                 }
-                console.log(this.slot_controllers.length)
                 if (this.slot_controllers.length>1) {
                     // need a tab view
                     this.tabs_view = new tabs_view.Tabs_View();
@@ -79,7 +78,6 @@ export class Device {
         }
     };
     slot_width_changed(slot_index, new_width) {
-        console.log('slot', slot_index, 'new width', new_width);
         if (this.tabs_view!=null)
             this.tabs_view.change_tab_width(slot_index, new_width);
     };
