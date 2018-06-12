@@ -101,8 +101,9 @@
 .device-tabs :first-child {
     border-left: var(--border-width) solid var(--border-color);
 }
-.device-tabs span.selected {
-    background-color: #eee;
+.device-tabs span.selected,
+.device-tabs span:hover {
+    background-color: var(--hover-background);
 }
 .device-slots :nth-child(even) {
     margin-right: 0;
@@ -131,6 +132,10 @@
 }
 .device-slot-line:hover {
     background: var(--hover-background);
+}
+.device-slot-line input,
+.device-slot-line select {
+    background: transparent;
 }
 .device-slot-label {
     display: inline-block;
@@ -178,9 +183,6 @@
     font-size: var(--slot-font-size);
     width: var(--slot-input-width);
     border: var(--border-width) solid var(--border-color);
-}
-.device-slot-select:hover {
-    background: var(--hover-background);
 }
 .device-slot-temp {
     font-size: var(--slot-font-size);
