@@ -17,7 +17,7 @@
     --control-border-radius: 3px;
     width: var( --default-width );
     --hover-background: #eee;
-    --border-color: #c7c7c7;
+    --border-color: #bbb;
 }
 .device-config-header {
     margin-bottom: 10pt;
@@ -96,12 +96,13 @@
     font-size: var(--slot-font-size);
     line-height: calc( var(--slot-font-size) * 2 );
     text-align: center;
+    cursor: pointer;
 }
 .device-tabs :first-child {
     border-left: var(--border-width) solid var(--border-color);
 }
 .device-tabs span.selected {
-
+    background-color: #eee;
 }
 .device-slots :nth-child(even) {
     margin-right: 0;

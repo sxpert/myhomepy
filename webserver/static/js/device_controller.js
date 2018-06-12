@@ -61,6 +61,9 @@ export class Device {
                 if (this.slot_controllers.length>1) {
                     // need a tab view
                     this.tabs_view = new tabs_view.Tabs_View();
+                    this.tabs_view.on_click = function(tab) {
+                        controller.tab_selected(tab);
+                    }
                     this.config_view.tabs = this.tabs_view;
                 }
                 for(var i=0; i<this.slot_controllers.length; i++) {
@@ -73,10 +76,16 @@ export class Device {
                     }
                     this.config_view.set_slot(i, slot.element);
                 }
+                if (this.tabs_view!==null)
+                    this.tabs_view.select_tab(0);
             }
             this.config_view.show('main-content');
         }
     };
+    tab_selected(index) {
+        console.log('tab', index, 'clicked');
+        this.tabs_view.select_tab(index);
+    }
     slot_width_changed(slot_index, new_width) {
         if (this.tabs_view!=null)
             this.tabs_view.change_tab_width(slot_index, new_width);
