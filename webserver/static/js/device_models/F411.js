@@ -3,7 +3,11 @@ import * as base from './base_device_model.js';
 export class Device_F411 extends base.Base_Device_Model {
     constructor(data) {
         super(data)
+        this.tab_prefix = 'Relay ';
     };
+    tab_label(index) {
+        return 'Relay '+(index+1);
+    }
 }
 
 Device_F411.prototype._device_types = {

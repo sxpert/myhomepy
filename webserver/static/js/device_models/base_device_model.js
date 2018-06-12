@@ -161,4 +161,7 @@ export class Base_Device_Model {
             return this.slots.length;
         return 0;
     }
+    tab_label(index) {
+        return 'tab '+index;
+    }
 }

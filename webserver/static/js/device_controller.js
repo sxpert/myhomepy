@@ -67,7 +67,7 @@ export class Device {
                     let slot = this.slot_controllers[i];
                     let index = i;
                     if (this.tabs_view!==null)
-                        this.tabs_view.add_tab('tab '+index);
+                        this.tabs_view.add_tab(index, this.device_model.tab_label(index));
                     slot.onWidthChanged = function(new_width) {
                         controller.slot_width_changed(index, new_width);
                     }

@@ -7,7 +7,7 @@ export class Tabs_View {
         el.classList.add('device-tabs');
         return el;        
     }
-    add_tab(text) {
+    add_tab(id, text) {
         let el = document.createElement('span');
         el.textContent = text;
         this.el_tabs.appendChild(el);

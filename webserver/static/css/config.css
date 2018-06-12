@@ -14,9 +14,10 @@
     --width-with-border: calc( var(--avail-width) / var(--slots-per-line) );
     --borders-width: calc( var(--border-width) * 2 );
     --slot-width: calc( var(--width-with-border) - var(--borders-width) );
+    --control-border-radius: 3px;
     width: var( --default-width );
     --hover-background: #eee;
-    --border-color: #d7d7d7;
+    --border-color: #c7c7c7;
 }
 .device-config-header {
     margin-bottom: 10pt;
@@ -63,7 +64,7 @@
 }
 .device-config-button {
     display: block;
-    border-radius: 3px;
+    border-radius: var(--control-border-radius);
     font-size: calc( var(--slot-font-size) - 2pt );
     width: var(--button-width);
     border: var(--border-width) solid #777;
@@ -81,11 +82,26 @@
     margin-bottom: var(--default-spacing);
 }
 .device-tabs {
-    width: calc( 100% - var(--borders-width) );
+    width: 100%;
     height: 25px;
-    border: var(--border-width) solid var(--border-color);
+    /* border: var(--border-width) solid var(--border-color); */
     margin-bottom: var(--default-spacing);  
     display: flex;  
+}
+.device-tabs span {
+    border-right: var(--border-width) solid var(--border-color);
+    border-top: var(--border-width) solid var(--border-color);
+    border-top-left-radius: var(--control-border-radius);
+    border-top-right-radius: var(--control-border-radius);
+    font-size: var(--slot-font-size);
+    line-height: calc( var(--slot-font-size) * 2 );
+    text-align: center;
+}
+.device-tabs :first-child {
+    border-left: var(--border-width) solid var(--border-color);
+}
+.device-tabs span.selected {
+
 }
 .device-slots :nth-child(even) {
     margin-right: 0;

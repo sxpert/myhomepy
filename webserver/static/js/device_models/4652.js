@@ -4,10 +4,14 @@ export class Device_4652 extends base.Base_Device_Model {
     constructor(data) {
         super(data);
     };
+    tab_label(index) {
+        return this._device_types[this.model_id].tab_labels[index];
+    }
 }
 
 Device_4652.prototype._device_types = {
     2 : {
+        tab_labels: ['Left Button', 'Right Button'],
         nb_slots : 2,
         references : {
             'BRAND_UNDEFINED' : {
