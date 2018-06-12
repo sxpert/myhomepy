@@ -94,7 +94,6 @@ class DeviceDatabase(object):
     #
     #
 
-
     def parse_ADDRESS_8_bit(self, value):
         if isinstance(value, str):
             value = int(value)
