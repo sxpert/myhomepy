@@ -96,23 +96,37 @@ export class Slot_Controller {
         return;
     };
     recurse_conditions(cond) {
-        return true;
+        if ((cond === null)||(cond===undefined)) return true;
+        if (cond in this.slot_model.conds) {
+            let cond_data = this.slot_model.conds[cond];
+            let op=cond_data.op;
+            switch(op) {
+                case '==':
+                    let field = this.slot_model.get_field(cond_data.field_name);
+                    let field_value = this.slot_model.get_symbolic_value_for_field(field);
+                    return (field_value == cond_data.value);
+                case 'OR': 
+                    let cond1 = this.recurse_conditions(cond_data.cond1);
+                    let cond2 = this.recurse_conditions(cond_data.cond2);
+                    return (cond1 || cond2);
+            }
+        } else console.log('can\'t find condition record for', cond);
+        return false;
     };
     set_fields_visibility(){
-        // let fields = this.slot_model.fields;
-        // for(var field_name in fields) {
-        //     var field_name = field_names[f];
-        //     let field = fields[field_name];
-        //     var can_display = true;
-        //     if (field.cond!==undefined)
-        //         can_display = this.recurse_conditions(field.cond);
-        //     this.slot_view.set_visible(field_name, can_display);
-        // }   
+        for(var field_name of this.slot_model.get_names()) {
+            let field = this.slot_model.get_field(field_name);
+            var can_display = true;
+            if (field.cond!==undefined)
+                can_display = this.recurse_conditions(field.cond);
+            this.slot_view.set_visible(field_name, can_display);
+        }   
     };
     set_current_ko() {
         let ko_id = this.slot_model.get_value('KO');
         let i_ko = this.slot_model.kos.ids.indexOf(ko_id);
         this.slot_view.set_ko_view(this.ko_views[i_ko]);
+        this.set_fields_visibility();
     }
     ko_changed(value) {
         let ko_values = this.slot_model.kos.values;
@@ -121,6 +135,7 @@ export class Slot_Controller {
         this.slot_model.set_value('KO', ko_ids[i_ko]);
         let ko_view = this.ko_views[i_ko]
         this.slot_view.set_ko_view(ko_view);
+        this.set_fields_visibility();
     }
     field_changed(name, value) {
         if (this.slot_model.set_value(name, value)) 

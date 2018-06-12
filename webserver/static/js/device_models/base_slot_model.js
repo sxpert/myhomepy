@@ -58,7 +58,8 @@ export class Base_Slot_Model {
         if (field.array_index!==null) name += '_'+field.array_index
         return name
     }
-    get_value_for_field(field) {
+    get_symbolic_value_for_field(field) {
+        if (field===undefined) return undefined;
         let var_name = field.var_name;
         let v = this.values[var_name]
         let access = field.access;
@@ -66,6 +67,22 @@ export class Base_Slot_Model {
             if ((v!==undefined)&&(v!==null)) v = v[field.array_index];
             if (v===null) v = undefined;
         }
+        if(v===undefined) {
+            v = field.default_value
+            console.log(field.var_name, 'default => value', v);
+        }
+        return v;
+    }
+    get_value_for_field(field) {
+        // if (field===undefined) return undefined;
+        // let var_name = field.var_name;
+        // let v = this.values[var_name]
+        // let access = field.access;
+        // if (access=='array') {
+        //     if ((v!==undefined)&&(v!==null)) v = v[field.array_index];
+        //     if (v===null) v = undefined;
+        // }
+        var v = this.get_symbolic_value_for_field(field);
         let field_type = field.field_type;
         switch (field_type) {
             case 'LIST': 
@@ -75,33 +92,48 @@ export class Base_Slot_Model {
                 else v = undefined;
                 break;
         }
-        if(v===undefined) {
-            v = field.default_value
-            console.log(field.var_name, 'default => value', v);
-        }
+        // if(v===undefined) {
+        //     v = field.default_value
+        //     console.log(field.var_name, 'default => value', v);
+        // }
         return v;
+    };
+    get_names() {
+        // returns all field names for the current KO
+        let ko_name = this.values.KO;
+        let names = this.names[ko_name];
+        return names;
     }
-    get_value(name) {
-        if (name=='KO') {
-            // special case !
-            return this.values.KO;
-        }
-        //console.log('get_value', name);
-        var v = undefined;
+    get_field(name) {
         let ko_name = this.values.KO;
         let names = this.names[ko_name];
         let index = names.indexOf(name);
         if (index>=0) {
-            return this.get_value_for_field(this.fields[ko_name][index])
+            return this.fields[ko_name][index];
         } else {
             // find if this name exist in other kos
             for(var ko_id in this.names) {
                 let index = this.names[ko_id].indexOf(name);
                 if (index>=0)
-                    return this.get_value_for_field(this.fields[ko_id][index])
+                    return this.fields[ko_id][index];
+            }
+            // find the field with this variable name in the ko
+            for(var field of this.fields[ko_name]){
+                if (field.var_name == name) {
+                    // there may be something about arrays to be done, but not now
+                    return field;
+                }
             }
         }
         return undefined;
+    };
+    get_value(name) {
+        if (name=='KO') {
+            // special case !
+            return this.values.KO;
+        }
+        let field = this.get_field(name);
+        return this.get_value_for_field(field);
     };
     set_value(name, value) {
         if (name=='KO') {
