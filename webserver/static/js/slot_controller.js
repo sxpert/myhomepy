@@ -30,6 +30,9 @@ export class Slot_Controller {
     set hidden(value) {
         this.slot_view.hidden = value;
     }
+    set single(value) {
+        this.slot_view.single = value;
+    }
     get element() {
         this.call_on_width_changed();
         return this.slot_view.element;

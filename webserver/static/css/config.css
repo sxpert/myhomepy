@@ -115,6 +115,9 @@
     --slot-label-width: calc( var(--slot-available-width) / 3 );
     --slot-input-width: calc( var(--slot-label-width) * 2 );
 }
+.device-slot.single {
+    border-top: var(--border-width) solid var(--border-color);
+}
 .device-slot-line {
     margin: var(--default-spacing);
     margin-top: 0;

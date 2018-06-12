@@ -21,6 +21,9 @@ export class Slot_View {
         this.el_slot.hidden = value;
         console.log(this.el_slot);
     }
+    set single(value) {
+        if (value) this.el_slot.classList.add('single');
+    }
     get element() {
         return this.el_slot;
     };

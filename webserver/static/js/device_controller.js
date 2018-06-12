@@ -76,6 +76,8 @@ export class Device {
                     }
                     this.config_view.set_slot(i, slot.element);
                 }
+                if (this.slot_controllers.length==1)
+                    this.slot_controllers[0].single = true;
                 this.tab_selected(0);
             }
             this.config_view.show('main-content');
