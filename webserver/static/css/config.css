@@ -84,8 +84,6 @@
 .device-tabs {
     width: 100%;
     height: 25px;
-    /* border: var(--border-width) solid var(--border-color); */
-    margin-bottom: var(--default-spacing);  
     display: flex;  
 }
 .device-tabs span {
@@ -105,27 +103,21 @@
 .device-tabs span:hover {
     background-color: var(--hover-background);
 }
-.device-slots :nth-child(even) {
-    margin-right: 0;
-}
 .device-slot {
     vertical-align: top;
     --slot-padding: 4pt;
     --slot-total-padding: calc( var(--slot-padding) * 2 );
-    display: inline-block;
     --slot-available-width: calc( var(--slot-width) - var(--slot-total-padding) );
-    width: var(--slot-available-width); 
+    width: calc( 100% - var(--borders-width) ); 
     border: var(--border-width) solid var(--border-color);
-    margin-right: var(--default-spacing);
-    margin-bottom: var(--default-spacing);
-    padding-left: var(--slot-padding);
-    padding-right: var(--slot-padding);
+    border-top: 0;
+    padding-top: var(--default-spacing);
     --slot-label-width: calc( var(--slot-available-width) / 3 );
     --slot-input-width: calc( var(--slot-label-width) * 2 );
 }
 .device-slot-line {
-    margin-top: var(--default-spacing);
-    margin-bottom: var(--default-spacing);
+    margin: var(--default-spacing);
+    margin-top: 0;
     --slot-address-width: calc( var(--slot-input-width) / 2 );
     --slot-address-input-label-width: calc( var(--slot-address-width) / 4 );
     --slot-address-input-width: calc( var(--slot-address-input-label-width) * 3 );

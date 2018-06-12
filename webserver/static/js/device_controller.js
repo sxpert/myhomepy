@@ -76,15 +76,17 @@ export class Device {
                     }
                     this.config_view.set_slot(i, slot.element);
                 }
-                if (this.tabs_view!==null)
-                    this.tabs_view.select_tab(0);
+                this.tab_selected(0);
             }
             this.config_view.show('main-content');
         }
     };
     tab_selected(index) {
         console.log('tab', index, 'clicked');
-        this.tabs_view.select_tab(index);
+        if (this.tabs_view!==null)
+            this.tabs_view.select_tab(index);
+        for(var slot_id in this.slot_controllers)
+            this.slot_controllers[slot_id].hidden = (slot_id!=index);
     }
     slot_width_changed(slot_index, new_width) {
         if (this.tabs_view!=null)

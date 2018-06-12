@@ -27,6 +27,9 @@ export class Slot_Controller {
     set onWidthChanged(func) {
         this._on_width_changed = func;
     }
+    set hidden(value) {
+        this.slot_view.hidden = value;
+    }
     get element() {
         this.call_on_width_changed();
         return this.slot_view.element;

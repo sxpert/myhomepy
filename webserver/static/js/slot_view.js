@@ -1,5 +1,6 @@
 export class Slot_View {
     constructor() {
+        this._hidden = false;
         this.ko_el = null;
         this.ko_view = null;
         this.el_slot = this.create_slot_element();
@@ -16,6 +17,10 @@ export class Slot_View {
         if (this.ko_el!==null) this.el_slot.appendChild(this.ko_el.field);
         if (this.ko_view!==null) this.el_slot.appendChild(this.ko_view.element);
     };
+    set hidden(value) {
+        this.el_slot.hidden = value;
+        console.log(this.el_slot);
+    }
     get element() {
         return this.el_slot;
     };

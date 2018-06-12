@@ -6,7 +6,7 @@ export class Device_F411 extends base.Base_Device_Model {
         this.tab_prefix = 'Relay ';
     };
     tab_label(index) {
-        return 'Relay '+(index+1);
+        return 'Actuator '+(index+1);
     }
 }
 
