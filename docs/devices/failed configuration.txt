@@ -1,0 +1,43 @@
+*1004*9#3245807*0##
+*#1004*101*1*21*4*2*4##
+*#1004*101*2*6*0*0##
+*#1004*101*4*0*0*0*0*0*0##
+*#1004*101*7*111111111111111101101111##
+*#1004*101*13*3245807##
+*#1004*101*30*1*221*0##
+*#1004*101*32#1*4*101##
+*1001*3*0##
+*1004*4*0##
+*1001*3*0##
+*1001*3*0##
+*1001*3*0##
+*1001*3*0##
+*1001*3*0##
+*1001*3*0##
+*1001*3*0##
+*1001*3*0##
+*1004*14#0*0##
+*#1004*0*#30*1*221##
+*#1004*0*#32#1*4*001##
+
+address "001" is invalid in KO 221 slave probe, probe is 1-9
+so we get the below complaint res_addr_ko_error "device answer KO address error"
+
+*#1004*101*34*1*1##
+*#1004*0*#35#0#1*0##
+
+programmer says "end of configuration for this slot"
+
+*1004*4*0##
+
+I said, go to hell
+
+*#1004*101*34*1*1##
+
+res_conf_wrong "device answer for wrong configuration"
+
+*1004*51*0##
+
+here we get this version... should disengage the active device
+
+*1004*3*0##

@@ -355,7 +355,8 @@ class DiagScannable(OWNSubSystem):
 
     def diag_cmd_conf_abort(self, matches):
         """
-        supposedly 'res_gw_busy' but it's rather useless, so we just skip it...
+        should be 'res_gw_busy' but it's rather useless, so we just skip it...
+        there may be a use when who != 1001 though...
         """
         return True
 

@@ -309,18 +309,18 @@ class BaseSlot(object):
         self.log("BaseSlot.cmd_ko_value ERROR: WTF KO is  '%s' ??" % (str(keyo)), LOG_ERROR)
         return False
 
-    def do_ko_sys(self, sys, addr):
-        # hah, can't handle addresses all the same way, they are parsed differently
-        # between systems !!
+    def do_ko_sys(self, sys, addr, values=None):
         dev = self._slots.parent
+
         who = dev.subsystem.SYSTEM_WHO
         if sys != who:
             self.log("ERROR: sys is different from SYSTEM_WHO %d != %d" % (sys, who), LOG_ERROR)
             # not worth bailing though...
-        # not sure this is any useful !
         # get the addr record 
         # note: ko => None should not happen
-        addr_rec = device_db.find_sys_addr(self.get_value(F_KO, None))
+        if values is None:
+            values = self._values
+        addr_rec = device_db.find_sys_addr(self.get_value(F_KO, values))
         if addr_rec is None:
             # bail
             return False
@@ -337,7 +337,7 @@ class BaseSlot(object):
         return False
 
     def cmd_ko_sys(self, sys, addr):
-        ok, var_name, value = self.do_ko_sys(sys, addr)
+        ok, var_name, value = self.do_ko_sys(sys, addr, self._tmp_values)
         if ok:
             return self.set_value(var_name, value, self._tmp_values)
         device_db.log("cmd_ko_sys: Unable to set %s => %s" % (var_name, str(value)))
