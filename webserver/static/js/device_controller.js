@@ -2,6 +2,7 @@ import * as ajax from './ajax.js';
 import * as tree from './tree_control.js';
 import * as bdm from './device_models/base_device_model_stub.js';
 import * as dev_conf_view from './device_config_view.js';
+import * as tabs_view from './tabs_view.js';
 import * as slot_controller from './slot_controller.js';
 
 export class Device {
@@ -14,6 +15,7 @@ export class Device {
         this.device_model = null;
         this.slot_controllers = null;
         this.config_view = null;
+        this.tabs_view = null;
     };
     get_tree_item() { 
         if (this.tree_item === null) {
@@ -56,11 +58,30 @@ export class Device {
                     controller.config_view.enabled = false;
                     controller.device_model.program_device();
                 }
-                for(var i=0; i<this.slot_controllers.length; i++)
-                    this.config_view.set_slot(i, this.slot_controllers[i].element);
+                console.log(this.slot_controllers.length)
+                if (this.slot_controllers.length>1) {
+                    // need a tab view
+                    this.tabs_view = new tabs_view.Tabs_View();
+                    this.config_view.tabs = this.tabs_view;
+                }
+                for(var i=0; i<this.slot_controllers.length; i++) {
+                    let slot = this.slot_controllers[i];
+                    let index = i;
+                    if (this.tabs_view!==null)
+                        this.tabs_view.add_tab('tab '+index);
+                    slot.onWidthChanged = function(new_width) {
+                        controller.slot_width_changed(index, new_width);
+                    }
+                    this.config_view.set_slot(i, slot.element);
+                }
             }
             this.config_view.show('main-content');
         }
+    };
+    slot_width_changed(slot_index, new_width) {
+        console.log('slot', slot_index, 'new width', new_width);
+        if (this.tabs_view!=null)
+            this.tabs_view.change_tab_width(slot_index, new_width);
     };
     set_device_model(stub) {
         let controller = this;

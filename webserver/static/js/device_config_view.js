@@ -6,6 +6,9 @@ export class Device_Config_View {
         this.el_discover = null;
         this.el_discover = null;
 
+        // potential tabs
+        this.tabs_view = null;
+
         // elements
         this.el_icon = this.create_device_icon_element();
         this.el_manufacturer_logo = this.create_manufacturer_logo_element();
@@ -23,6 +26,11 @@ export class Device_Config_View {
         this._on_discover_request = null;
         this._on_program_request = null;
     };
+    set tabs(view) {
+        this.tabs_view = view;
+        // remove the existing view, and force re-creation to add tabs
+        this.el_view = null;
+    }
     set on_name_change(func) {
         this._on_name_change = func;
     }
@@ -38,6 +46,8 @@ export class Device_Config_View {
     show(element_id) {
         var element = document.getElementById(element_id);
         element.innerHTML = '';
+        if (this.el_view===null) 
+            this.el_view = this.create_view();
         element.appendChild(this.el_view);
     };
     set_slot(position, slot) {
@@ -181,6 +191,8 @@ export class Device_Config_View {
         el.classList.add('device-config');
         el.appendChild(this.el_header);
         el.appendChild(this.el_description);
+        if (this.tabs_view)
+            el.appendChild(this.tabs_view.element);
         // only the slots container
         el.appendChild(this.el_slots);
         return el;

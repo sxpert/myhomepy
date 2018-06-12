@@ -78,7 +78,14 @@
     width: calc( 100% - var(--borders-width) );
     height: 150px;
     border: var(--border-width) solid var(--border-color);
-    margin-bottom: 10pt;
+    margin-bottom: var(--default-spacing);
+}
+.device-tabs {
+    width: calc( 100% - var(--borders-width) );
+    height: 25px;
+    border: var(--border-width) solid var(--border-color);
+    margin-bottom: var(--default-spacing);  
+    display: flex;  
 }
 .device-slots :nth-child(even) {
     margin-right: 0;

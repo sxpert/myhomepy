@@ -10,6 +10,7 @@ import * as temp_view from './slot_temp_view.js';
 
 export class Slot_Controller {
     constructor(slot_model) {
+        this._on_width_changed = null;
         this.slot_model = slot_model;
         let controller = this;
         slot_model.on_value_updated = function(name) {
@@ -23,7 +24,11 @@ export class Slot_Controller {
         this.initialize_view();
         this.set_fields_visibility();
     };
+    set onWidthChanged(func) {
+        this._on_width_changed = func;
+    }
     get element() {
+        this.call_on_width_changed();
         return this.slot_view.element;
     };
     initialize_view() {
@@ -38,7 +43,7 @@ export class Slot_Controller {
         for(var ko_i in model.kos.values) {
             let ko_value = model.kos.values[ko_i];
             let ko_name = model.kos.names[ko_i];
-            let ko_id = model.kos.ids[ko_i]
+            let ko_id = model.kos.ids[ko_i];
             this.ko_el.append_option(ko_value, ko_name, ko_id == model.values.KO);
 
             // generate the fields for each ko in the respective ko_view
@@ -172,18 +177,20 @@ export class Slot_Controller {
     };
     set_current_ko() {
         let ko_id = this.slot_model.get_value('KO');
-        let i_ko = this.slot_model.kos.ids.indexOf(ko_id);
-        this.slot_view.set_ko_view(this.ko_views[i_ko]);
+        let ko_i = this.slot_model.kos.ids.indexOf(ko_id);
+        this.slot_view.set_ko_view(this.ko_views[ko_i]);
         this.set_fields_visibility();
+        this.call_on_width_changed();
     }
     ko_changed(value) {
         let ko_values = this.slot_model.kos.values;
-        let i_ko = ko_values.indexOf(value);
+        let ko_i = ko_values.indexOf(value);
         let ko_ids = this.slot_model.kos.ids;
-        this.slot_model.set_value('KO', ko_ids[i_ko]);
-        let ko_view = this.ko_views[i_ko]
+        this.slot_model.set_value('KO', ko_ids[ko_i]);
+        let ko_view = this.ko_views[ko_i]
         this.slot_view.set_ko_view(ko_view);
         this.set_fields_visibility();
+        this.call_on_width_changed();
     }
     field_changed(name, value) {
         if (this.slot_model.set_value(name, value)) 
@@ -196,5 +203,13 @@ export class Slot_Controller {
         var value = this.slot_model.get_value(name)
         this.slot_view.set_value(name, value);
         this.set_fields_visibility();
+    };
+    call_on_width_changed() {
+        let ko_id = this.slot_model.get_value('KO');
+        let ko_i = this.slot_model.kos.ids.indexOf(ko_id);
+        let ko_widths = this.slot_model.kos.widths;
+        let ko_width = ko_widths[ko_i];
+        if (this._on_width_changed)
+            this._on_width_changed(ko_width);
     }
 }
