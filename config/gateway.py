@@ -15,6 +15,8 @@ class Gateway(object):
     passwd = None
     available = False
     system = None
+    proxy_port = None
+    proxy = None
 
     _cur_date = None
     _cur_time = None
@@ -81,6 +83,7 @@ class Gateway(object):
                 self.log("WARNING: problems in gateway configuration, this system will not be available")
             else:
                 self.log("Gateway %s ready" % str(self))
+            self.proxy_port = data.get('proxy_port', None)
         return self
 
     def __to_json__(self):
@@ -88,6 +91,8 @@ class Gateway(object):
         data['address'] = self.address
         data['port'] = self.port
         data['passwd'] = self.passwd
+        if self.proxy_port is not None:
+            data['proxy_port'] = self.proxy_port
         return data
 
     def set_available(self):
@@ -163,6 +168,10 @@ class Gateway(object):
         self.cmd_conn = None
         self.cmd_conn_task = None
         asyncio.ensure_future(self.mon_conn.run(), loop=self.loop)
+
+        # transparent proxy
+        if self.proxy_port is not None:
+            self.proxy = None
 
     async def run(self):
         while True:

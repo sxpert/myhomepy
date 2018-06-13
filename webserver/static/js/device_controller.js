@@ -84,7 +84,6 @@ export class Device {
         }
     };
     tab_selected(index) {
-        console.log('tab', index, 'clicked');
         if (this.tabs_view!==null)
             this.tabs_view.select_tab(index);
         for(var slot_id in this.slot_controllers)

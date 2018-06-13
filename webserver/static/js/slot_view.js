@@ -19,7 +19,6 @@ export class Slot_View {
     };
     set hidden(value) {
         this.el_slot.hidden = value;
-        console.log(this.el_slot);
     }
     set single(value) {
         if (value) this.el_slot.classList.add('single');
