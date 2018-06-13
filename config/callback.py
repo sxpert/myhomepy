@@ -67,60 +67,76 @@ class Action(object):
     AC_BUILT_IN = 1
     AC_PLUGIN = 2
 
-    _action_mode = None
+    action_mode = None
 
-    _module = None
-    _method = None
+    module = None
+    method = None
 
-    _params = None
+    params = None
 
     def __init__(self, callback):
         self.log = callback.log
 
     def __str__(self):
         a = 'Unknown'
-        if self._action_mode == self.AC_PLUGIN:
-            a = "Plugin(%s, %s, %s)" % (self._module, self._method, str(self._params))
+        if self.action_mode == self.AC_BUILT_IN:
+            a = "BuiltIn(%s, %s)" % (self.method, str(self.params))
+        elif self.action_mode == self.AC_PLUGIN:
+            a = "Plugin(%s, %s, %s)" % (self.module, self.method, str(self.params))
         return "<%s %s>" % (self.__class__.__name__, a)
 
     def loads(self, data):
+        _built_in = data.get("built-in", None)
         _plugin = data.get("plugin", None)
-        if _plugin is not None and isinstance(_plugin, dict):
-            self._action_mode = self.AC_PLUGIN
-            self._module = _plugin.get("module", None)
-            if self._module is None:
-                self.log('config.Action.load : no module specified for plugin...')
-            self._method = _plugin.get("method", None)
-            if self._method is None:
-                self.log('config.Action.load: no method specified for plugin...')
-        self._params = data.get("params", None)
+        if _built_in is not None and isinstance(_built_in, str):
+            self.action_mode = self.AC_BUILT_IN
+            self.method = _built_in
+            if self.module is None:
+                self.log('config.Action.loads: no built-in module specified...')
+        elif _plugin is not None and isinstance(_plugin, dict):
+            self.action_mode = self.AC_PLUGIN
+            self.module = _plugin.get("module", None)
+            if self.module is None:
+                self.log('config.Action.loads: no module specified for plugin...')
+            self.method = _plugin.get("method", None)
+            if self.method is None:
+                self.log('config.Action.loads: no method specified for plugin...')
+        self.params = data.get("params", None)
 
     def __to_json__(self):
         ac = {}
-        if self._action_mode == self.AC_PLUGIN:
+        if self.action_mode == self.AC_BUILT_IN:
+            ac['built-in'] = self.method
+        elif self.action_mode == self.AC_PLUGIN:
             pl = {}
-            pl['module'] = self._module
-            pl['method'] = self._method
+            pl['module'] = self.module
+            pl['method'] = self.method
             ac['plugin'] = pl
-        ac['params'] = self._params
+        ac['params'] = self.params
         return ac
 
     def execute(self, system, order, device, data):
-        if self._action_mode == self.AC_PLUGIN:
+        if self.action_mode == self.AC_BUILT_IN:
+            self.log('config.Action.execute : action is a built-in', LOG_INFO)
+            return self.exec_built_in(system, order, device, data)
+        elif self.action_mode == self.AC_PLUGIN:
             self.log('config.Action.execute : action is a plugin', LOG_INFO)
-            return self._exec_plugin(system, order, device, data)
+            return self.exec_plugin(system, order, device, data)
         self.log('config.Action.execute : unknown action type', LOG_INFO)
         return None
 
-    def _exec_plugin(self, system, order, device, data):
-        if self._module is None:
+    def exec_built_in(self, system, order, device, data):
+        self.log('exec_built_in: not implemented yet')
+
+    def exec_plugin(self, system, order, device, data):
+        if self.module is None:
             self.log("config.Action._exec_plugin : Module not specified, cancelling callback")
             return None
-        if self._method is None:
+        if self.method is None:
             self.log("config.Action._exec_plugin : Method not specified, cancelling callback")
             return None
         self.log('config.Action._exec_plugin: plugin appears valid %s %s'
-                 % (str(self._module), str(self._method)), LOG_INFO)
+                 % (str(self.module), str(self.method)), LOG_INFO)
         plugins_paths = PLUGINS_DIRS.split(os.pathsep)
         sys.path.extend(plugins_paths)
         self.log('config.Action._exec_plugin : plugins_paths %s' % (str(plugins_paths)), LOG_INFO)
@@ -132,7 +148,7 @@ class Action(object):
             self.log('config.Action._exec_plugin : dir_contents %s' % (str(dir_contents)), LOG_INFO)
             for filename in dir_contents:
                 name, ext = os.path.splitext(filename)
-                if ext.endswith(".py") and (name == self._module):
+                if ext.endswith(".py") and (name == self.module):
                     self.log('config.Action._exec_plugin : found module %s' % (filename), LOG_INFO)
                     # muck with the path and filename at this point...
                     module_name = path.replace('/', '.') + name
@@ -143,15 +159,15 @@ class Action(object):
         if m is None:
             return None
         # find method
-        func = getattr(m, self._method, None)
+        func = getattr(m, self.method, None)
         if func:
             self.log('config.Action._exec_plugin : calling %s %s %s %s %s' %
-                     (str(func), str(system), str(self._params),
+                     (str(func), str(system), str(self.params),
                       str(device), str(data)), LOG_INFO)
-            res = func(system, self._params, device, data)
+            res = func(system, self.params, device, data)
             self.log('config.Action._exec_plugin : callback plugin returned %s' % (str(res)), LOG_INFO)
             return res
-        self.log('Action._exec_plugin : unable to find function %s' % (str(self._method)), LOG_INFO)
+        self.log('Action._exec_plugin : unable to find function %s' % (str(self.method)), LOG_INFO)
         self.log('Action._exec_plugin%s' % (str(dir(m))), LOG_INFO)
         return None
 
