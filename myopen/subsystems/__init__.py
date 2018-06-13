@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from .subsystem import OWNSubSystem
-from .lighting import Lighting
-from .temp_control import TempControl
-from .gateway import Gateway
-from .diag_scannable import DiagScannable
-from .diag_lighting import DiagLighting
-from .diag_temp_control import DiagTempControl
-from .diag_gateway import DiagGateway
+from .lighting import Lighting                         #    1
+from .temp_control import TempControl                  #    4
+from .gateway import Gateway                           #   13
+from .cen_plus_dry_contacts import CenPlusDryContacts  #   25
+from .diag_scannable import DiagScannable        
+from .diag_lighting import DiagLighting                # 1001
+from .diag_temp_control import DiagTempControl         # 1004
+from .diag_gateway import DiagGateway                  # 1013
 
 
 __all__ = [
@@ -26,6 +27,7 @@ __all__ = [
 SubSystems = [Lighting,
               TempControl,
               Gateway,
+              CenPlusDryContacts,
               DiagLighting,
               DiagTempControl,
               DiagGateway, ]
