@@ -75,6 +75,7 @@ class Action(object):
     params = None
 
     def __init__(self, callback):
+        self.callback = callback
         self.log = callback.log
 
     def __str__(self):
@@ -126,7 +127,19 @@ class Action(object):
         return None
 
     def exec_built_in(self, system, order, device, data):
-        self.log('exec_built_in: not implemented yet')
+        from myopen.commands import BUILT_IN_COMMANDS
+        cmd_class = None
+        for c in BUILT_IN_COMMANDS:
+            if c.__name__ == self.method:
+                self.log("found built-in command %s" % (str(c)))
+                cmd_class = c
+                break
+        if cmd_class is None:
+            self.log("command with name %s not found" % (self.method))
+            return False
+        self.callback.callbacks.system.push_task(cmd_class, params=self.params)
+        return True
+        
 
     def exec_plugin(self, system, order, device, data):
         if self.module is None:
