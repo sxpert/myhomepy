@@ -112,8 +112,10 @@ class App {
     };
     websocket() {
         var app = this;
-        if (this._ws == null)
-            this._ws = new WebSocket('ws://'+window.location.host+'/api/websocket');
+        if (this._ws == null) {
+            let protocol = (window.location.protocol=='https:')?'wss:':'ws:';
+            this._ws = new WebSocket(protocol+'//'+window.location.host+'/api/websocket');
+        }
         this._ws.addEventListener('open', event => {
             console.log('ws opened', event);
         });

@@ -3,12 +3,14 @@
 import asyncio
 import base64
 import os
+import ssl
 
 import cryptography.fernet
 from aiohttp import web
 
-from . import decorators
-from . import views
+from core.logger import LOG_ERROR
+
+from . import decorators, views
 
 __all__ = ['WebServer']
 
@@ -144,7 +146,14 @@ class WebServer(object):
         self.runner = web.AppRunner(self.app)
         await self.runner.setup()
         # TODO: add ssl_context here
-        self.site = web.TCPSite(self.runner, self.address, self.port)
+        ssl_context = None
+        if self.config.tls.available:
+            cert = self.config.tls.cert
+            key = self.config.tls.key
+            self.config.log('TLS is supported, loading %s | %s' % (key, cert), LOG_ERROR)
+            ssl_context = ssl.SSLContext()
+            ssl_context.load_cert_chain(cert, key)
+        self.site = web.TCPSite(self.runner, self.address, self.port, ssl_context=ssl_context)
         await self.site.start()
         print('------ serving on %s:%d ------' % (self.address, self.port))
         print('session key', self.b64_key)
