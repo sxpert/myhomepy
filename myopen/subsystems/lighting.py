@@ -49,10 +49,22 @@ class Lighting(OWNSubSystem):
     }
 
     def _cmd_light(self, order, matches):
+        light = matches.get('light', None)
+        group = matches.get('group', None)
+        device = None
+        if light is not None:
+            ok, addr = device_db.parse_ADDRESS_long(light)
+            if ok:
+                device = addr
+            else:
+                self.log('Error while parsing light \'%s\'' % (light))
+        elif group is not None:
+            device = {'group': group}
+
         info = {
-            'data': matches,
+            'data': device,
             'order': order,
-            'device': matches,
+            'device': device,
             'func': None
         }
         return info
@@ -71,20 +83,13 @@ class Lighting(OWNSubSystem):
 
     def map_device(self, device):
         if isinstance(device, dict):
-            light = device.get('light', None)
+            # Note: for the future, there are also bus/a/pl addresses
+            #       but I don't have the equipment yet
+            a = device.get('a', None)
+            pl = device.get('pl', None)
             group = device.get('group', None)
-            if light is not None:
-                ok, addr = device_db.parse_ADDRESS_long(light)
-                if ok:
-                    self.log('found %s' % (str(addr)))
-                    a = addr.get('a', None)
-                    pl = addr.get('pl', None)
-                    if a is not None and pl is not None:
-                        return '%d-%d' % (a, pl)
-                    else:
-                        self.log('Error in address, we need \'a\' and \'pl\' values, parsed \'%s\' => %s' % (light, str(addr))) 
-                else:
-                    self.log('Error while parsing light \'%s\'' % (light))
+            if a is not None and pl is not None:
+                return '%d-%d' % (a, pl)
             elif group is not None:
                 return 'G-' + group
         return None
