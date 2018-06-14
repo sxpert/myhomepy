@@ -25,10 +25,10 @@ class BaseCommand(object):
     def send(self, msg):
         self.system.gateway.send(msg)
 
-    def dispatch(self, pkt):
-        # TODO: handle errors with a fatal handler
-        msg = Message(pkt, self.system)
-        msg.parse()
+    def dispatch(self, msg):
+        """
+        receives a Message instance
+        """
         if self.msg_handler is not None:
             return self.msg_handler(msg)  # pylint: disable=E1102
         return self.default_msg_handler(msg)

@@ -99,21 +99,21 @@ class Config(object):
     #
     # ========================================================================
     
-    async def websocket_dispatch(self, msg):
+    async def websocket_dispatch(self, obj):
         """
-        Dispatches messages to all registered websocket queues
+        Takes an object, and sends it to all registered websocket queues
         """
-        self.log('Config.websocket_dispatch %s' % (str(msg)))
+        self.log('Config.websocket_dispatch %s' % (str(obj)))
         for ws in self._websockets:
             # don't send if the websocket is closing...
             if not ws.closed:
                 self.log('pushing to %s' % (str(ws)))
-                if hasattr(msg, 'web_data'):
-                    msg = msg.web_data
+                if hasattr(obj, 'web_data'):
+                    obj = obj.web_data
                 try:
-                    await ws.send_json(msg)
+                    await ws.send_json(obj)
                 except TypeError:
-                    self.log('ERROR: %s can\'t be converted to json' % (str(msg)))
+                    self.log('ERROR: %s can\'t be converted to json' % (str(obj)))
 
     def websocket_send(self, msg):
         loop = asyncio.get_event_loop()

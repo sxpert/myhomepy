@@ -180,27 +180,35 @@ class Gateway(object):
             except asyncio.TimeoutError:
                 data = None
 
+            # TODO: parse message only once...
+
             if data is not None:
-                # send the message to websocket listener
+                msg = None
                 try:
-                    await self.system.websocket_dispatch(data)
+                    msg = Message(data, self)
                 except:
                     import traceback
                     traceback.print_exc()
                 handled = False
                 if self.system.is_cmd_busy:
                     try:
-                        handled = self.system.dispatch_message(data)
+                        handled = self.system.dispatch_message(msg)
                     except:
                         import traceback
                         traceback.print_exc()
                 if not handled:
                     try:
-                        m = Message(data, self)
-                        m.dispatch()
+                        msg.dispatch()
                     except:
                         import traceback
                         traceback.print_exc()
+                # finally, send the message to websocket listener
+                try:
+                    await self.system.systems.config.websocket_dispatch(msg)
+                except:
+                    import traceback
+                    traceback.print_exc()
+                
 
     # ------------------------------------------------------------------------
     #
