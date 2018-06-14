@@ -99,7 +99,11 @@ class Message(object):
         if self._name is not None:
             data['name'] = self._name
         if self._fields is not None:
-            data['fields'] = jsonize(self._fields['data'])
+            if isinstance(self._fields, dict):
+                fields_data = self._fields.get('data', None)
+                if fields_data is not None:
+                    data['fields'] = jsonize(self._fields['data'])
+                
         elif self._fi is not None:
             data['fields'] = self._fi[1]
         obj = {}
