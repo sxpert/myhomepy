@@ -12,10 +12,11 @@ Main application module
 import asyncio
 import logging
 import re
+from optparse import OptionParser
 from socket import gaierror
 
 from config.config import Config
-from core.logger import SYSTEM_LOGGER, LOG_ERROR, LOG_INFO, LOG_DEBUG
+from core.logger import LOG_DEBUG, LOG_ERROR, LOG_INFO, SYSTEM_LOGGER
 
 
 class Automator(object):
@@ -25,11 +26,17 @@ class Automator(object):
             return
         print(context)
 
+    def __init__(self, options):
+        if options.debug:
+            SYSTEM_LOGGER.level = LOG_DEBUG
+            logging.basicConfig(level=logging.DEBUG)
+        else:
+            SYSTEM_LOGGER.level = LOG_ERROR
+            logging.basicConfig(level=logging.DEBUG)
+        SYSTEM_LOGGER.logfile = options.log_file
+
     def run(self):
-        SYSTEM_LOGGER.level = LOG_ERROR
-        SYSTEM_LOGGER.logfile = 'myopen.log'
         self.loop = asyncio.get_event_loop()
-        logging.basicConfig(level=logging.DEBUG)
         self.loop.set_debug(False)
         self.loop.set_exception_handler(self.exception_handler)
         self.config = Config(self, loop=self.loop)
@@ -48,9 +55,14 @@ class Automator(object):
             tasks.cancel()
             return
 
-
 # main program
 if __name__ == '__main__':
+    parser = OptionParser()
+    parser.set_defaults(config_file='config.json')
+    parser.set_defaults(debug=False)
+    parser.set_defaults(log_file='myopen.log')
+    parser.add_option('-d', '--debug', action='store_true', dest='debug', help='Generate debug output')
+    (options, args) = parser.parse_args() 
     # create the application object, run the main loop
-    a = Automator()
+    a = Automator(options)
     a.run()
