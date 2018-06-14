@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     config = Config(None)
 
-    setup_OWN_server(loop, '0.0.0.0', 20005, 
+    setup_OWN_server(loop, '0.0.0.0', 20000, 
         config.systems[0].gateway.passwd, 
         config.systems[0].gateway.address, 
         config.systems[0].gateway.port)
