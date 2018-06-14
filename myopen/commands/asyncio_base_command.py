@@ -30,6 +30,7 @@ class BaseCommand(object):
         receives a Message instance
         """
         if self.msg_handler is not None:
+            self.log('BaseCommand.dispatch %s' % (str(msg)))
             return self.msg_handler(msg)  # pylint: disable=E1102
         return self.default_msg_handler(msg)
 
