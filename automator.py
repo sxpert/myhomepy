@@ -21,9 +21,10 @@ from core.logger import LOG_DEBUG, LOG_ERROR, LOG_INFO, SYSTEM_LOGGER
 
 class Automator(object):
     def exception_handler(self, loop, context):
-        exc = context['exception']
-        if exc.__class__ in (TimeoutError, gaierror, ):
-            return
+        exc = context.get('exception', None)
+        if exc is not None:
+            if exc.__class__ in (TimeoutError, gaierror, ):
+                return
         print(context)
 
     def __init__(self, options):
