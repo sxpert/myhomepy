@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 
+from myopen.device_db import device_db
 from .subsystem import OWNSubSystem
 
 
@@ -48,24 +49,44 @@ class Lighting(OWNSubSystem):
     }
 
     def _cmd_light(self, order, matches):
-        device = {'light': matches['light']}
-        return self.gen_callback_dict(order, device, None)
+        info = {
+            'data': matches,
+            'order': order,
+            'device': matches,
+            'func': None
+        }
+        return info
 
     def cmd_light_off(self, matches):
-        self._cmd_light(self.OP_CMD_LIGHT_OFF, matches)
+        return self._cmd_light(self.OP_CMD_LIGHT_OFF, matches)
 
     def cmd_light_on(self, matches):
-        self._cmd_light(self.OP_CMD_LIGHT_ON, matches)
+        return self._cmd_light(self.OP_CMD_LIGHT_ON, matches)
 
     def cmd_group_off(self, matches):
-        self._cmd_light(self.OP_CMD_GROUP_OFF, matches)
+        return self._cmd_light(self.OP_CMD_GROUP_OFF, matches)
 
     def cmd_group_on(self, matches):
-        self._cmd_light(self.OP_CMD_GROUP_ON, matches)
+        return self._cmd_light(self.OP_CMD_GROUP_ON, matches)
 
     def map_device(self, device):
-        if (type(device) is dict) and ('group' in device.keys()):
-            return 'G-'+str(device['group'])
+        if isinstance(device, dict):
+            light = device.get('light', None)
+            group = device.get('group', None)
+            if light is not None:
+                ok, addr = device_db.parse_ADDRESS_long(light)
+                if ok:
+                    self.log('found %s' % (str(addr)))
+                    a = addr.get('a', None)
+                    pl = addr.get('pl', None)
+                    if a is not None and pl is not None:
+                        return '%d-%d' % (a, pl)
+                    else:
+                        self.log('Error in address, we need \'a\' and \'pl\' values, parsed \'%s\' => %s' % (light, str(addr))) 
+                else:
+                    self.log('Error while parsing light \'%s\'' % (light))
+            elif group is not None:
+                return 'G-' + group
         return None
 
     def gen_command(self, operation, target):
