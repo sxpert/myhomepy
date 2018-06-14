@@ -190,25 +190,25 @@ class Gateway(object):
                     import traceback
                     traceback.print_exc()
                 if msg is not None:
-                    self.log('message parsing')
+                    #s elf.log('message parsing')
                     msg.parse()
                     handled = False
                     if self.system.is_cmd_busy:
-                        self.log('dispatch to current command')
+                        # self.log('dispatch to current command')
                         try:
                             handled = self.system.dispatch_message(msg)
                         except:
                             import traceback
                             traceback.print_exc()
                     if not handled:
-                        self.log('dispatch message')
+                        # self.log('dispatch message')
                         try:
                             msg.dispatch()
                         except:
                             import traceback
                             traceback.print_exc()
                     # finally, send the message to websocket listener
-                    self.log('dispatch to websockets')
+                    # self.log('dispatch to websockets')
                     try:
                         await self.system.systems.config.websocket_dispatch(msg)
                     except:
