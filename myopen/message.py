@@ -1,13 +1,57 @@
 # -*- coding: utf-8 -*-
 import re
 import sys
-from datetime import datetime, timezone
+from datetime import time, date, datetime, timezone
 
 from core.logger import LOG_ERROR, LOG_INFO
 
 from .asyncio_connection import MODE_COMMAND, MODE_MONITOR
 from .subsystems import find_subsystem
 
+def jsonize(data):
+    n_data = data
+    if isinstance(data, dict):
+        print('jsonize dict', data)
+        n_data = {}
+        for k in data.keys():
+            n_data[k] = jsonize(data[k])
+    elif isinstance(data, list):
+        print('jsonize list', data)
+        n_data = []
+        for v in data:
+            n_data.append(jsonize(v))
+    elif isinstance(data, datetime):
+        print('jsonize datetime', data)
+        n_data = {}
+        n_data['year'] = data.year
+        n_data['month'] = data.month
+        n_data['day'] = data.day
+        n_data['hour'] = data.hour
+        n_data['minute'] = data.minute
+        n_data['second'] = data.second
+        n_data['microsecond'] = data.microsecond
+        n_data['tzinfo'] = jsonize(data.tzinfo)
+    elif isinstance(data, time):
+        print('jsonize time', data)
+        n_data = {}
+        n_data['hour'] = data.hour
+        n_data['minute'] = data.minute
+        n_data['second'] = data.second
+        n_data['microsecond'] = data.microsecond
+        n_data['tzinfo'] = jsonize(data.tzinfo)
+    elif isinstance(data, date):
+        print('jsonize date', data)
+        n_data = {}
+        n_data['year'] = data.year
+        n_data['month'] = data.month
+        n_data['day'] = data.day
+    elif isinstance(data, timezone):
+        print('jsonize timezone', data)
+        n_data = {}
+        n_data['name'] = data.tzname(None)
+        n_data['utc_offset'] = data.utcoffset(None).total_seconds()
+    print('n_data => ', n_data)
+    return n_data
 
 class Message(object):
     MSG_NACK = 0
@@ -61,7 +105,9 @@ class Message(object):
             data['type'] = self.MSG_TYPES[self._type]
         if self._name is not None:
             data['name'] = self._name
-        if self._fi is not None:
+        if self._fields is not None:
+            data['fields'] = jsonize(self._fields['data'])
+        elif self._fi is not None:
             data['fields'] = self._fi[1]
         obj = {}
         obj['type'] = self.__class__.__name__
