@@ -215,7 +215,6 @@ class Gateway(object):
                         import traceback
                         traceback.print_exc()
                 
-
     # ------------------------------------------------------------------------
     #
     # gateway specific functions

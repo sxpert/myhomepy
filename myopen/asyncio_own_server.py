@@ -195,7 +195,6 @@ class Server(asyncio.Protocol):
 #
 # ----------------------------------------------------------------------------
 
-
 def setup_OWN_server(loop, host, port, password, proxy_to_host=None, proxy_to_port=None):
     def start_client_connection():
         return Server(password, proxy_to_host, proxy_to_port)
