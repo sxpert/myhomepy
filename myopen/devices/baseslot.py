@@ -56,6 +56,7 @@ class BaseSlot(object):
     def kos_for_slot(self):
         dev = self._slots.parent
         who = dev.subsystem.SYSTEM_WHO
+        # TODO: need the slot in here !
         kos = device_db.find_kos_for_device(who, dev.model_id, dev.fw_version)
         values = []
         widths = []
