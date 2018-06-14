@@ -182,7 +182,11 @@ class Gateway(object):
 
             if data is not None:
                 # send the message to websocket listener
-                await self.system.websocket_dispatch(data)
+                try:
+                    await self.system.websocket_dispatch(data)
+                except:
+                    import traceback
+                    traceback.print_exc()
                 handled = False
                 if self.system.is_cmd_busy:
                     try:
