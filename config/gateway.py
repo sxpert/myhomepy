@@ -189,25 +189,27 @@ class Gateway(object):
                 except:
                     import traceback
                     traceback.print_exc()
-                handled = False
-                if self.system.is_cmd_busy:
+                if msg is not None:
+                    msg.parse()
+                    handled = False
+                    if self.system.is_cmd_busy:
+                        try:
+                            handled = self.system.dispatch_message(msg)
+                        except:
+                            import traceback
+                            traceback.print_exc()
+                    if not handled:
+                        try:
+                            msg.dispatch()
+                        except:
+                            import traceback
+                            traceback.print_exc()
+                    # finally, send the message to websocket listener
                     try:
-                        handled = self.system.dispatch_message(msg)
+                        await self.system.systems.config.websocket_dispatch(msg)
                     except:
                         import traceback
                         traceback.print_exc()
-                if not handled:
-                    try:
-                        msg.dispatch()
-                    except:
-                        import traceback
-                        traceback.print_exc()
-                # finally, send the message to websocket listener
-                try:
-                    await self.system.systems.config.websocket_dispatch(msg)
-                except:
-                    import traceback
-                    traceback.print_exc()
                 
 
     # ------------------------------------------------------------------------

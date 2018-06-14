@@ -279,7 +279,6 @@ class Message(object):
         return None
 
     def dispatch(self):
-        self.parse()
         if isinstance(self._fields, bool):
             return self._fields
         if callable(self._fields):
