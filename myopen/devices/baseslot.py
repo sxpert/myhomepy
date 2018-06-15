@@ -56,26 +56,35 @@ class BaseSlot(object):
     def kos_for_slot(self):
         dev = self._slots.parent
         who = dev.subsystem.SYSTEM_WHO
-        kos = device_db.find_kos_for_device(who, dev.model_id, dev.fw_version)
+        # TODO: need the slot in here !
+        kos = device_db.find_kos_for_device(who, dev.model_id, dev.fw_version, self.number)
         values = []
         widths = []
         ids = []
         names = []
-        for ko in kos:
+        tabs = []
+        for ko_rec in kos:
+            ko, tab = ko_rec
             ko_data = device_db.get_ko_details(ko)
             if ko_data is not None:
                 w, i, n = ko_data
                 # skip those that would be too wide
-                if self.number + w <= len(dev.slots):
-                    values.append(ko)
-                    widths.append(w)
-                    ids.append(i)
-                    names.append(n)
+                # if self.number + w <= len(dev.slots):
+                #     values.append(ko)
+                #     widths.append(w)
+                #     ids.append(i)
+                #     names.append(n)
+                values.append(ko)
+                widths.append(w)
+                ids.append(i)
+                names.append(n)
+                tabs.append(tab)
         return {
             'values': values,
             'widths': widths,
             'ids': ids,
-            'names': names
+            'names': names,
+            'tabs': tabs
         }
 
     @property
@@ -154,12 +163,13 @@ class BaseSlot(object):
         else:
             dev = self._slots.parent
             who = dev.subsystem.SYSTEM_WHO
-            kos = device_db.find_symbolic_kos_for_device(who, dev.model_id, dev.fw_version)
+            kos = device_db.find_symbolic_kos_for_device(who, dev.model_id, dev.fw_version, self.number)
             # KO should be a symbol
             if ko not in kos:
                 device_db.log("BaseSlot.loads ERROR: invalid KO %s for object" % str(ko))
                 return False
             ko_value, width = kos[ko]    
+            # should not happen anymore
             if self.number + width > len(dev.slots):
                 device_db.log("BaseSlot.loads ERROR: KO %d is too wide (%d) to be set on slot %d" % (ko_value, width, self.number))
                 return False
@@ -289,7 +299,7 @@ class BaseSlot(object):
     def do_ko_value(self, keyo, state):
         dev = self._slots.parent
         who = dev.subsystem.SYSTEM_WHO
-        kos = device_db.find_kos_for_device(who, dev.model_id, dev.fw_version)
+        kos = device_db.find_kos_for_device(who, dev.model_id, dev.fw_version, self.number)
         if keyo in kos:
             return keyo
         self.log("BaseSlot.do_ko_value ERROR: invalid KO for object %s" % (str(keyo)))

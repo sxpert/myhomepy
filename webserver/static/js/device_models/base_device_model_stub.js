@@ -1,5 +1,6 @@
 import * as ajax from '../ajax.js';
 import * as dev_4652 from './4652.js';
+import * as dev_4672m2 from './4672m2.js';
 import * as dev_F411 from './F411.js';
 import * as dev_4693 from './4693.js';
 
@@ -45,6 +46,7 @@ export class Base_Device_Model_Stub {
 Base_Device_Model_Stub.prototype.device_types = {
     'LIGHTING' : {
         2: dev_4652.Device_4652,
+        82: dev_4672m2.Device_4672M2,
         129: dev_F411.Device_F411,
         130: dev_F411.Device_F411,
     },

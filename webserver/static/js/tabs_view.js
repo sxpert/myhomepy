@@ -52,6 +52,11 @@ export class Tabs_View {
             }
         }
     }
+    change_tab_label(tab_index, tab_label) {
+        let children = this.el_tabs.childNodes;
+        let tab = children[tab_index];
+        tab.textContent = tab_label;
+    }
     get element() {
         return this.el_tabs;
     }
