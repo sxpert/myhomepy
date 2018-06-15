@@ -1,0 +1,1 @@
+from .bt_4672m2 import Device4672M2
