@@ -25,7 +25,6 @@ class Automator(object):
         if exc is not None:
             if exc.__class__ in (TimeoutError, gaierror, ):
                 return
-        print(context)
 
     def __init__(self, options):
         if options.debug:
