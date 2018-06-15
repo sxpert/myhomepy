@@ -71,8 +71,8 @@ export class Device {
                     let index = i;
                     if (this.tabs_view!==null)
                         this.tabs_view.add_tab(index, this.device_model.tab_label(index));
-                    slot.onWidthChanged = function(new_width) {
-                        controller.slot_width_changed(index, new_width);
+                    slot.onWidthChanged = function(new_width, tab_label) {
+                        controller.slot_width_changed(index, new_width, tab_label);
                     }
                     this.config_view.set_slot(i, slot.element);
                 }
@@ -89,9 +89,11 @@ export class Device {
         for(var slot_id in this.slot_controllers)
             this.slot_controllers[slot_id].hidden = (slot_id!=index);
     }
-    slot_width_changed(slot_index, new_width) {
-        if (this.tabs_view!=null)
+    slot_width_changed(slot_index, new_width, tab_name) {
+        if (this.tabs_view!=null) {
             this.tabs_view.change_tab_width(slot_index, new_width);
+            this.tabs_view.change_tab_label(slot_index, tab_name);
+        }
     };
     set_device_model(stub) {
         let controller = this;

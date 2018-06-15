@@ -215,7 +215,9 @@ export class Slot_Controller {
         let ko_i = this.slot_model.kos.ids.indexOf(ko_id);
         let ko_widths = this.slot_model.kos.widths;
         let ko_width = ko_widths[ko_i];
+        let ko_tabs = this.slot_model.kos.tabs;
+        let tab_name = ko_tabs[ko_i];
         if (this._on_width_changed)
-            this._on_width_changed(ko_width);
+            this._on_width_changed(ko_width, tab_name);
     }
 }

@@ -362,35 +362,29 @@ class DeviceDatabase(object):
         data['names'] = names
         return data
 
-    def find_kos_for_device(self, system_id, model_id, firmware):
+    def find_kos_for_device(self, system_id, model_id, firmware, slot_number):
         """
         List KOs available for device with firmware
         """
         kos = []
         c = self.conn.cursor()
-        # find unconfigured ko
-        sql = "select unconf_ko from devices where system_id=? and model_id=?;"
-        c.execute(sql, [system_id, model_id])
-        unconf_ko = c.fetchall()
-        if len(unconf_ko) == 1:
-            unconf_ko = unconf_ko[0][0]
-            kos.append(unconf_ko)
-        # find other kos
-        sql = "select fw, ko from device_kos where system_id=? and model_id=? order by \"order\";"
-        c.execute(sql, [system_id, model_id])
+        # list all kos valid for slot
+        sql = "select fw, tab_label, ko from device_kos where system_id=? and model_id=? and slot=? order by \"order\";"
+        c.execute(sql, [system_id, model_id, slot_number])
         ko_entries = c.fetchall()
         for entry in ko_entries:
-            fw, ko = entry
+            fw, tab_label, ko = entry
             if self.match_fw(firmware, fw):
-                kos.append(ko)
+                kos.append((ko, tab_label,))
         return kos
 
-    def find_symbolic_kos_for_device(self, system_id, model_id, firmware):
-        kos = self.find_kos_for_device(system_id, model_id, firmware)
+    def find_symbolic_kos_for_device(self, system_id, model_id, firmware, slot_number):
+        kos = self.find_kos_for_device(system_id, model_id, firmware, slot_number)
         c = self.conn.cursor()
         data = {}
         sql = "select label, slot_width from kos where ko=?;"
-        for ko in kos:
+        for ko_rec in kos:
+            ko, _ = ko_rec
             c.execute(sql, [ko])
             label = c.fetchall()
             if len(label) != 1:
