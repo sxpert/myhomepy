@@ -7,7 +7,7 @@ from .dev_utils import map_value
 from core.logger import LOG_ERROR 
 from myopen.device_db import device_db
 
-__all__ = ['F_KO', 'MissingFieldsDefinitionError', 'BaseSlot', ]
+__all__ = ['F_KO', 'MissingFieldsDefinitionError', 'Slot', ]
 
 F_KO = 'KO'
 F_EMPTY = '_empty'
@@ -17,7 +17,7 @@ class MissingFieldsDefinitionError(Exception):
     pass
 
 
-class BaseSlot(object):
+class Slot(object):
     log = None
 
     def __init__(self, slots):
@@ -45,6 +45,15 @@ class BaseSlot(object):
         if self._slots is not None:
             return self._slots.slots.index(self)
         return None
+
+    @property
+    def is_valid(self):
+        ko = self.get_value(F_KO, None)
+        if ko is None:
+            self.log("Slot.is_valid : no KO => False")
+            return False
+        self.log("Slot.is_valid : default => False")
+        return False
 
     # ========================================================================
     #
@@ -291,7 +300,7 @@ class BaseSlot(object):
         return True
 
     def res_conf_ok(self):
-        self.log('BaseSlot.res_conf_ok: %s' % (str(self._tmp_values)), LOG_ERROR)
+        self.log('Slot.res_conf_ok: %s' % (str(self._tmp_values)), LOG_ERROR)
         self._values = self._tmp_values
         self._tmp_values = None
         return True
@@ -299,10 +308,12 @@ class BaseSlot(object):
     def do_ko_value(self, keyo, state):
         dev = self._slots.parent
         who = dev.subsystem.SYSTEM_WHO
-        kos = device_db.find_kos_for_device(who, dev.model_id, dev.fw_version, self.number)
-        if keyo in kos:
-            return keyo
-        self.log("BaseSlot.do_ko_value ERROR: invalid KO for object %s" % (str(keyo)))
+        kos_desc = device_db.find_kos_for_device(who, dev.model_id, dev.fw_version, self.number)
+        kos = []
+        for ko, _ in kos_desc:
+            if ko == keyo:
+                return keyo
+        self.log("Slot.do_ko_value ERROR: invalid KO %s for object (valid: %s)" % (str(keyo), str(kos)))
         return None
 
     def res_ko_value(self, keyo, state):
@@ -361,10 +372,12 @@ class BaseSlot(object):
 
         # value for F_KO should never be None here !
         field = device_db.find_field(_get_value(F_KO, None), index, _get_value)
+        self.log('Slot.do_param_ko : field : %s' % (str(field)))
         if field is not None:
             access_mode, field_type, field_type_detail, var_name, array_index = field
             # should check value
             ok, value = device_db.parse_value(val_par, field_type, field_type_detail)
+            device_db.log('Slot.do_param_ko : value parsed %s %s' % (str(ok), str(value)))
             if ok is not None:
                 if access_mode == 'array':
                     try:
@@ -393,7 +406,7 @@ class BaseSlot(object):
                     # more complicated modes
                     device_db.log('UNIMPLEMENTED: %s %s' % (str(field), str(value)))
             else:
-                device_db.log("ERROR: value returned is None")
+                device_db.log("Slot.do_param_ko ERROR: value returned is None")
         return (var_name, value)
 
     def res_param_ko(self, index, value):

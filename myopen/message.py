@@ -274,8 +274,12 @@ class Message(object):
 
     @property
     def function(self):
+        self.log('Message.function %s' % (str(self._fields)))
         if callable(self._fields):
             return self._fields
+        func = self._fields.get('func', None)
+        if func is not None and callable(func):
+            return func
         return None
 
     def dispatch(self):

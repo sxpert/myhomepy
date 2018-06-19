@@ -58,7 +58,7 @@ class CmdScanAid(BaseCommand):
     def receive_device_id(self, msg):
         if msg.is_conn_monitor:
             self.log('CmdScanAid.receive_device_id : monitor %s' % (str(msg)))
-            if msg.name == 'DIAG_RES_ID':
+            if msg.name == 'RES_ID':
                 # pretend those are handled
                 self.log('pretend message was handled')
                 return True

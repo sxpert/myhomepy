@@ -4,7 +4,7 @@ from ..constants import (
     VAR_NB_SLOTS, VAR_SLOT_CLASS,
 )
 from core.logger import LOG_ERROR
-from .baseslot import BaseSlot
+from .slot import Slot
 
 
 class Slots(object):
@@ -33,6 +33,15 @@ class Slots(object):
     def __len__(self):
         return len(self.slots)
 
+    @property
+    def is_valid(self):
+        if len(self.slots) == 0:
+            return False
+        valid = True
+        for s in self.slots:
+            valid = valid and s.is_valid
+        return valid
+
     # ========================================================================
     #
     # front-end related 
@@ -42,8 +51,8 @@ class Slots(object):
     @property
     def slot_class(self):
         if self.parent is not None:
-            return getattr(self.parent, VAR_SLOT_CLASS, BaseSlot)
-        return BaseSlot
+            return getattr(self.parent, VAR_SLOT_CLASS, Slot)
+        return Slot
 
     @property
     def web_data(self):

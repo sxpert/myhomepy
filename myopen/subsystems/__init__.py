@@ -54,7 +54,6 @@ def find_subsystem(who):
                 return s
     return None
 
-
 def find_diag_subsystem(who):
     for s in SubSystems:
         if getattr(s, 'SYSTEM_DIAG_WHO', None) == who:

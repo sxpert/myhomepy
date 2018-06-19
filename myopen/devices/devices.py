@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from .basedevice import BaseDevice
+from .device import Device
 from core.logger import LOG_ERROR, LOG_INFO, LOG_DEBUG
 from myopen.subsystems import find_subsystem
 
@@ -19,29 +19,31 @@ class Devices(object):
             self.log('Devices.loads : devices should contain a list',
                      LOG_ERROR)
             return None
+        if len(data) == 0:
+            self.log("Devices.loads : no devices, push discovery", LOG_ERROR)
+            return None
         # we have a list
         for dev_data in data:
-            subsystem = dev_data.get('subsystem', None)
-            subs = find_subsystem(subsystem)
-            # at this point, hw_addr is an 8 chars hex string
-            hw_addr = dev_data.get('hw_addr', None)
-            if hw_addr is not None and len(hw_addr) == 8:
-                hw_addr = int(hw_addr, 16)
-                dev_data['hw_addr'] = hw_addr
-            dev = BaseDevice(self, subs, dev_data)
+            # subsystem = dev_data.get('subsystem', None)
+            # subs = find_subsystem(subsystem)
+            # # at this point, hw_addr is an 8 chars hex string
+            # hw_addr = dev_data.get('hw_addr', None)
+            # if hw_addr is not None and len(hw_addr) == 8:
+            #     hw_addr = int(hw_addr, 16)
+            #     dev_data['hw_addr'] = hw_addr
+            
+            # dev = Device(self, subs, dev_data)
+            dev = Device(self)
+            self.log("Devices.loads : %s" % (dev_data))
             dev = dev.loads(dev_data)
+            self.log("Devices.loads : %s" % (str(dev)))
             # add device to list
-            k = Devices.format_hw_addr(dev.hw_addr)
-            self._devs[k] = dev
-            # if device is BaseDevice...
-            self.log('Devices.loads : device class %s'
-                     % (str(dev.__class__)), LOG_DEBUG)
-            self.log('Devices.loads : device is BaseDevice ? %s'
-                     % (str(dev.__class__ is BaseDevice)), LOG_DEBUG)
-            if dev.__class__ is BaseDevice:
-                self.log('Devices.loads : queuing %s' % (str(dev)),
-                         LOG_ERROR)
-                dev.queue_for_discovery()
+            self._devs[dev.hw_addr_hex] = dev
+            # if dev.__class__ is Device:
+            #     self.log('Devices.loads : queuing %s' % (str(dev)),
+            #              LOG_ERROR)
+            #     dev.queue_for_discovery()
+        
 
     def __to_json__(self):
         if len(self._devs) == 0:
@@ -108,13 +110,11 @@ class Devices(object):
             dev = self[k]
             dev.update_base_data(data)
             return dev
-        # build proxy device
-        d = BaseDevice(self, subsystem, data)
-        # should not happen
-        if not d.valid:
-            self.log('ERROR: proxy device is not valid')
-            return None
-        # insert proxy device
+        # create device
+        d = Device(self)
+        d.subsystem = subsystem
+        d.hw_addr = hw_addr
+        self.log('Devices._register: adding device %s %s ' % (k, str(d)), LOG_ERROR)
         self[k] = d
         return d
 
@@ -122,11 +122,8 @@ class Devices(object):
         """
         Registers a device, launches a scan if the device is unknown
         """
+        self.log("Register device %s %s" % (str(subsystem), str(data)), LOG_ERROR)
         dev = self._register(subsystem, data)
-        self.log('Devices.register : %s' % (str(dev)), LOG_INFO)
-        if dev.__class__.__name__ != BaseDevice.__name__:
-            return dev
-        # push command to get device info
         dev.queue_for_discovery()
         return dev
 
@@ -149,7 +146,7 @@ class Devices(object):
             self.log('Devices.replace_active_device: no device activated')
             return False
 
-        bd_name = BaseDevice.__name__
+        bd_name = Device.__name__
         ad_name = self._active_device.__class__.__name__
         nd_name = new_device.__class__.__name__
 

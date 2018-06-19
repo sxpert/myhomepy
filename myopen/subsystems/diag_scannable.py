@@ -217,7 +217,7 @@ class DiagScannable(OWNSubSystem):
             # device answers with it's ID
             # *#[who]*[where]*13*[id]##
             {
-                'name': 'DIAG_RES_ID',
+                'name': 'RES_ID',
                 're': r'^\*(?P<virt_id>\d{1,4})\*13\*(?P<hw_addr>\d{1,10})##$',
                 'func': 'diag_res_id'
             },
@@ -497,6 +497,7 @@ class DiagScannable(OWNSubSystem):
         hw_addr = matches['hw_addr']
         hw_addr_x = self.system.devices.format_hw_addr(hw_addr)
         def res_id():
+            self.log("DiagScannable.diag_res_id=>res_id: registering device %s" % matches, LOG_ERROR)
             return self.check_result(self.system.devices.register(self, matches), matches, False)
         info = {
             'data': {'virt_id': virt_id, 'hw_addr': hw_addr, 'hw_addr_x': hw_addr_x},

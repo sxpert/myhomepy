@@ -17,6 +17,8 @@ class DeviceDatabase(object):
     #
 
     def match_fw(self, dev_firmware, to_check):
+        if dev_firmware is None:
+            return False
         dev_firmware = dev_firmware.split('.')
         to_check = to_check.split('.')
         if len(dev_firmware) != 3:
@@ -168,6 +170,8 @@ class DeviceDatabase(object):
                 return self.check_error("ERROR: unable to find definition for integer %s" % field_type_detail)
             # at this point we must have one record
             v_undef, v_min, v_max = vals[0]
+            self.log('DeviceDatabase.parse_INTEGER : field_type_detail: %s value %s undef: %s min: %s max: %s' % 
+                (str(field_type_detail), str(value), str(v_undef), str(v_min), str(v_max)))
             if value != v_undef:
                 if value < v_min or value > v_max:
                     return self.check_error("ERROR: invalid value %d for integer %s, should be in [%d..%d]" %
@@ -176,6 +180,7 @@ class DeviceDatabase(object):
                 value = None
         else:
             return self.check_error("parse_INTEGER ERROR: %s expected an int value (%s)" % (field_type_detail, str(value)))
+        self.log('DeviceDatabase.parse_INTEGER : integer ok %d' % (value))
         return self.check_ok(value)
 
     def parse_LIST(self, field_type_detail, value):
@@ -199,6 +204,8 @@ class DeviceDatabase(object):
         return self.check_ok(value)
 
     def parse_value(self, value, field_type, field_type_detail):
+        self.log('DeviceDatabase.parse_value value: %s field_type: %s field_type_detail: %s' %
+            (str(value), str(field_type), str(field_type_detail)))
         f_name = "parse_%s" % (field_type)
         func = getattr(self, f_name, None)
         if func is not None:

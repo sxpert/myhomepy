@@ -1,5 +1,5 @@
 from core.logger import LOG_ERROR
-from myopen.devices import BaseDevice
+from myopen.devices import Device
 from myopen.subsystems import (TX_CMD_DIAG_ABORT, TX_CMD_DIAG_ID,
                                TX_CMD_PARAM_ALL_KO, DiagScannable,
                                find_diag_subsystem, replace_in_command)
@@ -18,7 +18,7 @@ class CmdDiagAid(BaseCommand):
             self.log('device is None, aborting', LOG_ERROR)
             return self.end()
 
-        if not issubclass(self.device.__class__, BaseDevice):
+        if not issubclass(self.device.__class__, Device):
             self.log('device invalid \'%s\'' % (str(self.device)),
                      LOG_ERROR)
             return self.end()
