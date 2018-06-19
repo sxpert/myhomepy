@@ -280,6 +280,10 @@ class Device(object):
 
         self._model_id = data.get('model_id', None)
 
+        fw = data.get('firmware_version', None)
+        if fw is not None:
+            self._fw_version = fw
+
         self.virt_id = data.get('virt_id', None)
 
         confs = data.get('configurators', None)
@@ -293,9 +297,6 @@ class Device(object):
         #     product_line = data.get('product_line', None)
         #     if product_line is not None:
         #         self.set_product_line(product_line)
-        # fw = data.get('firmware_version', None)
-        # if fw is not None:
-        #     self._fw_version = fw
 
         slots = data.get('slots', None)
         if slots is not None and isinstance(slots, list):

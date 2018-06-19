@@ -180,7 +180,7 @@ class DeviceDatabase(object):
                 value = None
         else:
             return self.check_error("parse_INTEGER ERROR: %s expected an int value (%s)" % (field_type_detail, str(value)))
-        self.log('DeviceDatabase.parse_INTEGER : integer ok %d' % (value))
+        self.log('DeviceDatabase.parse_INTEGER : integer ok %s' % (str(value)))
         return self.check_ok(value)
 
     def parse_LIST(self, field_type_detail, value):

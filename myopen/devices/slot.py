@@ -48,12 +48,13 @@ class Slot(object):
 
     @property
     def is_valid(self):
+        # check only the ko for now
         ko = self.get_value(F_KO, None)
         if ko is None:
             self.log("Slot.is_valid : no KO => False")
             return False
-        self.log("Slot.is_valid : default => False")
-        return False
+        self.log("Slot.is_valid : default => True")
+        return True
 
     # ========================================================================
     #
@@ -150,11 +151,11 @@ class Slot(object):
 
     def loads(self, data):
         if not isinstance(data, dict):
-            device_db.log("BaseSlot.loads ERROR: data must be a dict")
+            device_db.log("Slot.loads ERROR: data must be a dict")
             return False
         keys = data.keys()
         if len(keys) == 0:
-            device_db.log("BaseSlot.loads WARNING: we're missing info for slot %d" % (self.number))
+            device_db.log("Slot.loads WARNING: we're missing info for slot %d" % (self.number))
             device_db.log(self._slots.parent)
             device_db.log(data)
             return False
@@ -163,24 +164,25 @@ class Slot(object):
             # we don't have a ko, slot is probably empty
             empty = data.get(F_EMPTY, None)
             if empty is None:
-                device_db.log("BaseSlot.loads ERROR: there should be an '%s' value in this case" % (F_EMPTY))
+                device_db.log("Slot.loads ERROR: there should be an '%s' value in this case" % (F_EMPTY))
                 return False
             if empty != True:
-                device_db.log("BaseSlot.loads ERROR: %s should be True" % (F_EMPTY))
+                device_db.log("Slot.loads ERROR: %s should be True" % (F_EMPTY))
                 return False
             self.set_value(F_EMPTY, empty)
         else:
             dev = self._slots.parent
             who = dev.subsystem.SYSTEM_WHO
             kos = device_db.find_symbolic_kos_for_device(who, dev.model_id, dev.fw_version, self.number)
+            device_db.log("Slot.loads : symbolic kos : %s %s %s %s" % (str(who), str(dev.model_id), str(dev.fw_version), str(kos)))
             # KO should be a symbol
             if ko not in kos:
-                device_db.log("BaseSlot.loads ERROR: invalid KO %s for object" % str(ko))
+                device_db.log("Slot.loads ERROR: invalid KO %s for object" % str(ko))
                 return False
             ko_value, width = kos[ko]    
             # should not happen anymore
             if self.number + width > len(dev.slots):
-                device_db.log("BaseSlot.loads ERROR: KO %d is too wide (%d) to be set on slot %d" % (ko_value, width, self.number))
+                device_db.log("Slot.loads ERROR: KO %d is too wide (%d) to be set on slot %d" % (ko_value, width, self.number))
                 return False
             self.set_value(F_KO, ko_value)
 
@@ -206,7 +208,7 @@ class Slot(object):
                 # unable to find variable...
                 if not ok:
                     value = None
-                    device_db.log("BasicSlot.loads WARNING: unable to find a value for %s" % (var_name))
+                    device_db.log("Slot.loads WARNING: unable to find a value for %s" % (var_name))
                     # skip to next field name
                     continue
                 if value is None:
@@ -219,7 +221,7 @@ class Slot(object):
                             continue
                         o, v = device_db.parse_value(value[i], field_type, field_type_detail)
                         if not o: 
-                            self.log('BasicSlot.loads WARNING: invalid value \'%s\' for %s[%d]' % (value[i], var_name, i))
+                            self.log('Slot.loads WARNING: invalid value \'%s\' for %s[%d]' % (value[i], var_name, i))
                         ok = ok and o
                 else:
                     ok, value = device_db.parse_value(value, field_type, field_type_detail)
