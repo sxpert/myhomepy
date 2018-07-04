@@ -182,9 +182,9 @@ class Device(object):
     #     brand = self.BRANDS[brand_id]
     #     return brand['id']
 
-    @property
-    def product_line(self):
-        return self._product_line
+    # @property
+    # def product_line(self):
+    #     return self._product_line
 
     @property
     def model_id(self):
@@ -201,7 +201,7 @@ class Device(object):
         data['name'] = self.name
         data['description'] = self.description
         # data['brand_id'] = self.brand_id
-        data['product_line'] = self.product_line
+        # data['product_line'] = self.product_line
         data['subsystem'] = self.dump_subsystem()
         data['model_id'] = self.model_id
         data['slots'] = self.slots.web_data

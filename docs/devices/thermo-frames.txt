@@ -1,0 +1,54 @@
+thermo frames :
+
+*4*[what]*[where]##		TERMO_RES_ZONE_MODE
+				what = [0, 1, 102, 202, 303]
+				where = [1-99]
+*4*311*#[where]##
+*4*303*[where]##
+*4*102*[where]##
+*4*202*[where]##
+*4*302*[where]##
+*4*40*[where]##
+*4*[what]#[temp]*#0##
+*4*20*#0##
+*4*21*#0##
+		
+
+
+*#4*[where]*0*[temp]##			THERMO_RES_TEMP 
+					where = "[1-99]" "[1-8][01-99]"
+					temp = "0[00-50][0-9]"
+*#4*[where]*0##				THERMO_REQ_TEMP
+					where = "[1-99]" "[0-8][01-99]"
+*#4*[where]*11##			THERMO_REQ_FAN_COIL_SPEED
+					where = "[1-99]"
+*#4*[where]*11*[speed]##		THERMO_RES_FAN_COIL_SPEED
+					where = "[1-99]"
+					speed = [0, 1, 2, 3, 15]
+
+*#4*[where]*12##			THERMO_REQ_TEMP_ADJUSTED_ZONE_MODE
+					where = [1-99]
+*#4*[where]*12*[temp]*3##		THERMO_RES_TEMP_ADJUSTED
+					where = [1-99]
+					temp = "0[02-43][0-9]"
+*#4*[where]*13##			THERMO_REQ_LOCAL_OFFSET
+					where = "[1-99]"
+*#4*[where]*13*[local_offset]## 	THERMO_RES_LOCAL_OFFSET
+					where = "[1-99]"
+					local_offset = ["[01][0-3]", 4, 5]
+*#4*[where]*#14*[temp]*[mode]## 	THERMO_CMD_SET_TEMP
+					where = "#1" - "#99"
+					temp  = "0[05-04][05]"
+					mode = "[1(heating)2(conditional)3(generic)]" (
+*#4*[where]*14##			THERMO_REQ_SET_TEMP
+*#4*[where]*14*[temp]*3##	        THERMO_RES_SET_TEMP
+*#4*#0*#14*[temp]*[mode]##		THERMO_CMD_SET_CENTRAL_UNIT_TEMP
+
+*#4*[where]*19##		        THERMO_REQ_VALVE_STATUS
+					where = [
+*#4*[where]*19*[cooling]*[heating]##	THERMO_RES_VALVE_STATUS
+					cooling, heating [0-8]
+*#4*[where]*20##			THERMO_REQ_ACTUATOR_STATUS
+*#4*[where]*20*[status]##		THERMO_RES_ACTUATOR_STATUS
+					status = [0-9]
+

@@ -135,7 +135,7 @@ class DiagScannable(OWNSubSystem):
             # *[WHO]*14#[SLOT]*0##
             {
                 'name': 'CMD_RESET_KO',
-                're': r'^\*14#(?P<slot>\d{1,3})\*0##$',
+                're': r'^\*14#(?P<slot>\d{1,2})\*0##$',
                 'func': 'diag_cmd_reset_ko'
             },
 
@@ -163,6 +163,8 @@ class DiagScannable(OWNSubSystem):
             # res_fw_version
             # device answers with it's firmware version
             # *#[who]*[where]*2*[fw_version]##
+            # really:   
+            # *#[who]*[where]*2*[major]*[minor]*[build]##
             {   
                 'name': 'RES_FW_VERSION',
                 're': r'^\*(?P<virt_id>\d{1,4})\*2\*(?P<fw_version>.*)##$',
