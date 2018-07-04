@@ -1,0 +1,85 @@
+AS_ITEM_SYSTEM : id_item 281, id_system 1, modobj 2, main 1
+
+EN_DEVICE : id_device => (plein de choses) => 4652/2
+
+EN_FIRMWARE : id_firmware 145, id_item 281, firmware_v -1, firmware_r -1, slots 2, id_status 0, FW_default 1
+
+EN_BUILDS : id_build 106, firmware_b -1, localization_level 0, id_firmware 145
+
+AS_OBJECT_FIRMWARE : id_object_firmware [368, 369, 370, 371] id_firmware 145, id_key_object [400, 401, 404, 406]
+
+AS_OBJECT_FIRMWARE id_object_firmware 368, id_firmware 145, id_key_object 400
+
+EN_FILTER id_filter 273, id_object_firmware 368, note 'modality', whole_range 0, id_conf 1523
+
+EN_FILTER_RANGE id_filter 273, range [removed values], note 'baratin explicatif'
+
+AS_HIDDEN_KCONF id_conf 1523 [not present]
+
+EN_CONF_RANGE id_conf 1523 
+
+exemple 2
+---------
+
+AS_ITEM_SYSTEM : id_item 2180 , id_system 1, modobj 82, main 1
+
+EN_FIRMWARE : id_firmware 707, firmware 1.0.* , 4 slots, FW_default 0 id_build 637
+
+AS_OBJECT_FIRMWARE :
+iof,  if,  iko 
+1227, 707,   6
+1223, 707,   7
+1222, 707, 400
+1224, 707, 401
+1225, 707, 404
+1226, 707, 406
+
+
+exemple 3:
+----------
+hours   iof     if      iko     id_item status  device type
+1       275	    132	    6          2    0       F411/2                              (local button modality | hours | minutes | seconds | relay state on reset | load control mode)
+1       350	    142	    6          3    0       F411/4                              (local button modality | hours | minutes | seconds | relay state on reset | load control mode)
+1       412	    167	    6        128    0       BMSW1001                            (local button modality | hours | minutes | seconds | relay state on reset | load control mode)
+1       413	    168	    6        134    0       BMSW1002                            (local button modality | hours | minutes | seconds | relay state on reset | load control mode)
+1       414	    169	    6         63    0       BMSW1003                            (local button modality | hours | minutes | seconds | relay state on reset | load control mode)
+1       415	    166	    6          1    0       F411/1N                             (local button modality | hours | minutes | seconds | relay state on reset | load control mode)
+1       416	    170	    6       1593    0       F411/1NC                            (local button modality | hours | minutes | seconds | relay state on reset | load control mode)
+        417	    171	    6       1594    0       F411/1                              (load control mode | relay state on reset)
+        418	    172	    6       1595    0       F411/1FL                            (load control mode | relay state on reset)
+1       419	    173	    6       1596    0       F411/2NC                            (local button modality | hours | minutes | seconds | relay state on reset | load control mode)
+        445	    186	    6       1121    0       4671/1                              (load control mode | relay state on reset)
+1       478	    193	    6         54    0       3475                                (local button modality | hours | minutes | seconds | relay state on reset | load control mode)
+        479	    194	    6         55    0       3476                                (local button modality | load control mode | per energy management (state on reset))
+        484	    195	    6         66    0       L/N/NT4675                          (load control mode | per energy management (state on reset))
+1       506	    199	    6       1156    0       BMSW1005                            (local button modality | hours | minutes | seconds | relay state on reset | load control mode)
+        600	    281	    6         59    -1      BMSW3002 / 048841                   (load control mode | relay state on reset)
+        603	    300	    6        130    -1      BMSW3001 / 048840                   (load control mode | per energy management (state on reset))
+1       619	    157	    6       1184    0       4671M2                              (local button modality | hours | minutes | seconds | relay state on reset | load control mode)
+        641	    229	    6       1163    0       F522                                (local button modality | local control mode)       
+        642	    230	    6       1164    0       F523                                (local button modality | local control mode)       
+        644	    236	    6       1165    0       4672N                               (local button modality | local control mode)       
+1       1138	659	    6       2115    0       F411U2                              (local button modality | hours | minutes | seconds)
+1       1147	669	    6       2131    0       F411U1                              (local button modality | hours | minutes | seconds)
+1       1227	707	    6       2180    0       4672M2                              (local button modality | hours | minutes | seconds)
+        1287	751	    6       2213    1       3475MH                              (local button modality | load control mode | per energy management (state on reset))
+1       1428	764	    6       2233    0       K4672M2L                            (local button modality | hours | minutes | seconds)
+1       1455	774	    6       2247    0       H4672M2L / LN4672M2L / 067586       (local button modality | hours | minutes | seconds)
+
+                                                                                                                        
+1746	H4691	Display thermostat 2 modules	1	2	1	1686		0	0	Thermostat with display     (160, 691)  iof ([553, 554, 877],[1192, 1193, 1194])
+                                                                                                                        iko ([542, 545, 184],[542 , 545,  184])    
+2586	KM4691	Add-on SCS thermostat	        1	20	1	2242		0	0	                            771         iof 1395, iko 542 
+2587	KG4691	Add-on SCS thermostat	        1	20	1	2242		0	0	                            771
+2588	KW4691	Add-on SCS thermostat	        1	20	1	2242		0	0	                            771
+1991	LN4691	Display thermostat 2 modules	1	4	1	1686		0	0	Thermostat with display     (160, 691)
+
+542	Hotel thermostat	    1	1	7	95
+545	Residential thermostat	1	1	7	96
+184	Master probe	        1	1	7	184
+
+
+694	    152	546 item 1862                   1335    4917    MOD=11 1000
+730	    165	546 item 1862 basic probe       1384    4917
+1038	11	546 item 1657 local display     2383    4929    FUN=3       
+
