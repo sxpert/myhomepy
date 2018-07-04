@@ -287,9 +287,9 @@ class DeviceDatabase(object):
         """
         """
         c = self.conn.cursor()
-        sql = 'select "order", cond, disp, access, type, type_info, def_val, tab, ' \
+        sql = 'select sequence, cond, disp, access, type, type_info, def_val, tab, ' \
               'var_name, array_index, description from ko_params ' \
-              'where ko=? and ko_version=? order by "order";'
+              'where ko=? and ko_version=? order by sequence;'
         if ko_version is None:
             sql = sql.replace("ko_version=?", "ko_version is ?")
         c.execute(sql, [ko_value, ko_version])
@@ -358,7 +358,7 @@ class DeviceDatabase(object):
 
     def get_list_details(self, list_ref):
         c = self.conn.cursor()
-        sql = 'select value, id, name from lists where list_ref=? order by "order";'
+        sql = 'select value, id, name from lists where list_ref=? order by sequence;'
         c.execute(sql, [list_ref])
         values = []
         ids = []
@@ -441,7 +441,7 @@ class DeviceDatabase(object):
 
     def find_fields_for_ko(self, ko, ko_version):
         c = self.conn.cursor()
-        sql = "select distinct var_name, var_old from ko_params where ko=? and ko_version=? order by \"order\";"
+        sql = "select distinct var_name, var_old from ko_params where ko=? and ko_version=? order by sequence;"
         if ko_version is None:
             sql = sql.replace("ko_version=?", "ko_version is ?")
         c.execute(sql, [ko, ko_version])
@@ -462,7 +462,7 @@ class DeviceDatabase(object):
         if ko is None:
             self.log("find_sys_addr ERROR: ko can't be None")
         c = self.conn.cursor()
-        sql = "select \"order\", slot_param, access, type, type_info, var_name, description " \
+        sql = "select sequence, slot_param, access, type, type_info, var_name, description " \
               "from ko_params where ko=? and ko_version=? and slot_param='ADDR';"
         if ko_version is None:
             sql = sql.replace("ko_version=?", "ko_version is ?")
