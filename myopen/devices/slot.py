@@ -22,7 +22,7 @@ class Slot(object):
 
     def __init__(self, slots):
         self.log = slots.log
-        self._slots = slots
+        self.slots = slots
         self._values = {}
         self._tmp_values = None
         self._params = {}
@@ -42,8 +42,8 @@ class Slot(object):
         """
         The index of this slot in the slots container
         """
-        if self._slots is not None:
-            return self._slots.slots.index(self)
+        if self.slots is not None:
+            return self.slots.slots.index(self)
         return None
 
     @property
@@ -64,17 +64,18 @@ class Slot(object):
 
     @property
     def kos_for_slot(self):
-        dev = self._slots.parent
+        dev = self.slots.parent
         who = dev.subsystem.SYSTEM_WHO
         # TODO: need the slot in here !
         kos = device_db.find_kos_for_device(who, dev.model_id, dev.fw_version, self.number)
         values = []
+        versions = []
         widths = []
         ids = []
         names = []
         tabs = []
         for ko_rec in kos:
-            ko, tab = ko_rec
+            ko, ko_version, tab = ko_rec
             ko_data = device_db.get_ko_details(ko)
             if ko_data is not None:
                 w, i, n = ko_data
@@ -85,12 +86,14 @@ class Slot(object):
                 #     ids.append(i)
                 #     names.append(n)
                 values.append(ko)
+                versions.append(ko_version)
                 widths.append(w)
                 ids.append(i)
                 names.append(n)
                 tabs.append(tab)
         return {
             'values': values,
+            'versions': versions,
             'widths': widths,
             'ids': ids,
             'names': names,
@@ -101,13 +104,15 @@ class Slot(object):
     def slot_options(self):
         kos = self.kos_for_slot
         ko_values = kos['values']
+        ko_versions = kos['versions']
         integers = {}
         conds = {}
         fields = {}
         lists = {}
         for ko in ko_values:
             index = ko_values.index(ko)
-            params = device_db.get_params_for_ko(ko)
+            ko_version = ko_versions[index]
+            params = device_db.get_params_for_ko(ko, ko_version)
             # gets lists and conditions
             for p in params:
                 cond = p['cond']
@@ -156,7 +161,7 @@ class Slot(object):
         keys = data.keys()
         if len(keys) == 0:
             device_db.log("Slot.loads WARNING: we're missing info for slot %d" % (self.number))
-            device_db.log(self._slots.parent)
+            device_db.log(self.slots.parent)
             device_db.log(data)
             return False
         ko = data.get(F_KO, None)
@@ -171,7 +176,7 @@ class Slot(object):
                 return False
             self.set_value(F_EMPTY, empty)
         else:
-            dev = self._slots.parent
+            dev = self.slots.parent
             who = dev.subsystem.SYSTEM_WHO
             kos = device_db.find_symbolic_kos_for_device(who, dev.model_id, dev.fw_version, self.number)
             device_db.log("Slot.loads : symbolic kos : %s %s %s %s" % (str(who), str(dev.model_id), str(dev.fw_version), str(kos)))
@@ -179,17 +184,17 @@ class Slot(object):
             if ko not in kos:
                 device_db.log("Slot.loads ERROR: invalid KO %s for object" % str(ko))
                 return False
-            ko_value, width = kos[ko]    
+            ko_value, ko_version, width = kos[ko]    
             # should not happen anymore
             if self.number + width > len(dev.slots):
                 device_db.log("Slot.loads ERROR: KO %d is too wide (%d) to be set on slot %d" % (ko_value, width, self.number))
                 return False
             self.set_value(F_KO, ko_value)
 
-            fields = device_db.find_fields_for_ko(ko_value)
+            fields = device_db.find_fields_for_ko(ko_value, ko_version)
             for v in fields:
                 var_name, var_old = v
-                field = device_db.find_named_field(ko_value, var_name, self.get_value)
+                field = device_db.find_named_field(ko_value, ko_version, var_name, self.get_value)
                 if field is None:
                     # this field is not valid at this point
                     continue
@@ -248,10 +253,18 @@ class Slot(object):
             else:
                 ko_id = device_db.find_symbolic_ko_value(ko_value)
                 data[F_KO] = ko_id
-                fields = device_db.find_fields_for_ko(ko_value)
+                dev_kos = device_db.find_kos_for_device(self.slots.parent.subsystem.SYSTEM_WHO, 
+                                                        self.slots.parent.model_id, 
+                                                        self.slots.parent.fw_version, 
+                                                        self.number)
+                for ko in dev_kos:
+                    ko, ko_version, _ = ko
+                    if ko == ko_value:
+                        break
+                fields = device_db.find_fields_for_ko(ko_value, ko_version)
                 for f in fields:
                     field_name, _ = f
-                    field = device_db.find_named_field(ko_value, field_name, self.get_value)
+                    field = device_db.find_named_field(ko_value, ko_version, field_name, self.get_value)
                     if field is not None:
                         _, field_type, field_type_detail = field
                         value = self.get_value(field_name, None)
@@ -308,11 +321,11 @@ class Slot(object):
         return True
 
     def do_ko_value(self, keyo, state):
-        dev = self._slots.parent
+        dev = self.slots.parent
         who = dev.subsystem.SYSTEM_WHO
         kos_desc = device_db.find_kos_for_device(who, dev.model_id, dev.fw_version, self.number)
         kos = []
-        for ko, _ in kos_desc:
+        for ko, _, _ in kos_desc:
             if ko == keyo:
                 return keyo
         self.log("Slot.do_ko_value ERROR: invalid KO %s for object (valid: %s)" % (str(keyo), str(kos)))
@@ -333,7 +346,7 @@ class Slot(object):
         return False
 
     def do_ko_sys(self, sys, addr, values=None):
-        dev = self._slots.parent
+        dev = self.slots.parent
 
         who = dev.subsystem.SYSTEM_WHO
         if sys != who:
@@ -343,7 +356,13 @@ class Slot(object):
         # note: ko => None should not happen
         if values is None:
             values = self._values
-        addr_rec = device_db.find_sys_addr(self.get_value(F_KO, values))
+        ko_value = self.get_value(F_KO, None)
+        system_id = self.slots.parent.subsystem.SYSTEM_WHO
+        model_id = self.slots.parent.model_id
+        firmware = self.slots.parent.fw_version
+        slot_number = self.number
+        ko_version = device_db.get_ko_version(ko_value, system_id, model_id, firmware, slot_number)
+        addr_rec = device_db.find_sys_addr(ko_value, ko_version)
         if addr_rec is None:
             # bail
             return False
@@ -373,8 +392,16 @@ class Slot(object):
         value = None
 
         # value for F_KO should never be None here !
-        field = device_db.find_field(_get_value(F_KO, None), index, _get_value)
-        self.log('Slot.do_param_ko : field : %s' % (str(field)))
+        ko_value = _get_value(F_KO, None)
+        system_id = self.slots.parent.subsystem.SYSTEM_WHO
+        model_id = self.slots.parent.model_id
+        firmware = self.slots.parent.fw_version
+        slot_number = self.number
+        version = device_db.get_ko_version(ko_value, system_id, model_id, firmware, slot_number)
+        # there should be only one !
+        device_db.log("ko: %s version: %s" % (str(ko_value), str(version)))
+        field = device_db.find_field(ko_value, version, index, _get_value)
+        device_db.log('Slot.do_param_ko : field : %s' % (str(field)))
         if field is not None:
             access_mode, field_type, field_type_detail, var_name, array_index = field
             # should check value

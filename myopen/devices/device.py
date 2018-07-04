@@ -130,16 +130,16 @@ class Device(object):
         # test value type
         if isinstance(value, str):
             if len(value) != 8:
-                self.log("Device.hw_addr.setter : value is %d chars, 8 expected" % (len(value)))
+                self.log("Device.hw_addr.setter : value is %d chars, 8 expected" % (len(value)), LOG_ERROR)
             else:
                 try:
                     self._hw_addr = int(value, 16)
                 except ValueError:
-                    self.log("Device.hw_addr.setter : value '%s' is not valid hexadecimal" % (value))
+                    self.log("Device.hw_addr.setter : value '%s' is not valid hexadecimal" % (value), LOG_ERROR)
         elif isinstance(value, int):
             self._hw_addr = value
         else:
-            self.log("Device.hw_addr.setter : value of unknown type %s %s" % (value.__class__.__name__, str(value)))
+            self.log("Device.hw_addr.setter : value of unknown type %s %s" % (value.__class__.__name__, str(value)), LOG_ERROR)
 
     @property
     def hw_addr_hex(self):

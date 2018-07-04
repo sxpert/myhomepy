@@ -113,9 +113,9 @@ class Devices(object):
         # create device
         d = Device(self)
         d.subsystem = subsystem
-        d.hw_addr = hw_addr
-        self.log('Devices._register: adding device %s %s ' % (k, str(d)), LOG_ERROR)
-        self[k] = d
+        d.hw_addr = int(hw_addr)
+        self.log('Devices._register: adding device %s %s ' % (d.hw_addr_hex, str(d)), LOG_ERROR)
+        self[d.hw_addr_hex] = d
         return d
 
     def register(self, subsystem, data):
