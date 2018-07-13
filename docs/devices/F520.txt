@@ -1,0 +1,35 @@
+AS_OBJECT_FIRMWARE
+id_object_firmware  id_firmware     id_key_object
+638	                235	            469
+
+EN_KEY_OBJECT
+id_key_object   descr           slots   visible id_family   key_object
+469	            Energy metering	1	    1	    12	        198
+
+EN_CONF
+id_conf id_key_object id_firmware conf_name        id_conf_type descr                       descr_esc                               hidden idx id_conf_data_type seq vis read_only
+2387	0	          235	      A1	           1   	        A1	                        Energy Management A1 Address (0-2)	    0	   -1  2              	 1	 1	 
+2391	0	          235	      A2	           1   	        A2  	                    Energy Management A2 Address (0-9)	    0	   -1  2              	 2	 1	 
+2616	0	          235	      A3-TA	           2   	        A3-Ta	                    Energy Management A3Ta Address (0-9)    0	   -1  2              	 3	 1	 
+2617	0	          235	      A3-TB	           2	        A3-Tb	                    Energy Management A3Tb Address (0-9)	0	   -1  2              	 4	 1	 
+2618	0	          235	      A3-TC	           2	        A3-Tc	                    Energy Management A3Tc Address (0-9)    0	   -1  2              	 5	 1	 
+4522	0	          235	      AID	           0	        ID	                        ID	                                    0	   -1  6              	 0	 1	 0
+2399	469	          0	          A123	           null         Address                     Energy Management A123 Address (0-255)	0	   -1  2              	 1	 1	 
+4340	469	          0	          TOROID_DIRECTION null         Toroid direction management	                                        0      1   3              	 2	 1	 
+
+EN_FILTER
+id_filter   id_object_firmware  note                        whole_range id_conf
+3004	    638	                Toroid direction management	1	        4340
+
+EN_CONF_RANGE
+id_conf_range   value       name        descr_ext   default     seq     id_conf     digit   step    min_value   max_value   
+6853				                                0	        0	    2387		        1	    0	        2
+6854				                                0	        0	    2391		        1	    0	        9
+7703				                                0	        0	    2617		        1	    0	        9
+7704				                                0	        0	    2618		        1	    0	        9
+7705				                                0	        0	    2616		        1	    0	        9
+33964				                                0	        0	    2399		        1	    0	        127
+33965				                                0	        -1	    4340		        1		
+33966	        0	        Disabled	Disabled		        1	    4340		        1		
+33967	        1	        Enabled	    Enabled		            2	    4340		        1		
+34149	        ********	AID	        ID		                0	    4522	    0   	1	    0	        0
