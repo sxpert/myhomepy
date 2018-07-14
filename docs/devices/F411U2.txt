@@ -1,0 +1,28 @@
+the database refers to firmware 1.0.* however, it looks like there are device with firmware 1.5.* that are recognized by myhomesuite... what gives ?
+
+EN_DEVICE
+id_device   code    name                                brand   line    visible id_item visibilty_type  dependent   is_gateway  descr
+2450	    F411U2	2x10A actuator, 2DIN	            1	    5	    1	    2115                	0	        0	        2 channels DIN actuator with zero crossing
+
+EN_ITEM
+id_item descr                               id_family
+2115	2x10A actuator, 2DIN	            2
+
+AS_ITEM_SYSTEM
+id_item id_system   modobj  main
+2115	1	        78	    1
+
+EN_FIRMWARE
+id_firmware id_item firmware_v  firmware_r  slots   id_status   fw_default
+659	        2115	1	        0       	2	    0	        0
+
+AS_OBJECT_FIRMWARE
+id_object_firmware  id_firmware id_key_object
+1137	            659	        7
+1138	            659	        6
+
+EN_KEY_OBJECT
+id_key_object   descr               slots   visible id_family   key_object
+6	            Light actuator      1       1	    2	        6
+7	            Automation actuator	2	    1	    2	        7
+

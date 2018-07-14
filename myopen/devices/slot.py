@@ -323,7 +323,9 @@ class Slot(object):
     def do_ko_value(self, keyo, state):
         dev = self.slots.parent
         who = dev.subsystem.SYSTEM_WHO
+        device_db.log("%s %s %s %s" % (str(who), str(dev.model_id), str(dev.fw_version), str(self.number)))
         kos_desc = device_db.find_kos_for_device(who, dev.model_id, dev.fw_version, self.number)
+        device_db.log("%s" % (str(kos_desc)))
         kos = []
         for ko, _, _ in kos_desc:
             if ko == keyo:

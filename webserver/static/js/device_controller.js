@@ -1,12 +1,13 @@
 import * as ajax from './ajax.js';
 import * as tree from './tree_control.js';
-import * as bdm from './device_models/base_device_model_stub.js';
 import * as dev_conf_view from './device_config_view.js';
 import * as tabs_view from './tabs_view.js';
 import * as slot_controller from './slot_controller.js';
+import { Base_Device_Model } from './base_device_model.js';
 
 export class Device {
     constructor(devices, data) {
+        console.log("Device.constructor", devices, data);
         this.tree_item = null;
         this.devices = devices;
         this.id = data.id
@@ -28,14 +29,41 @@ export class Device {
         }
         return this.tree_item;
     };
+    set_device_model(data) {
+        if ((data.subsystem===undefined)||(data.model_id===undefined))
+            return console.log('missing either subsystem or model_id', data);
+        this.device_model = new Base_Device_Model(data);
+        this.device_model.system_id = this.system_id;
+        this.device_model.on_updated = function() {
+            controller.update_view();
+            controller.config_view.enabled = true;
+        }
+        // this.device_model.set_address_model()
+        // create slot controllers
+        let nb_slots = this.device_model.nb_slots
+        this.slot_controllers = new Array(nb_slots);
+        for(var i=0; i<nb_slots; i++) 
+            this.slot_controllers[i] = new slot_controller.Slot_Controller(this.device_model.slots[i]);
+        this.setup_config_view();
+    };
     setup_config_view() {
         if (this.device_model===null) {
-            let dc = this;
-            new bdm.Base_Device_Model_Stub(
-                this.devices.system.system_id, this.id, 
-                function (stub) {
-                    dc.set_device_model(stub);
-                });
+            let system_id = this.devices.system.system_id;
+            let url = '/api/get-device-data?system_id='+system_id+'&device_id='+this.id;
+            let controller = this;
+            ajax.get_json(url,
+                function(data) {
+                    if (data.ok !== undefined && data.ok === true) {
+                        data = data.device;
+                        if (data!==undefined) 
+                            return controller.set_device_model(data);
+                        console.log('problem, no \'device\' in ', data);
+                    }
+                },
+                function(request){
+                    console.log('error', request);
+                }
+            );        
         } else {
             // model is already there, time to setup the view
             if (this.config_view===null) {
@@ -95,24 +123,24 @@ export class Device {
             this.tabs_view.change_tab_label(slot_index, tab_name);
         }
     };
-    set_device_model(stub) {
-        let controller = this;
-        if (stub.success) {
-            this.device_model = stub.device_model;
-            this.device_model.on_updated = function() {
-                controller.update_view();
-                controller.config_view.enabled = true;
-            }
-            // this.device_model.set_address_model()
-            // create slot controllers
-            let nb_slots = this.device_model.nb_slots
-            this.slot_controllers = new Array(nb_slots);
-            for(var i=0; i<nb_slots; i++) 
-                this.slot_controllers[i] = new slot_controller.Slot_Controller(this.device_model.slots[i]);
-            this.setup_config_view();
-        } else 
-            console.log('Unable to obtain device_model from server');
-    };
+    // set_device_model(stub) {
+    //     let controller = this;
+    //     if (stub.success) {
+    //         this.device_model = stub.device_model;
+    //         this.device_model.on_updated = function() {
+    //             controller.update_view();
+    //             controller.config_view.enabled = true;
+    //         }
+    //         // this.device_model.set_address_model()
+    //         // create slot controllers
+    //         let nb_slots = this.device_model.nb_slots
+    //         this.slot_controllers = new Array(nb_slots);
+    //         for(var i=0; i<nb_slots; i++) 
+    //             this.slot_controllers[i] = new slot_controller.Slot_Controller(this.device_model.slots[i]);
+    //         this.setup_config_view();
+    //     } else 
+    //         console.log('Unable to obtain device_model from server');
+    // };
     update_view() {
         console.log('updating view');
     }
