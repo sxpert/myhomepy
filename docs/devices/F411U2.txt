@@ -95,20 +95,25 @@ id_conf_range   value   name                        descr_ext                   
 3450	        11	    Slave	                    Slave		                                        2	1401    	    1		
 3451	        15	    Master PUL	                Master PUL		                                    3	1401    	    1		
 3452	        16	    Slave and PUL	            Slave + PUL		                                    4	1401    	    1		
+
 3468	        	    	                        	                                        0	    -1	1414    	    1		
 3469	        0	    Toggle	                    ON/OFF cyclical	                            	    1	1414    	    1		
 3470	        1	    ON/OFF	                    Edge toggle (O/I)	                        	    2	1414    	    1		
 3471	        9	    ON - OFF	                ON - OFF		                                    3	1414    	    1		
 3472	        15	    Pushbutton	                Pushbutton		                                    4	1414    	    1		
 3473	        18	    Timed ON	                Timed-ON		                                    5	1414    	    1		
+
 3453	        	    	                        	                                        0	    0	1402    	    1	    0	        255
+
 3454	        	    	                        	                                        0	    -1	1403    	    1		
 3455	        0	    Restore last value	        Restore last value	                        	    1	1403    	    1		
 3456	        1	    Closed	                    Closed		                                        2	1403    	    1		
 3457	        2	    Open	                    Open		                                        3	1403    	    1		
+
 27500	        	    	                                            	                    0	    -1	3875    	    1		
 27501	        0	    With zero crossing	        With zero crossing	    	                        1	3875    	    1		
-27502	        1	    Without zero crossing	    Without zero crossing		                        2	3875    	    1		
+27502	        1	    Without zero crossing	    Without zero crossing		                        2	3875    	    1	
+	
 1		        	    	                                                                    0	    0	1		        1	    0	        255
 2		        	    	                                                                    0	    0	2		        1	    0	        59
 3		        	    	                                                                    30	    0	3		        1	    0	        59
