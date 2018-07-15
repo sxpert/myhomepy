@@ -285,18 +285,27 @@ class DeviceDatabase(object):
 
     def get_params_for_ko(self, ko_value, ko_version):
         """
+        find params valid for the ko_value and ko_version
+        in the db, ko version may be
+        - null
+        - comma-separated numbers
         """
         c = self.conn.cursor()
-        sql = 'select sequence, cond, disp, access, type, type_info, def_val, tab, ' \
+        sql = 'select ko_version, sequence, cond, disp, access, type, type_info, def_val, tab, ' \
               'var_name, array_index, description from ko_params ' \
-              'where ko=? and ko_version=? order by sequence;'
-        if ko_version is None:
-            sql = sql.replace("ko_version=?", "ko_version is ?")
-        c.execute(sql, [ko_value, ko_version])
+              'where ko=? order by sequence;'
+        c.execute(sql, [ko_value])
         params = c.fetchall()
         data = []
         for p in params:
-            order, cond, disp, access, field_type, field_type_detail, def_val, tab, var_name, array_index, description = p
+            ko_vers, order, cond, disp, access, field_type, field_type_detail, def_val, tab, var_name, array_index, description = p
+            # find if ko_vers is correct, else, continue with the next field
+            self.log("%s %s %s" % (str(var_name), str(ko_vers), str(ko_version)))
+            if ko_version is not None and ko_vers is not None:
+                versions = ko_vers.split(',')
+                versions = [ int(x) for x in versions]
+                if ko_version not in versions:
+                    continue
             val = {}
             val['order'] = order
             val['cond'] = cond

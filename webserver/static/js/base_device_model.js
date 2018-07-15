@@ -40,10 +40,14 @@ export class Base_Device_Model {
      * 
      */
     set system_id(system_id) {
+        console.log("setting system_id", system_id)
         this._system_id = system_id
     }
     discover_device() {
-        if ((this._system_id===undefined)||(this._system_id === null)) return false;
+        if ((this._system_id===undefined)||(this._system_id === null)) {
+            console.log("discover_device: system_id not set, abort")
+            return false;
+        }
         var url = '/api/do-device-discovery?system_id='+this._system_id+'&device_id='+this.id;
         var model = this;
         ajax.get_json(url,

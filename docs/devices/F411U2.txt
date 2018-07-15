@@ -26,3 +26,369 @@ id_key_object   descr               slots   visible id_family   key_object
 6	            Light actuator      1       1	    2	        6
 7	            Automation actuator	2	    1	    2	        7
 
+EN_CONF
+id_conf id_key_object   id_firmware conf_name                   id_conf_type    descr                                       descr_ext                                       hidden  idx typ seq vis ro
+1415	6	            0	        SUBTYPE		                                Type of load		                                                                        0	    -2	3	10	1	
+1399	6	            0	        A	                        1	            Area		                                                                                0	    -1	2	0	1	
+1400	6	            0	        PL	                        2	            Light point		                                                                            0	    -1	2	1	1	
+1401	6	            0	        M	                        4	            Modality		                                                                            0	    0	3	2	1	
+1414	6	            0	        LOCAL_BUTTON	            4	            Local button modality		                                                                0	    1	3	3	1	
+1402	6	            0	        DELAYED_OFF	                	            Delayed OFF for Slave (s)		                                                            1	    2	2	4	1	
+1403	6	            0	        STATE_RESET	                0	            Relay state on device reset		                                                            0	    3	3	5	1	
+3875	6	            0	        LOAD_CONTROL_MODE		                    Load control mode		                                                                    0	    4	3	6	1	
+1	    6	            0	        HOURS		                                Hours		                                                                                1	    10	2	7	1	
+2	    6	            0	        MINUTES		                                Minutes		                                                                                1	    11	2	8	1	
+3	    6	            0	        SECONDS		                                Seconds		                                                                                1	    12	2	9	1	
+1404	6	            0	        G1	                        3	            Group 1	                                    Group = 0 means no group	                    0	    240	2	11	1	
+1405	6	            0	        G2	                        3	            Group 2	                                    Group = 0 means no group	                    0	    241	2	12	1	
+1406	6	            0	        G3	                        3	            Group 3	                                    Group = 0 means no group	                    0	    242	2	13	1	
+1407	6	            0	        G4	                        3	            Group 4	                                    Group = 0 means no group	                    0	    243	2	14	1	
+1408	6	            0	        G5	                        3	            Group 5	                                    Group = 0 means no group	                    0	    244	2	15	1	
+1409	6	            0	        G6	                        3	            Group 6	                                    Group = 0 means no group	                    0	    245	2	16	1	
+1410	6	            0	        G7	                        3	            Group 7	                                    Group = 0 means no group	                    0	    246	2	17	1	
+1411	6	            0	        G8	                        3	            Group 8	                                    Group = 0 means no group	                    0	    247	2	18	1	
+1412	6	            0	        G9	                        3	            Group 9	                                    Group = 0 means no group	                    0	    248	2	19	1	
+1413	6	            0	        G10	                        3	            Group 10	                                Group = 0 means no group	                    0	    249	2	20	1	
+
+1420	7	            0	        SUBTYPE		                                Type of load		                                                                        0	-2	3	7	1	
+1416	7	            0	        A	                        1	            Area		                                                                                0	-1	2	0	1	
+1417	7	            0	        PL	                        2	            Light point		                                                                            0	-1	2	1	1	
+1418	7	            0	        M	                        4	            Modality		                                                                            0  	0	3	2	1	
+1419	7	            0	        LOCAL_BUTTON	            4	            Local button modality		                                                                0	1	3	3	1	
+4	    7	            0	        STOP_TIME	                0	            Stop time		                                                                            1	2	3	5	1	
+1421	7	            0	        G1	                        3	            Group 1	                                    Group = 0 means no group	                    0	240	2	8	1	
+1422	7	            0	        G2	                        3	            Group 2	                                    Group = 0 means no group	                    0	241	2	9	1	
+1423	7	            0	        G3	                        3	            Group 3	                                    Group = 0 means no group	                    0	242	2	10	1	
+1424	7	            0	        G4	                        3	            Group 4	                                    Group = 0 means no group	                    0	243	2	11	1	
+1425	7	            0	        G5	                        3	            Group 5	                                    Group = 0 means no group	                    0	244	2	12	1	
+1426	7	            0	        G6	                        3	            Group 6	                                    Group = 0 means no group	                    0	245	2	13	1	
+1427	7	            0	        G7	                        3	            Group 7	                                    Group = 0 means no group	                    0	246	2	14	1	
+1428	7	            0	        G8	                        3	            Group 8	                                    Group = 0 means no group	                    0	247	2	15	1	
+1429	7	            0	        G9	                        3	            Group 9	                                    Group = 0 means no group	                    0	248	2	16	1	
+1430	7	            0	        G10	                        3	            Group 10	                                Group = 0 means no group	                    0	249	2	17	1	
+
+AS_HIDDEN_KCONF
+id_conf_range   id_conf
+3449	        1402
+3451	        1402
+3473	        1
+3473	        2
+3473	        3
+3486	        4
+3488	        4
+
+EN_CONF_RANGE
+id_conf_range   value   name                        descr_ext                                   default seq id_conf digit   step    min_value   max_value
+3474	        	    	                        	                                        11	    -1	1415    	    1		
+3475	        11	    Actuator	                Attuatore	                                	    1	1415    	    1		
+3476	        1	    Lamp	                    Lampada		                                        2	1415    	    1		
+3477	        10	    Valve	                    Elettrovalvola	                            	    3	1415    	    1		
+3478	        15	    Differential restart	    Riarmo differenziale		                        4	1415    	    1		
+3479	        6	    Fan	                        Ventilatore		                                    5	1415    	    1		
+3480	        7	    Watering	                Irrigazione		                                    6	1415    	    1		
+3481	        8	    Controlled socket	        Presa comandata		                                7	1415    	    1		
+3482	        9	    Lock	                    Serratura	    	                                8	1415    	    1		
+3446	        	    	                                                	                0	    0	1399    	    1	    0	        10
+3447	        	    	                                                	                0	    0	1400    	    1	    0	        15
+3448	        	    	                                                	                0	    -1	1401    	    1		
+3449	        0	    Master	                    Master Standard mode		                        1	1401    	    1		
+3450	        11	    Slave	                    Slave		                                        2	1401    	    1		
+3451	        15	    Master PUL	                Master PUL		                                    3	1401    	    1		
+3452	        16	    Slave and PUL	            Slave + PUL		                                    4	1401    	    1		
+3468	        	    	                        	                                        0	    -1	1414    	    1		
+3469	        0	    Toggle	                    ON/OFF cyclical	                            	    1	1414    	    1		
+3470	        1	    ON/OFF	                    Edge toggle (O/I)	                        	    2	1414    	    1		
+3471	        9	    ON - OFF	                ON - OFF		                                    3	1414    	    1		
+3472	        15	    Pushbutton	                Pushbutton		                                    4	1414    	    1		
+3473	        18	    Timed ON	                Timed-ON		                                    5	1414    	    1		
+3453	        	    	                        	                                        0	    0	1402    	    1	    0	        255
+3454	        	    	                        	                                        0	    -1	1403    	    1		
+3455	        0	    Restore last value	        Restore last value	                        	    1	1403    	    1		
+3456	        1	    Closed	                    Closed		                                        2	1403    	    1		
+3457	        2	    Open	                    Open		                                        3	1403    	    1		
+27500	        	    	                                            	                    0	    -1	3875    	    1		
+27501	        0	    With zero crossing	        With zero crossing	    	                        1	3875    	    1		
+27502	        1	    Without zero crossing	    Without zero crossing		                        2	3875    	    1		
+1		        	    	                                                                    0	    0	1		        1	    0	        255
+2		        	    	                                                                    0	    0	2		        1	    0	        59
+3		        	    	                                                                    30	    0	3		        1	    0	        59
+3458	        	    	                                                	                0	    0	1404    	    1	    0	        255
+3459	        	    	                                                	                0	    0	1405    	    1	    0	        255
+3460	        	    	                                                	                0	    0	1406    	    1	    0	        255
+3461	        	    	                                                	                0	    0	1407    	    1	    0	        255
+3462	        	    	                                                	                0	    0	1408    	    1	    0	        255
+3463	        	    	                                                	                0	    0	1409    	    1	    0	        255
+3464	        	    	                                                	                0	    0	1410    	    1	    0	        255
+3465	        	    	                                                	                0	    0	1411    	    1	    0	        255
+3466	        	    	                                                	                0	    0	1412    	    1	    0	        255
+3467	        	    	                                                	                0	    0	1413    	    1	    0	        255
+
+3494	        	    	                                	                                11	    -1	1420		    1		
+3495	        11	    Actuator	                Attuatore		                                    1	1420		    1		
+3496	        2	    Shutter	                    Serranda		                                    2	1420		    1		
+3497	        3	    Curtain	                    Tenda		                                        3	1420		    1		
+3498	        4	    Gate	                    Cancello		                                    4	1420		    1		
+3499	        5	    Garage door	                Basculante		                                    5	1420		    1		
+3500	        15	    Differential restart	    Riarmo Differenziale	                    	    6	1420		    1		
+3483	        	    	                                                                	0	    0	1416		    1	    0       	10
+3484	        	    	                                                                	0	    0	1417		    1	    0       	15
+3485	        	    	                                                                	0	    -1	1418		    1		
+3486	        0	    Master	                    Master Standard mode	                    	    1	1418		    1		
+3487	        11	    Slave	                    Slave	    	                                    2	1418		    1		
+3488	        15	    Master PUL	                Master PUL		                                    3	1418		    1		
+3489	        16	    Slave and PUL	            Slave + PUL		                                    4	1418		    1		
+3490	        	    		                                                                12	    -1	1419		    1		
+3491	        12	    Bistable control	        Bistable		                                    1  	1419		    1		
+3492	        13	    Monostable control	        Monostable		                                    2	1419		    1		
+3493	        14	    Bistable and blades control	Mono+bistable command	                    	    3	1419		    1		
+4				                                                                                60	    -1	4	    	    1		
+144	            0	    Infinite	                Infinite	                                	    1	4	    	    1		
+145	            1	    1 s	                        1 s		                                            2	4	    	    1		
+146	            2	    2 s	                        2 s		                                            3	4	    	    1		
+147	            3	    3 s	                        3 s		                                            4	4	    	    1		
+148	            4	    4 s	                        4 s		                                            5	4	    	    1		
+149	            5	    5 s	                        5 s		                                            6	4	    	    1		
+150	            6	    6 s	                        6 s		                                            7	4	    	    1		
+151	            7	    7 s	                        7 s		                                            8	4	    	    1		
+152	            8	    8 s	                        8 s		                                            9	4	    	    1		
+153	            9	    9 s	                        9 s		                                            10	4	    	    1		
+154	            10	    10 s	                    10 s		                                        11	4	    	    1		
+155	            11	    11 s	                    11 s		                                        12	4	    	    1		
+156	            12	    12 s	                    12 s		                                        13	4	    	    1		
+157	            13	    13 s	                    13 s		                                        14	4	    	    1		
+158	            14	    14 s	                    14 s		                                        15	4	    	    1		
+159	            15	    15 s	                    15 s		                                        16	4	    	    1		
+160	            16	    16 s	                    16 s		                                        17	4	    	    1		
+161	            17	    17 s	                    17 s		                                        18	4	    	    1		
+163	            19	    19 s	                    19 s		                                        20	4	    	    1		
+164	            20	    20 s	                    20 s		                                        21	4	    	    1		
+165	            21	    21 s	                    21 s		                                        22	4	    	    1		
+166	            22	    22 s	                    22 s		                                        23	4	    	    1		
+167	            23	    23 s	                    23 s		                                        24	4	    	    1		
+168	            24	    24 s	                    24 s		                                        25	4	    	    1		
+169	            25	    25 s	                    25 s		                                        26	4	    	    1		
+170	            26	    26 s	                    26 s		                                        27	4	    	    1		
+171	            27	    27 s	                    27 s		                                        28	4	    	    1		
+172	            28	    28 s	                    28 s		                                        29	4	    	    1		
+173	            29	    29 s	                    29 s		                                        30	4	    	    1		
+174	            30	    30 s	                    30 s		                                        31	4	    	    1		
+175	            31	    31 s	                    31 s		                                        32	4	    	    1		
+176	            32	    32 s	                    32 s		                                        33	4	    	    1		
+177	            33	    33 s	                    33 s		                                        34	4	    	    1		
+178	            34	    34 s	                    34 s		                                        35	4	    	    1		
+179	            35	    35 s	                    35 s		                                        36	4	    	    1		
+180	            36	    36 s	                    36 s		                                        37	4	    	    1		
+181	            37	    37 s	                    37 s		                                        38	4	    	    1		
+182	            38	    38 s	                    38 s		                                        39	4	    	    1		
+183	            39	    39 s	                    39 s		                                        40	4	    	    1		
+184	            40	    40 s	                    40 s		                                        41	4	    	    1		
+185	            41	    41 s	                    41 s		                                        42	4	    	    1		
+186	            42	    42 s	                    42 s		                                        43	4	    	    1		
+187	            43	    43 s	                    43 s		                                        44	4	    	    1		
+188	            44	    44 s	                    44 s		                                        45	4	    	    1		
+189	            45	    45 s	                    45 s		                                        46	4	    	    1		
+190	            46	    46 s	                    46 s		                                        47	4	    	    1		
+191	            47	    47 s	                    47 s		                                        48	4	    	    1		
+192	            48	    48 s	                    48 s		                                        49	4	    	    1		
+193	            49	    49 s	                    49 s		                                        50	4	    	    1		
+194	            50	    50 s	                    50 s		                                        51	4	    	    1		
+195	            51	    51 s	                    51 s		                                        52	4	    	    1		
+196	            52	    52 s	                    52 s		                                        53	4	    	    1		
+197	            53	    53 s	                    53 s		                                        54	4	    	    1		
+198	            54	    54 s	                    54 s		                                        55	4	    	    1		
+199	            55	    55 s	                    55 s		                                        56	4	    	    1		
+200	            56	    56 s	                    56 s		                                        57	4	    	    1		
+201	            57	    57 s	                    57 s		                                        58	4	    	    1		
+202	            58	    58 s	                    58 s		                                        59	4	    	    1		
+203	            59	    59 s	                    59 s		                                        60	4	    	    1		
+204	            60	    60 s	                    60 s		                                        61	4	    	    1		
+205	            62	    2 min	                    2 min		                                        62	4	    	    1		
+206	            63	    3 min	                    3 min		                                        63	4	    	    1		
+207	            64	    4 min	                    4 min		                                        64	4	    	    1		
+208	            65	    5 min	                    5 min		                                        65	4	    	    1		
+209	            66	    6 min	                    6 min		                                        66	4	    	    1		
+210	            67	    7 min	                    7 min		                                        67	4	    	    1		
+211	            68	    8 min	                    8 min		                                        68	4	    	    1		
+212	            69	    9 min	                    9 min		                                        69	4	    	    1		
+213	            70	    10 min	                    10 min		                                        70	4	    	    1		
+3501				                                                                            0	    0	1421    	    1	    0       	255
+3502				                                                                            0	    0	1422		    1	    0       	255
+3503				                                                                            0	    0	1423		    1	    0       	255
+3504				                                                                            0	    0	1424		    1	    0       	255
+3505				                                                                            0	    0	1425		    1	    0       	255
+3506				                                                                            0	    0	1426		    1	    0       	255
+3507				                                                                            0	    0	1427		    1	    0       	255
+3508				                                                                            0	    0	1428		    1	    0       	255
+3509				                                                                            0	    0	1429		    1	    0       	255
+3510				                                                                            0	    0	1430		    1	    0       	255
+
+                                                                                                                                    |--- DOES NOT EXIST ---|                USELESS
+                                                                                                                                    Hours   Minutes Seconds StReset LocButt TpLoad  LdCtrl
+conf    device      modobj                                                              id_item status  slots   firm    id_firm id_o_firm   1       2       3       1403    1414    1415    3875    type
+PVA     F411/2      129     2 relays DIN actuator 10 A                                  2       0       2       *.*     132     275         1       1       1       1       1               1       1
+PVA     F411/4      130     4 relay actuator 2 modules DIN bus                          3       0       4       *.*     142     350         1       1       1       1       1               1       1
+        LN4671M2            Flush mounted actuator and free control                     1184    0       4       *.*     157     619         1       1       1       1       1               1       1
+PVA     F411/1N             1 relay DIN actuator 16 A                                   1       0       1       *.*     166     415         1       1       1       1       1               1       1
+        BMSW1001            1 relay DIN actuator 16 A 100/240 V                         128     0       1       *.*     167     412         1       1       1       1       0 1             1       2
+        BMSW1002            2 relay DIN actuator 16 A 100/240 V                         134     0       2       *.*     168     413         1       1       1       1       1               1       1
+        BMSW1003            4 relay DIN actuator 16 A 100/240 V                         63      0       4       *.*     169     414         1       1       1       1       0 1             1       2
+PVA     F411/1NC            1 relay DIN NC actuator 16 A                                1593    0       1       *.*     170     416         1       1       1       1       1       1       1       1
+PV      F411/1              Actuator with 1 relay DIN                                   1594    0       1       *.*     171     417                                 1                       1       4
+P       F411/1FL            Actuator 1 relay fluorescent lamps 2 DIN                    1595    0       1       *.*     172     418         (NO VIRTUAL CONFIGURATION SUPPORTED)
+PVA     F411/2NC            2 relays DIN NC actuator 10 A                               1596    0       2       *.*     173     419         1       1       1       1       1               1       1
+PV      L4671/1             Flush mounted actuator 1 relay                              1121    0       1       *.*     186     445                                 1                       1       4       
+PVA     3475                Basic actuator                                              54      0       1       *.*     193     478         1       1       1       1       1               1       1
+PVA     3476                Basic control actuator                                      55      0       1       *.*     194     479                                 1       0 2             1       3
+PVA     L/N/NT4675          Actuator 1 module 1 relay                                   66      0       1       *.*     195     484                                 1                       1       4
+PVA     BMSW1005            DIN - Switch  8 x 16 A - 230V                               1156    0       8       *.*     199     506         1       1       1       1       0 1             1       2
+PVA     F522                Actuator 16A with current sensor - 1 DIN                    1163    0       2       *.*     229     641                                         1               1       5
+PVA     F523                Actuator 16A - 1 DIN                                        1164    0       2       *.*     230     642                                         1               1       5
+PVA     L/N/NT4672N         Flush mounted actuator 16A                                  1165    0       2       *.*     236     644                                         1               1       5
+?       BMSW3002            Room Controller 2 Outputs 16 Amps                           59      -1      3       *.*     281     600                                 1                       1       4
+?       BMSW3001            Room Controller 1 Output 16 Amps                            130     -1      2       *.*     300     603                                 1                       1       4
+PVA     F411U2      78      2x10A actuator, 2DIN                                        2115    0       2       1.0     659     1138        1       1       1               1                       6
+PVA     F411U1              1x10A actuator, 2DIN                                        2131    0       1       1.0     669     1147        1       1       1               1                       6
+PVA     LN4672M2            Flush mounted actuator and free control with zero crossing  2180    0       4       1.0     707     1227        1       1       1               1                       6
+
+EN_FILTER
+id_filter   id_object_firmware  note                                    whole_range id_conf
+382	        416	                Type of loads	                        1	        1415    x
+224	        350	                Local button modality	                1	        1414    x
+73	        275	                Local button modality	                1	        1414    x
+372	        415	                Local button modality	                1	        1414    x
+378	        416	                Local button modality	                1	        1414    x  
+1167	    619	                Local button modality	                1	        1414    x
+1209	    641	                Local button modality	                1	        1414    x
+1210	    642	                Local button modality	                1	        1414    x
+1218	    644	                Local button modality	                1	        1414    x
+1795	    478	                Local button modality	                1	        1414    x
+1796	    413	                Local button modality	                1	        1414    x
+1894	    506	                Local button modality	                0	        1414    x
+1898	    479	                Local button modality	                0	        1414    x
+2375	    1147	            Local button modality	                1	        1414    x
+2380	    1138	            Local button modality	                1	        1414    x
+2468	    412	                Local button modality	                0	        1414    x
+2472	    414	                Local button modality	                0	        1414    x
+2476	    419	                Local button modality	                1	        1414    x
+2994	    1227	            Local button modality	                1	        1414    x
+227	        350	                Relay state on device reset	            1	        1403    x
+76	        275	                Relay state on device reset	            1	        1403    x
+365	        412	                Per energy management (State on Reset)	1	        1403    x
+367	        413	                Per energy management (State on Reset)	1	        1403    x
+371	        414	                Per energy management (State on Reset)	1	        1403    x
+373	        415	                Relay state on device reset	            1	        1403    x
+377	        416	                Per energy management (State on Reset)	1	        1403    x
+383	        417	                Per energy management (State on Reset)	1	        1403    x
+384	        418	                Per energy management (State on Reset)	1	        1403    x
+389	        419	                Relay state on device reset	            1	        1403    x
+573	        445	                Per energy management (State on Reset)	1	        1403    x
+679	        478	                Per energy management (State on Reset)	1	        1403    x
+683	        479	                Per energy management (State on Reset)	1	        1403    x
+690	        484	                Per energy management (State on Reset)	1	        1403    x
+725	        506	                Per energy management (State on Reset)	1	        1403    x
+1104	    600	                Relay state on device reset	            1	        1403    x
+1105	    603	                Per energy management (State on Reset)	1	        1403    x
+1172	    619	                Relay state on device reset	            1	        1403    x
+1856	    275	                Load_control_mode                   	1	        3875    x
+1857	    350	                Load_control_mode                   	1	        3875    x
+1858	    412	                Load_control_mode                   	1	        3875    x
+1859	    413	                Load_control_mode                   	1	        3875    x
+1860	    414	                Load_control_mode                   	1	        3875    x
+1861	    415	                Load_control_mode                   	1	        3875    x
+1862	    416	                Load_control_mode                   	1	        3875    x
+1863	    417	                Load_control_mode                   	1	        3875    x
+1864	    418	                Load_control_mode                   	1	        3875    x
+1865	    419	                Load_control_mode                   	1	        3875    x
+1866	    445	                Load_control_mode                   	1	        3875    x
+1867	    478	                Load_control_mode                   	1	        3875    x
+1868	    479	                Load_control_mode                   	1	        3875    x
+1869	    484	                Load_control_mode                   	1	        3875    x
+1870	    506	                Load_control_mode                   	1	        3875    x
+1871	    600	                Load_control_mode                   	1	        3875    x
+1872	    603	                Load_control_mode                   	1	        3875    x
+1873	    619	                Load_control_mode                   	1	        3875    x
+1874	    641	                Load_control_mode                   	1	        3875    x
+1875	    642	                Load_control_mode                   	1	        3875    x
+1876	    644	                Load_control_mode                   	1	        3875    x
+225	        350	                Hours	                                1	        1
+75	        275	                Hours	                                1	        1
+374	        415	                Hours	                                1	        1
+379	        416	                Hours	                                1	        1
+390	        419	                Hours	                                1	        1
+680	        478	                Hours	                                1	        1
+1168	    619	                Hours	                                1	        1
+1895	    506	                Hours	                                1	        1
+2376	    1147	            Hours	                                1	        1
+2383	    1138	            Hours	                                1	        1
+2428	    1227	            Hours	                                1	        1
+2469	    412	                Hours	                                1	        1
+2473	    414	                Hours	                                1	        1
+2479	    413	                Hours	                                1	        1
+226	        350	                Minutes	                                1	        2
+74	        275	                Minutes	                                1	        2
+375	        415	                Minutes	                                1	        2
+380	        416	                Minutes	                                1	        2
+391	        419	                Minutes	                                1	        2
+681	        478	                Minutes	                                1	        2
+1169	    619	                Minutes	                                1	        2
+1896	    506	                Minutes	                                1	        2
+2377	    1147	            Minutes	                                1	        2
+2381	    1138	            Minutes	                                1	        2
+2429	    1227	            Minutes	                                1	        2
+2470	    412	                Minutes	                                1	        2
+2474	    414	                Minutes	                                1	        2
+2480	    413	                Minutes	                                1	        2
+228	        350	                Seconds	                                1	        3
+77	        275	                Seconds	                                1	        3
+376	        415	                Seconds	                                1	        3
+381	        416	                Seconds	                                1	        3
+392	        419	                Seconds	                                1	        3
+682	        478	                Seconds	                                1	        3
+1170	    619	                Seconds	                                1	        3
+1897	    506	                Seconds	                                1	        3
+2378	    1147	            Seconds	                                1	        3
+2382	    1138	            Seconds	                                1	        3
+2430	    1227	            Seconds	                                1	        3
+2471	    412	                Seconds	                                1	        3
+2475	    414	                Seconds	                                1	        3
+2481	    413	                Seconds	                                1	        3
+
+67	        274	                subtype(ASTCBR)	                        0       	1420
+1196	    621	                subtype(ASTCBR)	                        0       	1420
+2419	    1223	            subtype(ASTCBR)	                        0       	1420
+207	        349	                (Local button mode)	                    1       	1419
+233	        351	                (Local button mode)	                    1       	1419
+66	        274	                (Local button mode)	                    1       	1419
+1195	    621	                (Local button mode)	                    1       	1419
+2379	    1137	            Local button modality	                1       	1419
+2993	    1223	            Local button modality	                1       	1419
+
+EN_FILTER_RANGE
+id_filter   range   note
+
+
+1894	    1	    ON/OFF
+1894	    15	    Pushbutton
+1894	    18	    Timed ON
+1894	    9	    ON - OFF
+
+1898	    60	    Pushbutton          ??? there's no value 60 in the range should that be 15 ?
+1898	    9	    ON - OFF
+
+2468	    1	    ON/OFF
+2468	    15	    Pushbutton
+2468	    18	    Timed ON
+2468	    9	    ON - OFF
+
+2472	    1	    ON/OFF
+2472	    15	    Pushbutton
+2472	    18	    Timed ON
+2472	    9	    ON - OFF
+
+
+
+67	        15	    Differential restart
+
+1196	    15	    Differential restart
+
+2419	    15	    Differential restart

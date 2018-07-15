@@ -33,7 +33,7 @@ export class Device {
         if ((data.subsystem===undefined)||(data.model_id===undefined))
             return console.log('missing either subsystem or model_id', data);
         this.device_model = new Base_Device_Model(data);
-        this.device_model.system_id = this.system_id;
+        this.device_model.system_id = this.devices.system.system_id;
         this.device_model.on_updated = function() {
             controller.update_view();
             controller.config_view.enabled = true;
