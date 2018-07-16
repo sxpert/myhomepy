@@ -1,4 +1,6 @@
+NOTES:
 the database refers to firmware 1.0.* however, it looks like there are device with firmware 1.5.* that are recognized by myhomesuite... what gives ?
+note2 : there is provision for Hours/minutes/seconds fields in KO 6... haven't found harware actually using this
 
 EN_DEVICE
 id_device   code    name                                brand   line    visible id_item visibilty_type  dependent   is_gateway  descr
@@ -28,6 +30,14 @@ id_key_object   descr               slots   visible id_family   key_object
 
 EN_CONF
 id_conf id_key_object   id_firmware conf_name                   id_conf_type    descr                                       descr_ext                                       hidden  idx typ seq vis ro
+3876	0	            659	        A	                        1	            Area	    	                                                                            0	    -1	2	1	1	
+3877	0	            659	        PL1	                        2	            PL1 - (0-9)		                                                                            0	    -1	2	2	1	
+3878	0	            659	        PL2	                        2	            PL2 - (0-9)		                                                                            0	    -1	2	3	1	
+3879	0	            659	        G1	                        3	            Group 1	    	                                                                            0	    -1	2	4	1	
+3880	0	            659	        MODE                        4	            mode(0-9, sla ,plu)	                        Mode 5-9 only for light	                        0	    -1	3	5	1	
+3882	0	            659	        C	                        	            Zero crossing - Dry contact	                For shutter only value 0 is valid	            0	    -1	3	6	1	
+4558	0	            659	        AID	                        0	            ID	                                        ID	                                            0	    -1	6	0	1	0
+
 1415	6	            0	        SUBTYPE		                                Type of load		                                                                        0	    -2	3	10	1	
 1399	6	            0	        A	                        1	            Area		                                                                                0	    -1	2	0	1	
 1400	6	            0	        PL	                        2	            Light point		                                                                            0	    -1	2	1	1	
@@ -113,7 +123,7 @@ id_conf_range   value   name                        descr_ext                   
 27500	        	    	                                            	                    0	    -1	3875    	    1		
 27501	        0	    With zero crossing	        With zero crossing	    	                        1	3875    	    1		
 27502	        1	    Without zero crossing	    Without zero crossing		                        2	3875    	    1	
-	
+
 1		        	    	                                                                    0	    0	1		        1	    0	        255
 2		        	    	                                                                    0	    0	2		        1	    0	        59
 3		        	    	                                                                    30	    0	3		        1	    0	        59
