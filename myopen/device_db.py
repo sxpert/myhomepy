@@ -596,5 +596,7 @@ class DeviceDatabase(object):
             return (access, f_type, type_info)
         return None
     
+    def get_device_icon(self, system_id, model_id, brand_id=None, line_id=None):
+        return None
 
 device_db = DeviceDatabase()

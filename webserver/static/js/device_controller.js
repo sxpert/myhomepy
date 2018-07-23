@@ -123,24 +123,6 @@ export class Device {
             this.tabs_view.change_tab_label(slot_index, tab_name);
         }
     };
-    // set_device_model(stub) {
-    //     let controller = this;
-    //     if (stub.success) {
-    //         this.device_model = stub.device_model;
-    //         this.device_model.on_updated = function() {
-    //             controller.update_view();
-    //             controller.config_view.enabled = true;
-    //         }
-    //         // this.device_model.set_address_model()
-    //         // create slot controllers
-    //         let nb_slots = this.device_model.nb_slots
-    //         this.slot_controllers = new Array(nb_slots);
-    //         for(var i=0; i<nb_slots; i++) 
-    //             this.slot_controllers[i] = new slot_controller.Slot_Controller(this.device_model.slots[i]);
-    //         this.setup_config_view();
-    //     } else 
-    //         console.log('Unable to obtain device_model from server');
-    // };
     update_view() {
         console.log('updating view');
     }

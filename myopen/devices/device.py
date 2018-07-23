@@ -7,6 +7,7 @@ from core.logger import LOG_DEBUG, LOG_ERROR
 from myopen.constants import (CONST_DEVICE_ICON, VAR_DEVICE_SYSTEM, VAR_ICON,
                               VAR_MODEL_ID, VAR_SLOTS, VAR_SYSTEM_DIAG_WHO,
                               VAR_SYSTEM_NAME)
+from myopen.device_db import device_db
 from myopen.subsystems import DiagScannable, OWNSubSystem, find_subsystem
 
 from .slots import Slots
@@ -149,7 +150,13 @@ class Device(object):
 
     @property
     def icon(self):
-        icon = getattr(self, VAR_ICON, None)
+        """
+        returns the icon name for the device
+        """
+        icon = None
+        if self.subsystem is not None and self._model_id is not None:
+            who = self.subsystem.SYSTEM_WHO
+            icon = device_db.get_device_icon(who, self.model_id)
         if icon is None:
             return CONST_DEVICE_ICON
         return icon
