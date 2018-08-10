@@ -1,1 +1,10 @@
 This software is licenced under the terms of the GNU GPL v3.0 or later
+
+how to:
+-------
+
+copy config.sample.json to config.json
+fill in the blanks in config.json
+
+$ ./automator.py
+
