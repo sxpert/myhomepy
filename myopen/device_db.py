@@ -225,13 +225,17 @@ class DeviceDatabase(object):
     def export_LIST(self, field_type_detail, value):
         c = self.conn.cursor()
         sql = "select id from lists where list_ref=? and value=?;"
+        params = [field_type_detail, value]
         try:
-            c.execute(sql, [field_type_detail, value])
+            c.execute(sql, params)
         except Exception as e:
             # TODO: handle the array case !
             return self.check_error("DeviceDatabase.export_LIST ERROR: ['%s', '%s'] <%s>" % (str(field_type_detail), str(value), str(e)))
         val = c.fetchall()
         if len(val) != 1:
+            self.log(sql)
+            self.log(params)
+            self.log(val)
             return self.check_error("export_LIST: should have only one record here")
         return self.check_ok(val[0][0])
 
@@ -259,7 +263,7 @@ class DeviceDatabase(object):
         - description
         """
         c = self.conn.cursor()
-        sql = 'select slot_width, label, description from kos where ko=?;'
+        sql = 'select slot_width, label, description from keyos where ko=?;'
         c.execute(sql, [ko_value])
         ko_data = c.fetchall()
         if len(ko_data) != 1:
@@ -279,18 +283,29 @@ class DeviceDatabase(object):
         # catch all...
         return default
 
-    def get_params_for_ko(self, ko_value):
+    def get_params_for_ko(self, ko_value, ko_version):
         """
+        find params valid for the ko_value and ko_version
+        in the db, ko version may be
+        - null
+        - comma-separated numbers
         """
         c = self.conn.cursor()
-        sql = 'select "order", cond, disp, access, type, type_info, def_val, tab, ' \
+        sql = 'select ko_version, sequence, cond, disp, access, type, type_info, def_val, tab, ' \
               'var_name, array_index, description from ko_params ' \
-              'where ko=? order by "order";'
+              'where ko=? order by sequence;'
         c.execute(sql, [ko_value])
         params = c.fetchall()
         data = []
         for p in params:
-            order, cond, disp, access, field_type, field_type_detail, def_val, tab, var_name, array_index, description = p
+            ko_vers, order, cond, disp, access, field_type, field_type_detail, def_val, tab, var_name, array_index, description = p
+            # find if ko_vers is correct, else, continue with the next field
+            self.log("%s %s %s" % (str(var_name), str(ko_vers), str(ko_version)))
+            if ko_version is not None and ko_vers is not None:
+                versions = ko_vers.split(',')
+                versions = [ int(x) for x in versions]
+                if ko_version not in versions:
+                    continue
             val = {}
             val['order'] = order
             val['cond'] = cond
@@ -352,7 +367,7 @@ class DeviceDatabase(object):
 
     def get_list_details(self, list_ref):
         c = self.conn.cursor()
-        sql = 'select value, id, name from lists where list_ref=? order by "order";'
+        sql = 'select value, id, name from lists where list_ref=? order by sequence;'
         c.execute(sql, [list_ref])
         values = []
         ids = []
@@ -376,22 +391,40 @@ class DeviceDatabase(object):
         kos = []
         c = self.conn.cursor()
         # list all kos valid for slot
-        sql = "select fw, tab_label, ko from device_kos where system_id=? and model_id=? and slot=? order by \"order\";"
+        sql = "select fw, tab_label, ko, ko_version from device_kos where system_id=? and model_id=? and slot=? order by sequence;"
         c.execute(sql, [system_id, model_id, slot_number])
         ko_entries = c.fetchall()
         for entry in ko_entries:
-            fw, tab_label, ko = entry
+            fw, tab_label, ko, ko_version = entry
             if self.match_fw(firmware, fw):
-                kos.append((ko, tab_label,))
+                kos.append((ko, ko_version, tab_label,))
         return kos
+
+    def get_ko_version(self, ko_value, system_id, model_id, firmware, slot_number):
+        sql = "select fw, ko, ko_version from device_kos where ko=? and system_id=? and model_id=? and slot=?;"
+        variables = [ko_value, system_id, model_id, slot_number]
+        c = self.conn.cursor()
+        c.execute(sql, variables)
+        ko_entries = c.fetchall()
+        versions = []
+        for entry in ko_entries:
+            fw, _, ko_version = entry
+            if self.match_fw(firmware, fw):
+                versions.append(ko_version)
+        if len(versions) != 1:
+            self.log("get_ko_version ERROR: expected 1 record got %s" % (str(versions)))
+            self.log(sql)
+            self.log(variables)
+            return None
+        return versions[0]
 
     def find_symbolic_kos_for_device(self, system_id, model_id, firmware, slot_number):
         kos = self.find_kos_for_device(system_id, model_id, firmware, slot_number)
         c = self.conn.cursor()
         data = {}
-        sql = "select label, slot_width from kos where ko=?;"
+        sql = "select label, slot_width from keyos where ko=?;"
         for ko_rec in kos:
-            ko, _ = ko_rec
+            ko, ko_version, _ = ko_rec   # ko, ko_version, tab
             c.execute(sql, [ko])
             label = c.fetchall()
             if len(label) != 1:
@@ -400,12 +433,12 @@ class DeviceDatabase(object):
             label, width = label[0]
             if width is None: 
                 width = 1
-            data[label] = (ko, width,)
+            data[label] = (ko, ko_version, width,)
         return data
 
     def find_symbolic_ko_value(self, ko):
         c = self.conn.cursor()
-        sql = "select label from kos where ko=?;"
+        sql = "select label from keyos where ko=?;"
         c.execute(sql, [ko])
         val = c.fetchall()
         if len(val) != 1:
@@ -415,14 +448,16 @@ class DeviceDatabase(object):
             value = val[0][0]
         return value
 
-    def find_fields_for_ko(self, ko):
+    def find_fields_for_ko(self, ko, ko_version):
         c = self.conn.cursor()
-        sql = "select distinct var_name, var_old from ko_params where ko=? order by \"order\";"
-        c.execute(sql, [ko])
+        sql = "select distinct var_name, var_old from ko_params where ko=? and ko_version=? order by sequence;"
+        if ko_version is None:
+            sql = sql.replace("ko_version=?", "ko_version is ?")
+        c.execute(sql, [ko, ko_version])
         fields = c.fetchall()
         return fields
 
-    def find_sys_addr(self, ko):
+    def find_sys_addr(self, ko, ko_version):
         """
         Find the ADDR record for the KO
 
@@ -436,9 +471,11 @@ class DeviceDatabase(object):
         if ko is None:
             self.log("find_sys_addr ERROR: ko can't be None")
         c = self.conn.cursor()
-        sql = "select \"order\", slot_param, access, type, type_info, var_name, description " \
-              "from ko_params where ko=? and slot_param='ADDR';"
-        c.execute(sql, [ko])
+        sql = "select sequence, slot_param, access, type, type_info, var_name, description " \
+              "from ko_params where ko=? and ko_version=? and slot_param='ADDR';"
+        if ko_version is None:
+            sql = sql.replace("ko_version=?", "ko_version is ?")
+        c.execute(sql, [ko, ko_version])
         rec = c.fetchall()
         if len(rec) > 1:
             self.log("find_sys_addr ERROR: I should have obtained only one record")
@@ -487,7 +524,7 @@ class DeviceDatabase(object):
             return False
 
 
-    def find_field(self, ko, index, get_value):
+    def find_field(self, ko, ko_version, index, get_value):
         """
         finds the corresponding field for index using values already in the slot
         
@@ -500,8 +537,12 @@ class DeviceDatabase(object):
         """
         c = self.conn.cursor()
         sql = "select cond, access, type, type_info, var_name, array_index "\
-              " from ko_params where ko=? and param_id=?;"
-        c.execute(sql, [ko, index])
+              " from ko_params where ko=? and ko_version=? and param_id=?;"
+        if ko_version is None:
+            sql = sql.replace("ko_version=?", "ko_version is ?")
+        self.log(sql)
+        params = [ko, ko_version, index]
+        c.execute(sql, params)
         recs = c.fetchall()
         vr = []
         for r in recs:
@@ -517,9 +558,13 @@ class DeviceDatabase(object):
         if len(vr) == 1:
             _, access, f_type, type_info, var_name, array_index = vr[0]
             return (access, f_type, type_info, var_name, array_index,)
+        # there was a problem
+        self.log("find_field ERROR")
+        self.log(sql)
+        self.log(params)
         return None
 
-    def find_named_field(self, ko, field_name, get_value):
+    def find_named_field(self, ko, ko_version, field_name, get_value):
         """
         finds the corresponding field for field_name using values already in the slot
         
@@ -530,8 +575,10 @@ class DeviceDatabase(object):
         """
         c = self.conn.cursor()
         sql = "select distinct cond, access, type, type_info"\
-              " from ko_params where ko=? and var_name=? and disp='true';"
-        c.execute(sql, [ko, field_name])
+              " from ko_params where ko=? and ko_version=? and var_name=? and disp='true';"
+        if ko_version is None:
+            sql = sql.replace("ko_version=?", "ko_version is ?")
+        c.execute(sql, [ko, ko_version, field_name])
         recs = c.fetchall()
         vr = []
         for r in recs:
@@ -549,5 +596,7 @@ class DeviceDatabase(object):
             return (access, f_type, type_info)
         return None
     
+    def get_device_icon(self, system_id, model_id, brand_id=None, line_id=None):
+        return None
 
 device_db = DeviceDatabase()
