@@ -76,12 +76,14 @@ class AsyncIOOWNConnection(object):
                 self.log('resetting the msg handler')
                 self.msg_handler = self.state_start
                 try:
+                    self.log('create a new transport connection')
                     self.transport, _ = await self.loop.create_connection(
                         lambda: self.protocol, self.host, self.port)
                 except gaierror:
                     self.log('sleep about 5 seconds')
                     await asyncio.sleep(5)
                 else:
+                    self.log('create a new StreamWriter')
                     self.writer = StreamWriter(
                         self.transport, self.protocol, self.reader, self.loop)
                     self.log('connection is up and running')
