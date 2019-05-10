@@ -79,8 +79,10 @@ class AsyncIOOWNConnection(object):
                 self.transport = None
 
             if not self.reader:
+                self.log('create a StreamReader')
                 self.reader = StreamReader(loop=self.loop)
             if not self.protocol:
+                self.log('create OWNProtocol')
                 self.protocol = OWNProtocol(self.reader, log=self.log)
             if not self.protocol.is_connected:
                 if not self._auto_restart:
