@@ -48,6 +48,10 @@ class AsyncIOOWNConnection(object):
                            color=self.MODE_COLORS[self.mode])
         else:
             self.log = log
+        self.reader = None
+        self.writer = None
+        self.protocol = None
+        self.transport = None
 
     @property
     def auto_restart(self):
@@ -61,10 +65,23 @@ class AsyncIOOWNConnection(object):
         self._run = True
         started = False
         # start with the login procedure
-        self.reader = StreamReader(loop=self.loop)
-        self.protocol = OWNProtocol(self.reader, log=self.log)
+
+        # TODO: this is broken, it fails to restart properly
+
         ctr = 0
         while self._run:
+            if self.protocol and not self.protocol.is_connected:
+                # reset everything
+                self.log('we have been disconnected - reset everything')
+                self.reader = None
+                self.writer = None
+                self.protocol = None
+                self.transport = None
+
+            if not self.reader:
+                self.reader = StreamReader(loop=self.loop)
+            if not self.protocol:
+                self.protocol = OWNProtocol(self.reader, log=self.log)
             if not self.protocol.is_connected:
                 if not self._auto_restart:
                     if started:
