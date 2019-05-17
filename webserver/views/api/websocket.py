@@ -4,7 +4,6 @@ import asyncio
 import aiohttp_jinja2
 from aiohttp import WSMsgType, web
 from aiohttp_session import get_session
-from core.logger import LOG_ERROR
 
 from ...decorators import login_required
 
@@ -16,7 +15,7 @@ class WebSocket(web.View):
         print('WEBSOCKET preparing')
         ws = web.WebSocketResponse()
         await ws.prepare(self.request)
-        LOG_ERROR("WEBSOCKET: initialized with %s"%(str(ws._writer.transport.get_extra_info('peername'))))
+        config.log("WEBSOCKET: initialized with %s"%(str(ws._writer.transport.get_extra_info('peername'))))
         print('WEBSOCKET register')
         config.websocket_register(ws)
 
@@ -24,7 +23,7 @@ class WebSocket(web.View):
             print('WEBSOCKET', msg.type)
             if msg.type == WSMsgType.TEXT:
                 if msg.data == 'close':
-                    LOG_ERROR("websocket closing %s"%(str(ws._writer.transport.get_extra_info('peername'))))
+                    config.log("websocket closing %s"%(str(ws._writer.transport.get_extra_info('peername'))))
                     await ws.close()
                 else:
                     print('WEBSOCKET', msg.data)
