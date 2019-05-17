@@ -16,7 +16,7 @@ class WebSocket(web.View):
         print('WEBSOCKET preparing')
         ws = web.WebSocketResponse()
         await ws.prepare(self.request)
-        LOG_ERROR("WEBSOCKET: initialized with %s"%(str(ws.writer.transport.get_extra_info('peername'))))
+        LOG_ERROR("WEBSOCKET: initialized with %s"%(str(ws._writer.transport.get_extra_info('peername'))))
         print('WEBSOCKET register')
         config.websocket_register(ws)
 
@@ -24,7 +24,7 @@ class WebSocket(web.View):
             print('WEBSOCKET', msg.type)
             if msg.type == WSMsgType.TEXT:
                 if msg.data == 'close':
-                    LOG_ERROR("websocket closing %s"%(str(ws.writer.transport.get_extra_info('peername'))))
+                    LOG_ERROR("websocket closing %s"%(str(ws._writer.transport.get_extra_info('peername'))))
                     await ws.close()
                 else:
                     print('WEBSOCKET', msg.data)
