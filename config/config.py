@@ -115,7 +115,7 @@ class Config(object):
                 except TypeError:
                     self.log('ERROR: %s can\'t be converted to json' % (str(obj)))
                 except Exception as e:
-                    self.log('Error: %s'%(str(e)))
+                    self.log('ERROR: %s'%(str(e)), LOG_ERROR)
 
     def websocket_send(self, msg):
         loop = asyncio.get_event_loop()
