@@ -16,6 +16,7 @@ class WebSocket(web.View):
         print('WEBSOCKET preparing')
         ws = web.WebSocketResponse()
         await ws.prepare(self.request)
+        LOG_ERROR("WEBSOCKET: initialized with %s"%(str(ws.remote_access)))
         print('WEBSOCKET register')
         config.websocket_register(ws)
 
