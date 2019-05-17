@@ -114,6 +114,8 @@ class Config(object):
                     await ws.send_json(obj)
                 except TypeError:
                     self.log('ERROR: %s can\'t be converted to json' % (str(obj)))
+                except Exception as e:
+                    self.log('Error: %s'%(str(e)))
 
     def websocket_send(self, msg):
         loop = asyncio.get_event_loop()
