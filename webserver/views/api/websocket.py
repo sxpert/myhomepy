@@ -2,9 +2,9 @@
 import asyncio
 
 import aiohttp_jinja2
-from aiohttp import WSMsgType
-from aiohttp import web
+from aiohttp import WSMsgType, web
 from aiohttp_session import get_session
+from core.logger import LOG_ERROR
 
 from ...decorators import login_required
 
@@ -23,6 +23,7 @@ class WebSocket(web.View):
             print('WEBSOCKET', msg.type)
             if msg.type == WSMsgType.TEXT:
                 if msg.data == 'close':
+                    LOG_ERROR("websocket closing %s"%(str(ws.remote_address)))
                     await ws.close()
                 else:
                     print('WEBSOCKET', msg.data)
