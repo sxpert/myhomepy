@@ -107,7 +107,7 @@ class Config(object):
         for ws in self._websockets:
             # don't send if the websocket is closing...
             if not ws.closed:
-                self.log('pushing to %s' % (str(ws)))
+                self.log('pushing to %s' % (str(ws)), LOG_ERROR)
                 if hasattr(obj, 'web_data'):
                     obj = obj.web_data
                 if ws._writer.transport.is_closing():
