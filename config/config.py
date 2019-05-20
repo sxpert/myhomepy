@@ -3,7 +3,7 @@ import json
 import asyncio
 
 import core.core_json_encoder as cje
-from core.logger import (get_logger, LOG_INFO, COLOR_YELLOW)
+from core.logger import (get_logger, LOG_INFO, LOG_ERROR, COLOR_YELLOW)
 
 import webserver
 from . import system, systems, tls
