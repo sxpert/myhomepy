@@ -110,10 +110,14 @@ class Config(object):
                 self.log('pushing to %s' % (str(ws)))
                 if hasattr(obj, 'web_data'):
                     obj = obj.web_data
+                if ws._writer.transport.is_closing():
+                    self.log('ERROR: transport is closed', LOG_ERROR)
+                    print("CONFIG websocket_dispatch : transport is closed")
+                    # should unregister the socket
                 try:
                     await ws.send_json(obj)
                 except TypeError:
-                    self.log('ERROR: %s can\'t be converted to json' % (str(obj)))
+                    self.log('ERROR: %s can\'t be converted to json' % (str(obj)), LOG_ERROR)
                 except Exception as e:
                     self.log('ERROR: %s'%(str(e)), LOG_ERROR)
 
