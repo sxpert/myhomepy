@@ -112,8 +112,9 @@ class Config(object):
                     obj = obj.web_data
                 if ws._writer.transport.is_closing():
                     self.log('ERROR: transport is closed', LOG_ERROR)
-                    print("CONFIG websocket_dispatch : transport is closed")
                     # should unregister the socket
+                    self.websocket.unregister(ws)
+                    continue
                 try:
                     await ws.send_json(obj)
                 except TypeError:
@@ -136,7 +137,7 @@ class Config(object):
         """
         Removes the given queue from the list of queues
         """
-        self.log('unregister websocket %s' % (str(ws)))
+        self.log('unregister websocket %s' % (str(ws)), LOG_ERROR)
 
     async def websocket_close_all(self):
         for ws in self._websockets:
