@@ -113,7 +113,7 @@ class Config(object):
                 if ws._writer.transport.is_closing():
                     self.log('ERROR: transport is closed', LOG_ERROR)
                     # should unregister the socket
-                    self.websocket.unregister(ws)
+                    self.websocket_unregister(ws)
                     continue
                 try:
                     await ws.send_json(obj)
