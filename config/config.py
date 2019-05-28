@@ -137,7 +137,8 @@ class Config(object):
         """
         Removes the given queue from the list of queues
         """
-        self.log('unregister websocket %s' % (str(ws)), LOG_ERROR)
+        self.log('unregister websocket %s' % (str(ws)), LOG_ERROR)  
+        self._websockets.remove(ws)
 
     async def websocket_close_all(self):
         for ws in self._websockets:
