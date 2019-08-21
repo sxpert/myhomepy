@@ -16,6 +16,7 @@ lgg-databases*
 lgg-software*
 test.py
 venv
+.venv
 .pyenv
 .vscode/settings.json
 .vscode/.ropeproject/config.py
